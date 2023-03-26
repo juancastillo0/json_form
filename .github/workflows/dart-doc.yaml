@@ -1,0 +1,31 @@
+name: Dart Documentation
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  document:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        sdk: [stable]
+    steps:
+      - uses: actions/checkout@3
+      - uses: dart-lang/setup-dart@1
+        with:
+          sdk: ${{ matrix.sdk }}
+      - id: install
+        name: Install dependencies
+        run: |
+          dart pub get
+          dart pub global activate dartdoc
+      - name: Verify dartdoc
+        run: dart pub global run dartdoc \
+          --no-generate-docs \
+          --errors=unresolved-doc-reference,ambiguous-doc-reference,ambiguous-reexport,broken-link,deprecated,no-library-level-docs,unknown-directive,unknown-macro
+        if: always() && steps.install.outcome == 'success'
+      - run: dart run .github/collect_examples.dart --check
+        if: always() && steps.install.outcome == 'success'
