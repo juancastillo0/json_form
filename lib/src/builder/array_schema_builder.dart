@@ -6,11 +6,10 @@ import 'package:flutter_jsonschema_builder/src/fields/shared.dart';
 import 'package:flutter_jsonschema_builder/src/models/models.dart';
 
 class ArraySchemaBuilder extends StatefulWidget {
-  const ArraySchemaBuilder({
-    super.key,
+  ArraySchemaBuilder({
     required this.mainSchema,
     required this.schemaArray,
-  });
+  }) : super(key: Key(schemaArray.idKey));
   final Schema mainSchema;
   final SchemaArray schemaArray;
 
@@ -20,6 +19,9 @@ class ArraySchemaBuilder extends StatefulWidget {
 
 class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
   SchemaArray get schemaArray => widget.schemaArray;
+  int lastItemId = 0;
+
+  String generateItemId() => (lastItemId++).toString();
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +54,8 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
             ...schemaArray.items.map((schemaLoop) {
               final index = schemaArray.items.indexOf(schemaLoop);
               return Column(
+                key: Key(schemaLoop.idKey),
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   RemoveItemInherited(
@@ -93,13 +97,13 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
   }
 
   void _addItem() {
-    if (schemaArray.items.isEmpty) {
-      _addFirstItem();
-    } else {
-      _addItemFromFirstSchema();
-    }
-
-    setState(() {});
+    setState(() {
+      if (schemaArray.items.isEmpty) {
+        _addFirstItem();
+      } else {
+        _addItemFromFirstSchema();
+      }
+    });
   }
 
   void _removeItem(int index) {
@@ -113,7 +117,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
     if (itemsBaseSchema is Map<String, dynamic>) {
       final newSchema = Schema.fromJson(
         itemsBaseSchema,
-        id: '0',
+        id: generateItemId(),
         parent: schemaArray,
       );
 
@@ -123,7 +127,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
         (itemsBaseSchema as List).cast<Map<String, dynamic>>().map(
               (e) => Schema.fromJson(
                 e,
-                id: '0',
+                id: generateItemId(),
                 parent: schemaArray,
               ),
             ),
@@ -132,10 +136,14 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
   }
 
   void _addItemFromFirstSchema() {
-    final currentItems = schemaArray.items;
-    final newSchemaObject =
-        currentItems.first.copyWith(id: currentItems.length.toString());
-
-    currentItems.add(newSchemaObject);
+    final itemsBaseSchema = schemaArray.itemsBaseSchema is Map<String, dynamic>
+        ? schemaArray.itemsBaseSchema
+        : (schemaArray.itemsBaseSchema as List).first;
+    final newSchema = Schema.fromJson(
+      itemsBaseSchema as Map<String, dynamic>,
+      id: generateItemId(),
+      parent: schemaArray,
+    );
+    schemaArray.items.add(newSchema);
   }
 }

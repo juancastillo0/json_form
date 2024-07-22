@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_jsonschema_builder/src/builder/widget_builder.dart';
 import 'package:flutter_jsonschema_builder/src/models/json_form_schema_style.dart';
-import 'package:flutter_jsonschema_builder/src/models/schema.dart';
+import 'package:flutter_jsonschema_builder/src/models/models.dart';
 
 class WidgetBuilderInherited extends InheritedWidget {
   WidgetBuilderInherited({
@@ -60,41 +60,48 @@ class WidgetBuilderInherited extends InheritedWidget {
     log('updateObjectData $object path $path value $value');
 
     final stack = path.split('.');
+    Schema schema = mainSchema;
 
-    while (stack.length > 1) {
+    while (stack.isNotEmpty) {
       final _key = stack[0];
-      final isNextKeyInteger = int.tryParse(stack[1]) != null;
-      final newContent = isNextKeyInteger ? [] : {};
-      final _keyNumeric = int.tryParse(_key);
-
-      log('$_key - next Key is int? $isNextKeyInteger');
-
-      _addNewContent(object, _keyNumeric, newContent);
-
-      final tempObject = object[_keyNumeric ?? _key];
-      if (tempObject != null) {
-        object = tempObject;
+      int? _keyNumeric;
+      if (schema is SchemaArray) {
+        _keyNumeric = schema.items.indexWhere((test) => test.id == _key);
+        final l = object as List;
+        while (l.length != schema.items.length) {
+          l.length > schema.items.length ? l.removeLast() : l.add(null);
+        }
+        schema = schema.items[_keyNumeric];
       } else {
-        object[_key] = newContent;
-        object = newContent;
+        schema = (schema as SchemaObject)
+            .properties!
+            .firstWhere((p) => p.id == _key);
       }
 
       stack.removeAt(0);
+      if (stack.isEmpty) {
+        _addNewContent(object, _keyNumeric, value);
+        object[_keyNumeric ?? _key] = value;
+      } else {
+        final newContent = schema is SchemaArray ? [] : {};
+        _addNewContent(object, _keyNumeric, newContent);
+
+        final tempObject = object[_keyNumeric ?? _key];
+        if (tempObject != null) {
+          object = tempObject;
+        } else {
+          object[_keyNumeric ?? _key] = newContent;
+          object = newContent;
+        }
+      }
     }
-
-    final _key = stack[0];
-    final _keyNumeric = int.tryParse(_key);
-    _addNewContent(object, _keyNumeric, value);
-
-    object[_keyNumeric ?? _key] = value;
-    stack.removeAt(0);
   }
 
   /// add a new value into a schema,
   void _addNewContent(dynamic object, int? _keyNumeric, dynamic value) {
     if (object is List && _keyNumeric != null) {
-      if (object.length - 1 < _keyNumeric) {
-        object.add(value);
+      while (object.length - 1 < _keyNumeric) {
+        object.add(object.length == _keyNumeric ? value : null);
       }
     }
   }
