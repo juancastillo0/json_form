@@ -61,7 +61,7 @@ class _TextJFormFieldState extends State<TextJFormField> {
           onChanged: (value) {
             if (_timer != null && _timer!.isActive) _timer!.cancel();
 
-            _timer = Timer(const Duration(seconds: 1), () {
+            _timer = Timer(const Duration(microseconds: 1), () {
               if (widget.onChanged != null) widget.onChanged!(value);
             });
           },

@@ -197,7 +197,7 @@ class PropertySchemaBuilder extends StatelessWidget {
             onChanged: (value) {
               dispatchBooleanEventToParent(
                 context,
-                value != null && value.isNotEmpty,
+                value != null,
               );
               updateData(context, value);
               widgetBuilderInherited.notifyChanges();

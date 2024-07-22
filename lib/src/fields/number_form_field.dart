@@ -5,8 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_jsonschema_builder/src/builder/logic/widget_builder_logic.dart';
 import 'package:flutter_jsonschema_builder/src/fields/fields.dart';
 import 'package:flutter_jsonschema_builder/src/fields/shared.dart';
+import 'package:flutter_jsonschema_builder/src/models/schema.dart';
 
-class NumberJFormField extends PropertyFieldWidget<String?> {
+class NumberJFormField extends PropertyFieldWidget<num?> {
   const NumberJFormField({
     super.key,
     required super.property,
@@ -38,6 +39,13 @@ class _NumberJFormFieldState extends State<NumberJFormField> {
     super.dispose();
   }
 
+  num? parseValue(String? value) {
+    if (value == null || value.isEmpty) return null;
+    return widget.property.type == SchemaType.integer
+        ? int.tryParse(value)
+        : double.tryParse(value);
+  }
+
   @override
   Widget build(BuildContext context) {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
@@ -47,15 +55,22 @@ class _NumberJFormFieldState extends State<NumberJFormField> {
         key: Key(widget.property.idKey),
         keyboardType: TextInputType.number,
         inputFormatters: inputFormatters,
+        initialValue: widget.property.defaultValue?.toString() ?? '',
         autofocus: false,
-        onSaved: widget.onSaved,
+        onSaved: (value) {
+          final v = parseValue(value);
+          if (v == null) return;
+          widget.onSaved(v);
+        },
         autovalidateMode: AutovalidateMode.onUserInteraction,
         readOnly: widget.property.readOnly,
         onChanged: (value) {
+          final v = parseValue(value);
+          if (v == null) return;
           if (_timer != null && _timer!.isActive) _timer!.cancel();
 
-          _timer = Timer(const Duration(seconds: 1), () {
-            if (widget.onChanged != null) widget.onChanged!(value);
+          _timer = Timer(const Duration(microseconds: 1), () {
+            if (widget.onChanged != null) widget.onChanged!(v);
           });
         },
         style: widget.property.readOnly
@@ -73,6 +88,14 @@ class _NumberJFormFieldState extends State<NumberJFormField> {
               value.length <= widget.property.minLength!) {
             return uiConfig.localizedTexts
                 .minLength(minLength: widget.property.minLength!);
+          }
+          final parsed = parseValue(value);
+          if (parsed != null) {
+            final error = uiConfig.localizedTexts.numberPropertiesError(
+              widget.property.numberProperties,
+              parsed,
+            );
+            if (error != null) return error;
           }
 
           if (widget.customValidator != null)
