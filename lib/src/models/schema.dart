@@ -38,7 +38,7 @@ enum SchemaType {
 
   static bool isNullable(Object? json) {
     if (json is String) {
-      return false;
+      return !_notNull(json);
     } else if (json is List) {
       return !json.every(_notNull);
     } else {

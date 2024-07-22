@@ -42,6 +42,11 @@ class WidgetBuilderInherited extends InheritedWidget {
           ),
       fieldTitle: uiConfig?.fieldTitle ?? textTheme.bodyMedium,
       label: uiConfig?.label,
+      debugMode: uiConfig?.debugMode,
+      fieldWrapperBuilder: uiConfig?.fieldWrapperBuilder,
+      formSectionBuilder: uiConfig?.formSectionBuilder,
+      localizedTexts: uiConfig?.localizedTexts,
+      labelPosition: uiConfig?.labelPosition,
       //builders
       addItemBuilder: uiConfig?.addItemBuilder,
       removeItemBuilder: uiConfig?.removeItemBuilder,
@@ -100,7 +105,7 @@ class WidgetBuilderInherited extends InheritedWidget {
 
   @override
   bool updateShouldNotify(covariant WidgetBuilderInherited oldWidget) =>
-      mainSchema != oldWidget.mainSchema;
+      mainSchema != oldWidget.mainSchema || uiConfig != oldWidget.uiConfig;
 
   static WidgetBuilderInherited of(BuildContext context) {
     final result =

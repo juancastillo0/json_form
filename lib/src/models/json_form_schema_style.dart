@@ -81,6 +81,47 @@ class JsonFormSchemaUiConfig {
             label: Text(localizedTexts.addItem()),
           );
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is JsonFormSchemaUiConfig &&
+        other.fieldTitle == fieldTitle &&
+        other.error == error &&
+        other.title == title &&
+        other.titleAlign == titleAlign &&
+        other.subtitle == subtitle &&
+        other.description == description &&
+        other.label == label &&
+        other.localizedTexts == localizedTexts &&
+        other.debugMode == debugMode &&
+        other.labelPosition == labelPosition &&
+        other.addItemBuilder == addItemBuilder &&
+        other.removeItemBuilder == removeItemBuilder &&
+        other.submitButtonBuilder == submitButtonBuilder &&
+        other.addFileButtonBuilder == addFileButtonBuilder &&
+        other.formSectionBuilder == formSectionBuilder &&
+        other.fieldWrapperBuilder == fieldWrapperBuilder;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        fieldTitle,
+        error,
+        title,
+        titleAlign,
+        subtitle,
+        description,
+        label,
+        localizedTexts,
+        debugMode,
+        labelPosition,
+        addItemBuilder,
+        removeItemBuilder,
+        submitButtonBuilder,
+        addFileButtonBuilder,
+        formSectionBuilder,
+        fieldWrapperBuilder,
+      );
 }
 
 enum LabelPosition {

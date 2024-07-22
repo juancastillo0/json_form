@@ -43,6 +43,7 @@ class SchemaArray extends Schema {
 
     return schemaArray;
   }
+
   @override
   SchemaArray copyWith({
     required String id,

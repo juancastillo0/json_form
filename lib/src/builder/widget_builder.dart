@@ -54,6 +54,11 @@ class _JsonFormState extends State<JsonForm> {
 
   @override
   void initState() {
+    initMainSchema();
+    super.initState();
+  }
+
+  void initMainSchema() {
     mainSchema = (Schema.fromJson(
       json.decode(widget.jsonSchema),
       id: kGenesisIdKey,
@@ -61,8 +66,15 @@ class _JsonFormState extends State<JsonForm> {
       ..setUiSchema(
         widget.uiSchema != null ? json.decode(widget.uiSchema!) : null,
       );
+  }
 
-    super.initState();
+  @override
+  void didUpdateWidget(covariant JsonForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.jsonSchema != widget.jsonSchema ||
+        oldWidget.uiSchema != widget.uiSchema) {
+      initMainSchema();
+    }
   }
 
   @override
