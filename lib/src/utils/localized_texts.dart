@@ -1,3 +1,4 @@
+import 'package:flutter_jsonschema_builder/src/models/array_schema.dart';
 import 'package:flutter_jsonschema_builder/src/models/property_schema.dart';
 
 class LocalizedTexts {
@@ -29,6 +30,20 @@ class LocalizedTexts {
       l.add('The value must be less than or equal to ${config.maximum}');
     if (errors.contains(NumberPropertiesError.exclusiveMaximum))
       l.add('The value must be less than ${config.exclusiveMaximum}');
+    return l.isEmpty ? null : l.join('\n');
+  }
+
+  String maxItemsTooltip(int i) => 'You can only add $i items';
+
+  String? arrayPropertiesError(ArrayProperties config, List value) {
+    final errors = config.errors(value);
+    final l = <String>[];
+    if (errors.contains(ArrayPropertiesError.minItems))
+      l.add('You must add at least ${config.minItems} items');
+    if (errors.contains(ArrayPropertiesError.maxItems))
+      l.add('You can only add ${config.maxItems} items');
+    if (errors.contains(ArrayPropertiesError.uniqueItems))
+      l.add('Items must be unique');
     return l.isEmpty ? null : l.join('\n');
   }
 }

@@ -26,23 +26,28 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
   @override
   Widget build(BuildContext context) {
     final widgetBuilderInherited = WidgetBuilderInherited.of(context);
+    final uiConfig = widgetBuilderInherited.uiConfig;
 
     final widgetBuilder = FormField(
       validator: (_) {
-        if (schemaArray.requiredNotNull && schemaArray.items.isEmpty)
-          return widgetBuilderInherited.uiConfig.localizedTexts.required();
-        return null;
+        final array = widgetBuilderInherited.controller.retrieveObjectData(
+          schemaArray.idKey,
+        ) as List?;
+        return uiConfig.localizedTexts.arrayPropertiesError(
+          schemaArray.arrayProperties,
+          array ?? [],
+        );
       },
       onSaved: (_) {
         if (schemaArray.items.isEmpty) {
-          widgetBuilderInherited.updateObjectData(
-            widgetBuilderInherited.data,
+          widgetBuilderInherited.controller.updateObjectData(
             schemaArray.idKey,
             [],
           );
         }
       },
       builder: (field) {
+        int _index = 0;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -52,7 +57,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
               mainSchema: widget.mainSchema,
             ),
             ...schemaArray.items.map((schemaLoop) {
-              final index = schemaArray.items.indexOf(schemaLoop);
+              final index = _index++;
               return Column(
                 key: Key(schemaLoop.idKey),
                 mainAxisSize: MainAxisSize.min,
@@ -86,7 +91,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
           if (!schemaArray.isArrayMultipleFile())
             Align(
               alignment: Alignment.centerRight,
-              child: widgetBuilderInherited.uiConfig.addItemWidget(
+              child: uiConfig.addItemWidget(
                 _addItem,
                 schemaArray,
               ),
@@ -98,6 +103,10 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
 
   void _addItem() {
     setState(() {
+      WidgetBuilderInherited.of(context).controller.updateDataInPlace(
+            schemaArray.idKey,
+            (array) => (array as List? ?? [])..add(null),
+          );
       if (schemaArray.items.isEmpty) {
         _addFirstItem();
       } else {
@@ -108,6 +117,10 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
 
   void _removeItem(int index) {
     setState(() {
+      WidgetBuilderInherited.of(context).controller.updateDataInPlace(
+            schemaArray.idKey,
+            (array) => (array as List? ?? [])..removeAt(index),
+          );
       schemaArray.items.removeAt(index);
     });
   }

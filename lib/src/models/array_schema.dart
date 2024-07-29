@@ -1,21 +1,12 @@
 import '../models/models.dart';
 
-// extension SchemaArrayX on SchemaArray {
-//   bool get isMultipleFile {
-//     return items.isNotEmpty &&
-//         items.first is SchemaProperty &&
-//         (items.first as SchemaProperty).format == PropertyFormat.dataurl;
-//   }
-// }
-
 class SchemaArray extends Schema {
   SchemaArray({
     required super.id,
     required this.itemsBaseSchema,
     String? title,
-    this.minItems,
-    this.maxItems,
-    this.uniqueItems = true,
+    super.description,
+    this.arrayProperties = const ArrayProperties(),
     List<Schema>? items,
     super.requiredProperty,
     required super.nullable,
@@ -32,9 +23,8 @@ class SchemaArray extends Schema {
     final schemaArray = SchemaArray(
       id: id,
       title: json['title'],
-      minItems: json['minItems'],
-      maxItems: json['maxItems'],
-      uniqueItems: json['uniqueItems'] ?? true,
+      description: json['description'],
+      arrayProperties: ArrayProperties.fromJson(json),
       itemsBaseSchema: json['items'],
       parentIdKey: parent?.idKey,
       nullable: SchemaType.isNullable(json['type']),
@@ -53,9 +43,8 @@ class SchemaArray extends Schema {
     final newSchema = SchemaArray(
       id: id,
       title: title,
-      maxItems: maxItems,
-      minItems: minItems,
-      uniqueItems: uniqueItems,
+      description: description,
+      arrayProperties: arrayProperties,
       itemsBaseSchema: itemsBaseSchema,
       requiredProperty: requiredProperty,
       nullable: nullable,
@@ -81,9 +70,7 @@ class SchemaArray extends Schema {
   // it allow us
   final dynamic itemsBaseSchema;
 
-  int? minItems;
-  int? maxItems;
-  bool uniqueItems;
+  final ArrayProperties arrayProperties;
 
   bool isArrayMultipleFile() {
     return itemsBaseSchema is Map &&
@@ -102,5 +89,43 @@ class SchemaArray extends Schema {
       parentIdKey: parentIdKey,
       dependentsAddedBy: dependentsAddedBy,
     )..isMultipleFile = true;
+  }
+}
+
+enum ArrayPropertiesError {
+  minItems,
+  maxItems,
+  uniqueItems,
+  // contains, prefixItems
+}
+
+class ArrayProperties {
+  final int? minItems;
+  final int? maxItems;
+  final bool? uniqueItems;
+
+  const ArrayProperties({
+    this.minItems,
+    this.maxItems,
+    this.uniqueItems,
+  });
+
+  factory ArrayProperties.fromJson(Map<String, dynamic> json) {
+    return ArrayProperties(
+      minItems: json['minItems'],
+      maxItems: json['maxItems'],
+      uniqueItems: json['uniqueItems'],
+    );
+  }
+
+  List<ArrayPropertiesError> errors(List<dynamic> value) {
+    final errors = <ArrayPropertiesError>[];
+    if (minItems != null && value.length < minItems!)
+      errors.add(ArrayPropertiesError.minItems);
+    if (maxItems != null && value.length > maxItems!)
+      errors.add(ArrayPropertiesError.maxItems);
+    if (uniqueItems != null && value.toSet().length != value.length)
+      errors.add(ArrayPropertiesError.uniqueItems);
+    return errors;
   }
 }
