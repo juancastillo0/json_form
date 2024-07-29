@@ -8,16 +8,14 @@ import 'package:flutter_jsonschema_builder/src/models/models.dart';
 class WidgetBuilderInherited extends InheritedWidget {
   WidgetBuilderInherited({
     super.key,
-    required this.mainSchema,
+    required this.controller,
     required super.child,
     this.fileHandler,
     this.customPickerHandler,
     this.customValidatorHandler,
   });
 
-  final Schema mainSchema;
-  final Map data = {};
-
+  final JsonFormController controller;
   final FileHandler? fileHandler;
   final CustomPickerHandler? customPickerHandler;
   final CustomValidatorHandler? customValidatorHandler;
@@ -55,64 +53,10 @@ class WidgetBuilderInherited extends InheritedWidget {
     );
   }
 
-  /// update [data] with key,values from jsonSchema
-  void updateObjectData(dynamic object, String path, dynamic value) {
-    log('updateObjectData $object path $path value $value');
-
-    final stack = path.split('.');
-    Schema schema = mainSchema;
-
-    while (stack.isNotEmpty) {
-      final _key = stack[0];
-      int? _keyNumeric;
-      if (schema is SchemaArray) {
-        _keyNumeric = schema.items.indexWhere((test) => test.id == _key);
-        final l = object as List;
-        while (l.length != schema.items.length) {
-          l.length > schema.items.length ? l.removeLast() : l.add(null);
-        }
-        schema = schema.items[_keyNumeric];
-      } else {
-        schema = (schema as SchemaObject)
-            .properties!
-            .firstWhere((p) => p.id == _key);
-      }
-
-      stack.removeAt(0);
-      if (stack.isEmpty) {
-        _addNewContent(object, _keyNumeric, value);
-        object[_keyNumeric ?? _key] = value;
-      } else {
-        final newContent = schema is SchemaArray ? [] : {};
-        _addNewContent(object, _keyNumeric, newContent);
-
-        final tempObject = object[_keyNumeric ?? _key];
-        if (tempObject != null) {
-          object = tempObject;
-        } else {
-          object[_keyNumeric ?? _key] = newContent;
-          object = newContent;
-        }
-      }
-    }
-  }
-
-  /// add a new value into a schema,
-  void _addNewContent(dynamic object, int? _keyNumeric, dynamic value) {
-    if (object is List && _keyNumeric != null) {
-      while (object.length - 1 < _keyNumeric) {
-        object.add(object.length == _keyNumeric ? value : null);
-      }
-    }
-  }
-
-  void notifyChanges() {
-    // if (onChanged != null) onChanged!(data);
-  }
-
   @override
   bool updateShouldNotify(covariant WidgetBuilderInherited oldWidget) =>
-      mainSchema != oldWidget.mainSchema || uiConfig != oldWidget.uiConfig;
+      controller.mainSchema != oldWidget.controller.mainSchema ||
+      uiConfig != oldWidget.uiConfig;
 
   static WidgetBuilderInherited of(BuildContext context) {
     final result =
@@ -163,4 +107,84 @@ class RemoveItemInherited extends InheritedWidget {
   @override
   bool updateShouldNotify(covariant RemoveItemInherited oldWidget) =>
       removeItem != oldWidget.removeItem || schema != oldWidget.schema;
+}
+
+class JsonFormController extends ChangeNotifier {
+  Schema? mainSchema;
+  final Map data;
+
+  JsonFormController({
+    required this.data,
+    this.mainSchema,
+  });
+
+  /// update [data] with key,values from jsonSchema
+  dynamic retrieveObjectData(String path) {
+    return _transverseObjectData(path, update: false);
+  }
+
+  /// update [data] with key,values from jsonSchema
+  dynamic updateObjectData(String path, dynamic value) {
+    return _transverseObjectData(path, newValue: value, update: true);
+  }
+
+  dynamic updateDataInPlace(
+    String path,
+    dynamic Function(dynamic previousValue) update,
+  ) {
+    return _transverseObjectData(path, updateFn: update, update: true);
+  }
+
+  /// update [data] with key,values from jsonSchema
+  dynamic _transverseObjectData(
+    String path, {
+    required bool update,
+    dynamic Function(dynamic previousValue)? updateFn,
+    dynamic newValue,
+  }) {
+    dynamic object = data;
+    log('updateObjectData $object path $path newValue $newValue');
+
+    final stack = path.split('.');
+    Schema schema = mainSchema!;
+
+    for (int i = 0; i < stack.length; i++) {
+      final _key = stack[i];
+      int? _keyNumeric;
+      if (schema is SchemaArray) {
+        _keyNumeric = schema.items.indexWhere((test) => test.id == _key);
+        final l = object as List;
+        while (l.length != schema.items.length) {
+          l.length > schema.items.length ? l.removeLast() : l.add(null);
+        }
+        schema = schema.items[_keyNumeric];
+      } else {
+        schema = (schema as SchemaObject)
+            .properties!
+            .firstWhere((p) => p.id == _key);
+      }
+
+      if (i == stack.length - 1) {
+        final previous = object[_keyNumeric ?? _key];
+        if (update) {
+          if (updateFn != null) {
+            object[_keyNumeric ?? _key] = updateFn(previous);
+          } else {
+            object[_keyNumeric ?? _key] = newValue;
+          }
+          notifyListeners();
+        }
+        return previous;
+      } else {
+        final newContent = schema is SchemaArray ? [] : {};
+        final tempObject = object[_keyNumeric ?? _key];
+        if (tempObject != null) {
+          object = tempObject;
+        } else {
+          object[_keyNumeric ?? _key] = newContent;
+          object = newContent;
+        }
+      }
+    }
+  }
 }

@@ -24,10 +24,11 @@ class JsonForm extends StatefulWidget {
   const JsonForm({
     super.key,
     required this.jsonSchema,
-    this.uiSchema,
     required this.onFormDataSaved,
+    this.controller,
+    this.uiSchema,
     this.fileHandler,
-    this.jsonFormSchemaUiConfig,
+    this.uiConfig,
     this.customPickerHandler,
     this.customValidatorHandler,
   });
@@ -35,9 +36,10 @@ class JsonForm extends StatefulWidget {
   final String jsonSchema;
   final void Function(dynamic) onFormDataSaved;
 
+  final JsonFormController? controller;
   final String? uiSchema;
   final FileHandler? fileHandler;
-  final JsonFormSchemaUiConfig? jsonFormSchemaUiConfig;
+  final JsonFormSchemaUiConfig? uiConfig;
   final CustomPickerHandler? customPickerHandler;
   final CustomValidatorHandler? customValidatorHandler;
 
@@ -46,41 +48,52 @@ class JsonForm extends StatefulWidget {
 }
 
 class _JsonFormState extends State<JsonForm> {
-  late SchemaObject mainSchema;
-
+  Schema get mainSchema => controller.mainSchema!;
+  late JsonFormController controller;
   final _formKey = GlobalKey<FormState>();
 
   _JsonFormState();
 
   @override
   void initState() {
-    initMainSchema();
     super.initState();
+    initMainSchema(controllerChanged: true);
   }
 
-  void initMainSchema() {
-    mainSchema = (Schema.fromJson(
+  void initMainSchema({required bool controllerChanged}) {
+    if (controllerChanged) {
+      controller = widget.controller ?? JsonFormController(data: {});
+      if (controller.mainSchema != null) {
+        return;
+      }
+    }
+    final mainSchema = (Schema.fromJson(
       json.decode(widget.jsonSchema),
       id: kGenesisIdKey,
     ) as SchemaObject)
       ..setUiSchema(
         widget.uiSchema != null ? json.decode(widget.uiSchema!) : null,
       );
+    controller.mainSchema = mainSchema;
   }
 
   @override
   void didUpdateWidget(covariant JsonForm oldWidget) {
     super.didUpdateWidget(oldWidget);
+    final controllerChanged = oldWidget.controller != widget.controller;
     if (oldWidget.jsonSchema != widget.jsonSchema ||
-        oldWidget.uiSchema != widget.uiSchema) {
-      initMainSchema();
+        oldWidget.uiSchema != widget.uiSchema ||
+        controllerChanged) {
+      initMainSchema(
+        controllerChanged: controllerChanged,
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return WidgetBuilderInherited(
-      mainSchema: mainSchema,
+      controller: controller,
       fileHandler: widget.fileHandler,
       customPickerHandler: widget.customPickerHandler,
       customValidatorHandler: widget.customValidatorHandler,
@@ -111,6 +124,7 @@ class _JsonFormState extends State<JsonForm> {
                     const SizedBox(height: 20),
                     uiConfig.submitButtonBuilder == null
                         ? ElevatedButton(
+                            key: const Key('JsonForm_submitButton'),
                             onPressed: () => onSubmit(widgetBuilderInherited),
                             child: Text(
                               uiConfig.localizedTexts.submit(),
@@ -126,10 +140,11 @@ class _JsonFormState extends State<JsonForm> {
           );
         },
       ),
-    )..setJsonFormSchemaStyle(context, widget.jsonFormSchemaUiConfig);
+    )..setJsonFormSchemaStyle(context, widget.uiConfig);
   }
 
   Widget _buildHeaderTitle(BuildContext context) {
+    final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -137,8 +152,8 @@ class _JsonFormState extends State<JsonForm> {
           width: double.infinity,
           child: Text(
             mainSchema.title,
-            style: WidgetBuilderInherited.of(context).uiConfig.title,
-            textAlign: WidgetBuilderInherited.of(context).uiConfig.titleAlign,
+            style: uiConfig.title,
+            textAlign: uiConfig.titleAlign,
           ),
         ),
         const Divider(),
@@ -147,8 +162,8 @@ class _JsonFormState extends State<JsonForm> {
             width: double.infinity,
             child: Text(
               mainSchema.description!,
-              style: WidgetBuilderInherited.of(context).uiConfig.description,
-              textAlign: WidgetBuilderInherited.of(context).uiConfig.titleAlign,
+              style: uiConfig.description,
+              textAlign: uiConfig.titleAlign,
             ),
           ),
       ],
@@ -160,8 +175,9 @@ class _JsonFormState extends State<JsonForm> {
     if (_formKey.currentState != null && _formKey.currentState!.validate()) {
       _formKey.currentState?.save();
 
-      log(widgetBuilderInherited.data.toString());
-      widget.onFormDataSaved(widgetBuilderInherited.data);
+      final data = widgetBuilderInherited.controller.data;
+      log(data.toString());
+      widget.onFormDataSaved(data);
     }
   }
 }
