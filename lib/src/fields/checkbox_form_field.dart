@@ -25,6 +25,7 @@ class _CheckboxJFormFieldState extends State<CheckboxJFormField> {
 
   @override
   Widget build(BuildContext context) {
+    final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     return FormField<bool>(
       key: Key(widget.property.idKey),
       initialValue: widget.property.defaultValue ?? false,
@@ -38,15 +39,14 @@ class _CheckboxJFormFieldState extends State<CheckboxJFormField> {
             CheckboxListTile(
               isError: field.hasError,
               value: field.value ?? false,
-              title: Text(
-                WidgetBuilderInherited.of(context)
-                    .uiConfig
-                    .labelText(widget.property),
-                style: widget.property.readOnly
-                    ? const TextStyle(color: Colors.grey)
-                    : WidgetBuilderInherited.of(context).uiConfig.label,
-              ),
-              controlAffinity: ListTileControlAffinity.leading,
+              title: uiConfig.labelPosition == LabelPosition.table
+                  ? null
+                  : Text(
+                      uiConfig.labelText(widget.property),
+                      style: widget.property.readOnly
+                          ? const TextStyle(color: Colors.grey)
+                          : WidgetBuilderInherited.of(context).uiConfig.label,
+                    ),
               onChanged: widget.property.readOnly
                   ? null
                   : (bool? value) {

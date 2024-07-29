@@ -33,6 +33,7 @@ class WrapFieldWithLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final directionality = Directionality.of(context);
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     final removeItem = uiConfig.removeItemWidget(context, property);
 
@@ -48,7 +49,8 @@ class WrapFieldWithLabel extends StatelessWidget {
     }
     // configured in the field itself
     final showLabel = ignoreFieldLabel ||
-        uiConfig.labelPosition != LabelPosition.fieldInputDecoration;
+        uiConfig.labelPosition != LabelPosition.fieldInputDecoration &&
+            uiConfig.labelPosition != LabelPosition.table;
     if (!showLabel && removeItem == null) {
       return child;
     }
@@ -56,8 +58,9 @@ class WrapFieldWithLabel extends StatelessWidget {
     final labelText = uiConfig.labelText(property);
     Widget label = Text(
       labelText,
-      style: uiConfig.fieldTitle,
+      style: uiConfig.label,
     );
+    // TODO: improve LabelPosition.side with removeItem
     if (removeItem != null) {
       label = Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -71,15 +74,18 @@ class WrapFieldWithLabel extends StatelessWidget {
     final mappedChild = uiConfig.labelPosition == LabelPosition.top
         ? child
         : Expanded(child: child);
+    final space = uiConfig.labelPosition == LabelPosition.top
+        ? null
+        : const SizedBox(width: 20);
 
     return Flex(
       crossAxisAlignment: CrossAxisAlignment.center,
       direction: uiConfig.labelPosition == LabelPosition.top
           ? Axis.vertical
           : Axis.horizontal,
-      children: uiConfig.labelPosition == LabelPosition.right
-          ? [mappedChild, label]
-          : [label, mappedChild],
+      children: directionality == TextDirection.rtl
+          ? [mappedChild, if (space != null) space, label]
+          : [label, if (space != null) space, mappedChild],
     );
   }
 }

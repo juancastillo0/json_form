@@ -166,7 +166,7 @@ class SchemaProperty extends Schema {
   bool isDependentsActive = false;
 
   // not suported yet
-  String? widget, emptyValue, help = '';
+  String? widget, emptyValue, help;
   List<dynamic>? oneOf;
 
   void setDependents(SchemaObject schema) {

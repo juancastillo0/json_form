@@ -84,10 +84,7 @@ class _DropDownJFormFieldState extends State<DropDownJFormField> {
             style: widget.property.readOnly
                 ? const TextStyle(color: Colors.grey)
                 : uiConfig.label,
-            decoration: InputDecoration(
-              errorStyle: uiConfig.error,
-              labelText: uiConfig.fieldLabelText(widget.property),
-            ),
+            decoration: uiConfig.inputDecoration(widget.property),
           ),
         ),
       ),

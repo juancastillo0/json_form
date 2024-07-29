@@ -172,34 +172,35 @@ class _MyHomePageState extends State<MyHomePage> {
             customPickerHandler: () => {
               '*': (data) async {
                 return showDialog(
-                    context: context,
-                    builder: (context) {
-                      return Scaffold(
-                        body: Container(
-                          margin: const EdgeInsets.all(20),
-                          child: Column(
-                            children: [
-                              const Text('My Custom Picker'),
-                              ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: data.keys.length,
-                                itemBuilder: (context, index) {
-                                  return ListTile(
-                                    title: Text(
-                                        data.values.toList()[index].toString()),
-                                    onTap: () => Navigator.pop(
-                                        context, data.keys.toList()[index]),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
+                  context: context,
+                  builder: (context) {
+                    return Scaffold(
+                      body: Container(
+                        margin: const EdgeInsets.all(20),
+                        child: Column(
+                          children: [
+                            const Text('My Custom Picker'),
+                            ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: data.keys.length,
+                              itemBuilder: (context, index) {
+                                return ListTile(
+                                  title: Text(
+                                      data.values.toList()[index].toString()),
+                                  onTap: () => Navigator.pop(
+                                      context, data.keys.toList()[index]),
+                                );
+                              },
+                            ),
+                          ],
                         ),
-                      );
-                    });
+                      ),
+                    );
+                  },
+                );
               }
             },
-            jsonFormSchemaUiConfig: JsonFormSchemaUiConfig(
+            uiConfig: JsonFormSchemaUiConfig(
               title: const TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,

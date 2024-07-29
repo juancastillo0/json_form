@@ -52,12 +52,21 @@ class JsonFormSchemaUiConfig {
   final Widget? Function(FieldWrapperParams params)? fieldWrapperBuilder;
 
   String labelText(SchemaProperty property) =>
-      '${property.titleOrId} ${property.requiredNotNull ? "*" : ""}';
+      '${property.titleOrId}${property.requiredNotNull ? "*" : ""}';
 
   String? fieldLabelText(SchemaProperty property) =>
       labelPosition == LabelPosition.fieldInputDecoration
           ? labelText(property)
           : null;
+
+  InputDecoration inputDecoration(SchemaProperty property) {
+    return InputDecoration(
+      errorStyle: error,
+      labelText: fieldLabelText(property),
+      helperText: property.help ??
+          (labelPosition == LabelPosition.table ? null : property.description),
+    );
+  }
 
   Widget? removeItemWidget(BuildContext context, Schema property) {
     final removeItem = RemoveItemInherited.getRemoveItem(context, property);
@@ -66,6 +75,7 @@ class JsonFormSchemaUiConfig {
     return removeItemBuilder != null
         ? removeItemBuilder!(removeItem.value, removeItem.key)
         : TextButton.icon(
+            key: Key('removeItem_${removeItem.key}'),
             onPressed: removeItem.value,
             icon: const Icon(Icons.remove),
             label: Text(localizedTexts.removeItem()),
@@ -73,12 +83,21 @@ class JsonFormSchemaUiConfig {
   }
 
   Widget addItemWidget(void Function() addItem, SchemaArray schemaArray) {
+    String? message;
+    final props = schemaArray.arrayProperties;
+    if (props.maxItems != null && schemaArray.items.length >= props.maxItems!) {
+      message = localizedTexts.maxItemsTooltip(props.maxItems!);
+    }
     return addItemBuilder != null
         ? addItemBuilder!(addItem, schemaArray.idKey)
-        : TextButton.icon(
-            onPressed: addItem,
-            icon: const Icon(Icons.add),
-            label: Text(localizedTexts.addItem()),
+        : Tooltip(
+            message: message,
+            child: TextButton.icon(
+              key: Key('addItem_${schemaArray.idKey}'),
+              onPressed: message == null ? addItem : null,
+              icon: const Icon(Icons.add),
+              label: Text(localizedTexts.addItem()),
+            ),
           );
   }
 
@@ -126,8 +145,8 @@ class JsonFormSchemaUiConfig {
 
 enum LabelPosition {
   top,
-  left,
-  right,
+  side,
+  table,
   fieldInputDecoration,
 }
 

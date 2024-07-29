@@ -7,10 +7,12 @@ class GeneralSubtitle extends StatelessWidget {
     super.key,
     required this.field,
     this.mainSchema,
+    this.omitDivider = false,
   });
 
   final Schema field;
   final Schema? mainSchema;
+  final bool omitDivider;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +36,7 @@ class GeneralSubtitle extends StatelessWidget {
               if (removeItem != null) removeItem,
             ],
           ),
-          const Divider(),
+          if (!omitDivider) const Divider(),
         ],
         if (field.description != null &&
             field.description != mainSchema?.description)

@@ -73,19 +73,13 @@ class _DateJFormFieldState extends State<DateJFormField> {
             return;
           }
         },
-        decoration: InputDecoration(
-          hintText: dateFormatString.toUpperCase(),
-          helperText:
-              widget.property.help != null && widget.property.help!.isNotEmpty
-                  ? widget.property.help
-                  : null,
-          suffixIcon: IconButton(
-            icon: const Icon(Icons.date_range_outlined),
-            onPressed: widget.property.readOnly ? null : _openCalendar,
-          ),
-          errorStyle: uiConfig.error,
-          labelText: uiConfig.fieldLabelText(widget.property),
-        ),
+        decoration: uiConfig.inputDecoration(widget.property).copyWith(
+              hintText: dateFormatString.toUpperCase(),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.date_range_outlined),
+                onPressed: widget.property.readOnly ? null : _openCalendar,
+              ),
+            ),
       ),
     );
   }

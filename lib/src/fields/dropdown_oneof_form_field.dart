@@ -103,10 +103,7 @@ class _SelectedFormFieldState extends State<DropdownOneOfJFormField> {
             items: _buildItems(),
             onChanged: _onChanged,
             onSaved: widget.onSaved,
-            decoration: InputDecoration(
-              errorStyle: uiConfig.error,
-              labelText: uiConfig.fieldLabelText(widget.property),
-            ),
+            decoration: uiConfig.inputDecoration(widget.property),
           ),
         ),
       ),

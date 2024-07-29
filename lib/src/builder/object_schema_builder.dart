@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_jsonschema_builder/flutter_jsonschema_builder.dart';
 import 'package:flutter_jsonschema_builder/src/builder/general_subtitle_widget.dart';
 import 'package:flutter_jsonschema_builder/src/builder/logic/object_schema_logic.dart';
+import 'package:flutter_jsonschema_builder/src/builder/logic/widget_builder_logic.dart';
 import 'package:flutter_jsonschema_builder/src/builder/widget_builder.dart';
 import 'package:flutter_jsonschema_builder/src/fields/shared.dart';
 import 'package:flutter_jsonschema_builder/src/models/models.dart';
@@ -30,6 +32,12 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder> {
 
   @override
   Widget build(BuildContext context) {
+    final properties = widget.schemaObject.properties ?? [];
+    final directionality = Directionality.of(context);
+    final widgetBuilderInherited = WidgetBuilderInherited.of(context);
+    final isTableLabel =
+        widgetBuilderInherited.uiConfig.labelPosition == LabelPosition.table;
+
     return ObjectSchemaInherited(
       schemaObject: _schemaObject,
       listen: (value) {
@@ -45,14 +53,40 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder> {
               field: widget.schemaObject,
               mainSchema: widget.mainSchema,
             ),
-            if (widget.schemaObject.properties != null)
-              ...widget.schemaObject.properties!.map(
-                (e) => FormFromSchemaBuilder(
-                  schemaObject: widget.schemaObject,
-                  mainSchema: widget.mainSchema,
-                  schema: e,
-                ),
+            if (isTableLabel)
+              Table(
+                children: [
+                  ...properties.whereType<SchemaProperty>().map(
+                    (e) {
+                      final title = GeneralSubtitle(
+                        field: e,
+                        mainSchema: widget.mainSchema,
+                        omitDivider: true,
+                      );
+                      return TableRow(
+                        children: [
+                          if (directionality == TextDirection.ltr) title,
+                          FormFromSchemaBuilder(
+                            schemaObject: widget.schemaObject,
+                            mainSchema: widget.mainSchema,
+                            schema: e,
+                          ),
+                          if (directionality == TextDirection.rtl) title,
+                        ],
+                      );
+                    },
+                  ),
+                ],
               ),
+            ...properties
+                .where((p) => !isTableLabel || p is! SchemaProperty)
+                .map(
+                  (e) => FormFromSchemaBuilder(
+                    schemaObject: widget.schemaObject,
+                    mainSchema: widget.mainSchema,
+                    schema: e,
+                  ),
+                ),
           ],
         ),
       ),

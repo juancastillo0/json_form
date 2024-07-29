@@ -83,14 +83,7 @@ class _TextJFormFieldState extends State<TextJFormField> {
           style: property.readOnly
               ? const TextStyle(color: Colors.grey)
               : uiConfig.label,
-          decoration: InputDecoration(
-            helperText: property.help != null && property.help!.isNotEmpty
-                ? property.help
-                : null,
-            labelStyle: const TextStyle(color: Colors.blue),
-            errorStyle: uiConfig.error,
-            labelText: uiConfig.fieldLabelText(property),
-          ),
+          decoration: uiConfig.inputDecoration(property),
         ),
       ),
     );
