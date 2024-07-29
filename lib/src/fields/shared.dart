@@ -61,18 +61,25 @@ class WrapFieldWithLabel extends StatelessWidget {
     if (removeItem != null) {
       label = Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [if (showLabel) label else child, removeItem],
+        children: [Expanded(child: showLabel ? label : child), removeItem],
       );
       if (!showLabel) return label;
+      if (uiConfig.labelPosition != LabelPosition.top) {
+        label = Expanded(child: label);
+      }
     }
+    final mappedChild = uiConfig.labelPosition == LabelPosition.top
+        ? child
+        : Expanded(child: child);
+
     return Flex(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       direction: uiConfig.labelPosition == LabelPosition.top
           ? Axis.vertical
           : Axis.horizontal,
       children: uiConfig.labelPosition == LabelPosition.right
-          ? [child, label]
-          : [label, child],
+          ? [mappedChild, label]
+          : [label, mappedChild],
     );
   }
 }
