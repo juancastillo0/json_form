@@ -23,10 +23,6 @@ class NumberJFormField extends PropertyFieldWidget<num?> {
 class _NumberJFormFieldState extends State<NumberJFormField> {
   Timer? _timer;
 
-  static final inputFormatters = [
-    FilteringTextInputFormatter.allow(RegExp('[0-9.,]+')),
-  ];
-
   @override
   void initState() {
     widget.triggerDefaultValue();
@@ -49,12 +45,24 @@ class _NumberJFormFieldState extends State<NumberJFormField> {
   @override
   Widget build(BuildContext context) {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
+    final numberProperties = widget.property.numberProperties;
+    final signed = (numberProperties.minimum ?? -1) < 0 &&
+        (numberProperties.exclusiveMinimum ?? -1) < 0;
+    final decimal = widget.property.type == SchemaType.number;
+
     return WrapFieldWithLabel(
       property: widget.property,
       child: TextFormField(
         key: Key(widget.property.idKey),
-        keyboardType: TextInputType.number,
-        inputFormatters: inputFormatters,
+        keyboardType: TextInputType.numberWithOptions(
+          decimal: decimal,
+          signed: signed,
+        ),
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(
+            RegExp('${signed ? '-?' : ''}[0-9${decimal ? '.,' : ''}]*'),
+          ),
+        ],
         initialValue: widget.property.defaultValue?.toString() ?? '',
         autofocus: false,
         onSaved: (value) {
@@ -102,14 +110,7 @@ class _NumberJFormFieldState extends State<NumberJFormField> {
             return widget.customValidator!(value);
           return null;
         },
-        decoration: InputDecoration(
-          helperText:
-              widget.property.help != null && widget.property.help!.isNotEmpty
-                  ? widget.property.help
-                  : null,
-          errorStyle: uiConfig.error,
-          labelText: uiConfig.fieldLabelText(widget.property),
-        ),
+        decoration: uiConfig.inputDecoration(widget.property),
       ),
     );
   }
