@@ -2,7 +2,29 @@ import 'dart:developer';
 
 import '../models/models.dart';
 
-enum PropertyFormat { general, password, date, datetime, email, dataurl, uri }
+enum PropertyFormat {
+  general,
+  password,
+  date,
+  dateTime,
+  time,
+  email,
+  idnEmail,
+  dataUrl,
+  hostname,
+  idnHostname,
+  uri,
+  uriReference,
+  iri,
+  iriReference,
+  uuid,
+  ipv4,
+  ipv6,
+  uriTemplate,
+  jsonPointer,
+  relativeJsonPointer,
+  regex,
+}
 
 PropertyFormat propertyFormatFromString(String? value) {
   switch (value) {
@@ -10,14 +32,42 @@ PropertyFormat propertyFormatFromString(String? value) {
       return PropertyFormat.password;
     case 'date':
       return PropertyFormat.date;
-    case 'datetime':
-      return PropertyFormat.datetime;
+    case 'date-time':
+      return PropertyFormat.dateTime;
     case 'email':
       return PropertyFormat.email;
     case 'data-url':
-      return PropertyFormat.dataurl;
+      return PropertyFormat.dataUrl;
     case 'uri':
       return PropertyFormat.uri;
+    case 'uri-reference':
+      return PropertyFormat.uriReference;
+    case 'iri':
+      return PropertyFormat.iri;
+    case 'iri-reference':
+      return PropertyFormat.iriReference;
+    case 'time':
+      return PropertyFormat.time;
+    case 'idn-email':
+      return PropertyFormat.idnEmail;
+    case 'hostname':
+      return PropertyFormat.hostname;
+    case 'idn-hostname':
+      return PropertyFormat.idnHostname;
+    case 'uuid':
+      return PropertyFormat.uuid;
+    case 'ipv4':
+      return PropertyFormat.ipv4;
+    case 'ipv6':
+      return PropertyFormat.ipv6;
+    case 'uri-template':
+      return PropertyFormat.uriTemplate;
+    case 'json-pointer':
+      return PropertyFormat.jsonPointer;
+    case 'relative-json-pointer':
+      return PropertyFormat.relativeJsonPointer;
+    case 'regex':
+      return PropertyFormat.regex;
     default:
       return PropertyFormat.general;
   }

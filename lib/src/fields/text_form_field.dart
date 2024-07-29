@@ -102,13 +102,13 @@ class _TextJFormFieldState extends State<TextJFormField> {
       case PropertyFormat.date:
         textInputType = TextInputType.datetime;
         break;
-      case PropertyFormat.datetime:
+      case PropertyFormat.dateTime:
         textInputType = TextInputType.datetime;
         break;
       case PropertyFormat.email:
         textInputType = TextInputType.emailAddress;
         break;
-      case PropertyFormat.dataurl:
+      case PropertyFormat.dataUrl:
         textInputType = TextInputType.text;
         break;
       case PropertyFormat.uri:

@@ -38,7 +38,7 @@ abstract class PropertyFieldWidget<T> extends StatefulWidget {
       try {
         if (property.format == PropertyFormat.date) {
           value = DateFormat(dateFormatString).parse(value);
-        } else if (property.format == PropertyFormat.datetime) {
+        } else if (property.format == PropertyFormat.dateTime) {
           value = DateFormat(dateTimeFormatString).parse(value);
         }
       } catch (e) {

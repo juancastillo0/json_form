@@ -82,7 +82,7 @@ class SchemaArray extends Schema {
       id: id,
       title: title,
       type: SchemaType.string,
-      format: PropertyFormat.dataurl,
+      format: PropertyFormat.dataUrl,
       requiredProperty: requiredProperty,
       nullable: nullable,
       description: description,
