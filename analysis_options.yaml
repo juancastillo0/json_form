@@ -9,3 +9,4 @@ linter:
     no_leading_underscores_for_local_identifiers: false
     require_trailing_commas: true
     curly_braces_in_flow_control_structures: false
+    unawaited_futures: true
