@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:flutter/services.dart';
 
 const String dateFormatString = 'yyyy-MM-dd';
-const String dateTimeFormatString = 'yyyy-MM-dd hh:mm:ss';
+const String dateTimeFormatString = 'yyyy-MM-dd HH:mm:ss';
 
 class DateTextInputJsonFormatter extends TextInputFormatter {
   @override

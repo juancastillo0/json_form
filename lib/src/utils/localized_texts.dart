@@ -46,4 +46,6 @@ class LocalizedTexts {
       l.add('Items must be unique');
     return l.isEmpty ? null : l.join('\n');
   }
+
+  String invalidDate() => 'Invalid date';
 }
