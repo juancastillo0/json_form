@@ -33,6 +33,7 @@ class PropertySchemaBuilder extends StatelessWidget {
 
     // sort
     final schemaPropertySorted = schemaProperty;
+    final customValidator = _getCustomValidator(context, schemaProperty.idKey);
 
     if (schemaProperty.widget == 'radio') {
       _field = RadioButtonJFormField(
@@ -43,10 +44,9 @@ class PropertySchemaBuilder extends StatelessWidget {
         },
         onSaved: (val) {
           log('onSaved: RadioButtonJFormField ${schemaProperty.idKey}  : $val');
-
           updateData(context, val);
         },
-        customValidator: _getCustomValidator(context, schemaProperty.idKey),
+        customValidator: customValidator,
       );
     } else if (schemaProperty.enumm != null &&
         (schemaProperty.enumm!.isNotEmpty ||
@@ -70,7 +70,7 @@ class PropertySchemaBuilder extends StatelessWidget {
           );
           updateData(context, value);
         },
-        customValidator: _getCustomValidator(context, schemaProperty.idKey),
+        customValidator: customValidator,
       );
     } else if (schemaProperty.oneOf != null) {
       _field = DropdownOneOfJFormField(
@@ -96,11 +96,45 @@ class PropertySchemaBuilder extends StatelessWidget {
             updateData(context, value.oneOfModelEnum?.first);
           }
         },
-        customValidator: _getCustomValidator(context, schemaProperty.idKey),
+        customValidator: customValidator,
       );
     } else {
       switch (schemaProperty.type) {
+        case SchemaType.integer:
+        case SchemaType.number:
+          _field = NumberJFormField(
+            property: schemaPropertySorted,
+            onSaved: (val) {
+              log('onSaved: NumberJFormField ${schemaProperty.idKey}  : $val');
+              updateData(context, val);
+            },
+            onChanged: (value) {
+              dispatchBooleanEventToParent(
+                context,
+                value != null,
+              );
+              updateData(context, value);
+            },
+            customValidator: customValidator,
+          );
+          break;
+        case SchemaType.boolean:
+          _field = CheckboxJFormField(
+            property: schemaPropertySorted,
+            onChanged: (value) {
+              dispatchBooleanEventToParent(context, value!);
+              updateData(context, value);
+            },
+            onSaved: (val) {
+              log('onSaved: CheckboxJFormField ${schemaProperty.idKey}  : $val');
+              updateData(context, val);
+            },
+            customValidator: customValidator,
+          );
+
+          break;
         case SchemaType.string:
+        default:
           if (schemaProperty.format == PropertyFormat.date ||
               schemaProperty.format == PropertyFormat.dateTime) {
             _field = DateJFormField(
@@ -129,8 +163,7 @@ class PropertySchemaBuilder extends StatelessWidget {
 
                 updateData(context, date);
               },
-              customValidator:
-                  _getCustomValidator(context, schemaProperty.idKey),
+              customValidator: customValidator,
             );
             break;
           }
@@ -161,8 +194,7 @@ class PropertySchemaBuilder extends StatelessWidget {
 
                 updateData(context, value);
               },
-              customValidator:
-                  _getCustomValidator(context, schemaProperty.idKey),
+              customValidator: customValidator,
             );
             break;
           }
@@ -177,72 +209,9 @@ class PropertySchemaBuilder extends StatelessWidget {
               dispatchStringEventToParent(context, value!);
               updateData(context, value);
             },
-            customValidator: _getCustomValidator(context, schemaProperty.idKey),
+            customValidator: customValidator,
           );
           break;
-        case SchemaType.integer:
-        case SchemaType.number:
-          _field = NumberJFormField(
-            property: schemaPropertySorted,
-            onSaved: (val) {
-              log('onSaved: NumberJFormField ${schemaProperty.idKey}  : $val');
-              updateData(context, val);
-            },
-            onChanged: (value) {
-              dispatchBooleanEventToParent(
-                context,
-                value != null,
-              );
-              updateData(context, value);
-            },
-            customValidator: _getCustomValidator(context, schemaProperty.idKey),
-          );
-          break;
-        case SchemaType.boolean:
-          if (schemaProperty.widget == 'radio') {
-            _field = RadioButtonJFormField(
-              property: schemaPropertySorted,
-              onChanged: (value) {
-                dispatchBooleanEventToParent(context, value != null);
-                updateData(context, value);
-              },
-              onSaved: (val) {
-                log('onSaved: RadioButtonJFormField ${schemaProperty.idKey}  : $val');
-                updateData(context, val);
-              },
-              customValidator:
-                  _getCustomValidator(context, schemaProperty.idKey),
-            );
-          } else {
-            _field = CheckboxJFormField(
-              property: schemaPropertySorted,
-              onChanged: (value) {
-                dispatchBooleanEventToParent(context, value!);
-                updateData(context, value);
-              },
-              onSaved: (val) {
-                log('onSaved: CheckboxJFormField ${schemaProperty.idKey}  : $val');
-                updateData(context, val);
-              },
-              customValidator:
-                  _getCustomValidator(context, schemaProperty.idKey),
-            );
-          }
-
-          break;
-        default:
-          _field = TextJFormField(
-            property: schemaPropertySorted,
-            onSaved: (val) {
-              log('onSaved: TextJFormField ${schemaProperty.idKey}  : $val');
-              updateData(context, val);
-            },
-            onChanged: (value) {
-              dispatchStringEventToParent(context, value!);
-              updateData(context, value);
-            },
-            customValidator: _getCustomValidator(context, schemaProperty.idKey),
-          );
       }
     }
 

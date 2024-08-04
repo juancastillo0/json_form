@@ -103,6 +103,7 @@ class _JsonFormState extends State<JsonForm> {
           final uiConfig = widgetBuilderInherited.uiConfig;
 
           return SingleChildScrollView(
+            key: const Key('JsonForm_scrollView'),
             child: Form(
               key: _formKey,
               child: Container(

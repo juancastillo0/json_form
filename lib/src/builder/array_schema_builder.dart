@@ -59,13 +59,13 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
             ...schemaArray.items.map((schemaLoop) {
               final index = _index++;
               return Column(
-                key: Key(schemaLoop.idKey),
+                key: Key('JsonForm_item_${schemaLoop.idKey}'),
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   RemoveItemInherited(
                     removeItem: MapEntry(
-                      schemaArray.idKey,
+                      schemaLoop.idKey,
                       () => _removeItem(index),
                     ),
                     schema: schemaLoop,

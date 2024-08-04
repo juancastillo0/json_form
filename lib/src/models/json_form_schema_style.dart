@@ -91,7 +91,7 @@ class JsonFormSchemaUiConfig {
     return addItemBuilder != null
         ? addItemBuilder!(addItem, schemaArray.idKey)
         : Tooltip(
-            message: message,
+            message: message ?? '',
             child: TextButton.icon(
               key: Key('addItem_${schemaArray.idKey}'),
               onPressed: message == null ? addItem : null,

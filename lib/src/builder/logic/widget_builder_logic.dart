@@ -65,6 +65,14 @@ class WidgetBuilderInherited extends InheritedWidget {
     assert(result != null, 'No WidgetBuilderInherited found in context');
     return result!;
   }
+
+  static WidgetBuilderInherited get(BuildContext context) {
+    final result = context
+        .getElementForInheritedWidgetOfExactType<WidgetBuilderInherited>();
+
+    assert(result != null, 'No WidgetBuilderInherited found in context');
+    return result!.widget as WidgetBuilderInherited;
+  }
 }
 
 // ignore: must_be_immutable
@@ -153,6 +161,10 @@ class JsonFormController extends ChangeNotifier {
       int? _keyNumeric;
       if (schema is SchemaArray) {
         _keyNumeric = schema.items.indexWhere((test) => test.id == _key);
+        if (_keyNumeric == -1) {
+          return null;
+        }
+
         final l = object as List;
         while (l.length != schema.items.length) {
           l.length > schema.items.length ? l.removeLast() : l.add(null);
