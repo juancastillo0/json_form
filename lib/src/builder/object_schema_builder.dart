@@ -58,10 +58,21 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder> {
                 children: [
                   ...properties.whereType<SchemaProperty>().map(
                     (e) {
-                      final title = GeneralSubtitle(
-                        field: e,
-                        mainSchema: widget.mainSchema,
-                        omitDivider: true,
+                      final title = Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 15),
+                          Text(
+                            e.titleOrId,
+                            style: widgetBuilderInherited.uiConfig.label,
+                          ),
+                          if (e.description != null)
+                            Text(
+                              e.description!,
+                              style:
+                                  widgetBuilderInherited.uiConfig.description,
+                            ),
+                        ],
                       );
                       return TableRow(
                         children: [
