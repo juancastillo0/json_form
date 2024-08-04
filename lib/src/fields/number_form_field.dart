@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_jsonschema_builder/src/builder/logic/widget_builder_logic.dart';
@@ -20,21 +18,8 @@ class NumberJFormField extends PropertyFieldWidget<num?> {
   _NumberJFormFieldState createState() => _NumberJFormFieldState();
 }
 
-class _NumberJFormFieldState extends State<NumberJFormField> {
-  Timer? _timer;
-
-  @override
-  void initState() {
-    widget.triggerDefaultValue();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
+class _NumberJFormFieldState
+    extends PropertyFieldState<num?, NumberJFormField> {
   num? parseValue(String? value) {
     if (value == null || value.isEmpty) return null;
     return widget.property.type == SchemaType.integer
@@ -63,7 +48,7 @@ class _NumberJFormFieldState extends State<NumberJFormField> {
             RegExp('${signed ? '-?' : ''}[0-9${decimal ? '.,' : ''}]*'),
           ),
         ],
-        initialValue: widget.property.defaultValue?.toString() ?? '',
+        initialValue: super.getDefaultValue()?.toString() ?? '',
         autofocus: false,
         onSaved: (value) {
           final v = parseValue(value);
@@ -75,11 +60,7 @@ class _NumberJFormFieldState extends State<NumberJFormField> {
         onChanged: (value) {
           final v = parseValue(value);
           if (v == null) return;
-          if (_timer != null && _timer!.isActive) _timer!.cancel();
-
-          _timer = Timer(const Duration(microseconds: 1), () {
-            if (widget.onChanged != null) widget.onChanged!(v);
-          });
+          if (widget.onChanged != null) widget.onChanged!(v);
         },
         style: widget.property.readOnly
             ? const TextStyle(color: Colors.grey)

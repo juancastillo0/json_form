@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_jsonschema_builder/src/builder/logic/widget_builder_logic.dart';
@@ -23,21 +21,8 @@ class TextJFormField extends PropertyFieldWidget<String> {
   _TextJFormFieldState createState() => _TextJFormFieldState();
 }
 
-class _TextJFormFieldState extends State<TextJFormField> {
-  Timer? _timer;
+class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
   SchemaProperty get property => widget.property;
-
-  @override
-  void initState() {
-    widget.triggerDefaultValue();
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,19 +37,13 @@ class _TextJFormFieldState extends State<TextJFormField> {
           keyboardType: getTextInputTypeFromFormat(property.format),
           maxLines: property.widget == "textarea" ? null : 1,
           obscureText: property.format == PropertyFormat.password,
-          initialValue: property.defaultValue ?? '',
+          initialValue: super.getDefaultValue() ?? '',
           onSaved: widget.onSaved,
           maxLength: property.maxLength,
           inputFormatters: [textInputCustomFormatter(property.format)],
           autovalidateMode: AutovalidateMode.onUserInteraction,
           readOnly: property.readOnly,
-          onChanged: (value) {
-            if (_timer != null && _timer!.isActive) _timer!.cancel();
-
-            _timer = Timer(const Duration(microseconds: 1), () {
-              if (widget.onChanged != null) widget.onChanged!(value);
-            });
-          },
+          onChanged: widget.onChanged,
           validator: (String? value) {
             if (property.requiredNotNull && value != null) {
               final validated = inputValidationJsonSchema(
@@ -90,33 +69,36 @@ class _TextJFormFieldState extends State<TextJFormField> {
   }
 
   TextInputType getTextInputTypeFromFormat(PropertyFormat format) {
-    late TextInputType textInputType;
-
     switch (format) {
       case PropertyFormat.general:
-        textInputType = TextInputType.text;
-        break;
+      case PropertyFormat.time:
+      case PropertyFormat.hostname:
+      case PropertyFormat.idnHostname:
+      case PropertyFormat.uuid:
+      case PropertyFormat.ipv4:
+      case PropertyFormat.ipv6:
+      case PropertyFormat.jsonPointer:
+      case PropertyFormat.relativeJsonPointer:
+      case PropertyFormat.regex:
+        return TextInputType.text;
       case PropertyFormat.password:
-        textInputType = TextInputType.visiblePassword;
-        break;
+        return TextInputType.visiblePassword;
       case PropertyFormat.date:
-        textInputType = TextInputType.datetime;
-        break;
+        return TextInputType.datetime;
       case PropertyFormat.dateTime:
-        textInputType = TextInputType.datetime;
-        break;
+        return TextInputType.datetime;
       case PropertyFormat.email:
-        textInputType = TextInputType.emailAddress;
-        break;
+      case PropertyFormat.idnEmail:
+        return TextInputType.emailAddress;
       case PropertyFormat.dataUrl:
-        textInputType = TextInputType.text;
-        break;
+        return TextInputType.text;
       case PropertyFormat.uri:
-        textInputType = TextInputType.url;
-        break;
+      case PropertyFormat.uriReference:
+      case PropertyFormat.iri:
+      case PropertyFormat.iriReference:
+      case PropertyFormat.uriTemplate:
+        return TextInputType.url;
     }
-
-    return textInputType;
   }
 
   TextInputFormatter textInputCustomFormatter(PropertyFormat format) {

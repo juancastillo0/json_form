@@ -21,40 +21,29 @@ class DropDownJFormField extends PropertyFieldWidget<dynamic> {
   _DropDownJFormFieldState createState() => _DropDownJFormFieldState();
 }
 
-class _DropDownJFormFieldState extends State<DropDownJFormField> {
+class _DropDownJFormFieldState
+    extends PropertyFieldState<dynamic, DropDownJFormField> {
   dynamic value;
+
+  late List<dynamic> values;
+  late List<String> names;
+
   @override
   void initState() {
-    // fill enum property
+    values = widget.property.type == SchemaType.boolean
+        ? [true, false]
+        : (widget.property.enumm ?? widget.property.enumNames ?? []);
+    names =
+        widget.property.enumNames ?? values.map((v) => v.toString()).toList();
 
-    if (widget.property.enumm == null) {
-      switch (widget.property.type) {
-        case SchemaType.boolean:
-          widget.property.enumm = [true, false];
-          break;
-        default:
-          widget.property.enumm =
-              widget.property.enumNames?.map((e) => e.toString()).toList() ??
-                  [];
-      }
-    }
-
-    value = widget.property.defaultValue;
-    widget.triggerDefaultValue();
+    value = super.getDefaultValue();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    assert(widget.property.enumm != null, 'enum is required');
     assert(
-      () {
-        if (widget.property.enumNames != null) {
-          return widget.property.enumNames!.length ==
-              widget.property.enumm!.length;
-        }
-        return true;
-      }(),
+      names.length == values.length,
       '[enumNames] and [enum]  must be the same size ',
     );
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
@@ -107,29 +96,19 @@ class _DropDownJFormFieldState extends State<DropDownJFormField> {
     });
   }
 
-  List<DropdownMenuItem>? _buildItems() {
-    final w = <DropdownMenuItem>[];
-    for (var i = 0; i < widget.property.enumm!.length; i++) {
-      final value = widget.property.enumm![i];
-      final text = widget.property.enumNames?[i] ?? value;
-      w.add(
-        DropdownMenuItem(
-          value: value,
-          child: Text(text.toString()),
-        ),
+  List<DropdownMenuItem> _buildItems() {
+    return List.generate(values.length, (i) {
+      return DropdownMenuItem(
+        key: Key('${widget.property.idKey}_$i'),
+        value: values[i],
+        child: Text(names[i]),
       );
-    }
-    return w;
+    });
   }
 
   Map _getItems() {
-    final data = {};
-    for (var i = 0; i < widget.property.enumm!.length; i++) {
-      final value = widget.property.enumm![i];
-      final text = widget.property.enumNames?[i] ?? value;
-      data[value] = text;
-    }
-
-    return data;
+    return {
+      for (var i = 0; i < values.length; i++) values[i]: names[i],
+    };
   }
 }

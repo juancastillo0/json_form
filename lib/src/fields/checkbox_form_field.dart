@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_jsonschema_builder/flutter_jsonschema_builder.dart';
 import 'package:flutter_jsonschema_builder/src/builder/logic/widget_builder_logic.dart';
 import 'package:flutter_jsonschema_builder/src/fields/fields.dart';
 import 'package:flutter_jsonschema_builder/src/fields/shared.dart';
@@ -16,19 +17,15 @@ class CheckboxJFormField extends PropertyFieldWidget<bool> {
   _CheckboxJFormFieldState createState() => _CheckboxJFormFieldState();
 }
 
-class _CheckboxJFormFieldState extends State<CheckboxJFormField> {
-  @override
-  void initState() {
-    widget.triggerDefaultValue();
-    super.initState();
-  }
-
+class _CheckboxJFormFieldState
+    extends PropertyFieldState<bool, CheckboxJFormField> {
   @override
   Widget build(BuildContext context) {
-    final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
+    final widgetBuilderInherited = WidgetBuilderInherited.of(context);
+    final uiConfig = widgetBuilderInherited.uiConfig;
     return FormField<bool>(
       key: Key(widget.property.idKey),
-      initialValue: widget.property.defaultValue ?? false,
+      initialValue: super.getDefaultValue() ?? false,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       onSaved: widget.onSaved,
       validator: widget.customValidator,
@@ -39,6 +36,9 @@ class _CheckboxJFormFieldState extends State<CheckboxJFormField> {
             CheckboxListTile(
               isError: field.hasError,
               value: field.value ?? false,
+              controlAffinity: uiConfig.labelPosition == LabelPosition.table
+                  ? ListTileControlAffinity.leading
+                  : ListTileControlAffinity.platform,
               title: uiConfig.labelPosition == LabelPosition.table
                   ? null
                   : Text(

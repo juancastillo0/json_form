@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_jsonschema_builder/flutter_jsonschema_builder.dart';
 import 'package:flutter_jsonschema_builder/src/builder/logic/widget_builder_logic.dart';
 import 'package:flutter_jsonschema_builder/src/fields/fields.dart';
 import 'package:flutter_jsonschema_builder/src/fields/shared.dart';
@@ -19,36 +20,20 @@ class RadioButtonJFormField extends PropertyFieldWidget<dynamic> {
   _RadioButtonJFormFieldState createState() => _RadioButtonJFormFieldState();
 }
 
-class _RadioButtonJFormFieldState extends State<RadioButtonJFormField> {
-  bool booleanValue = false;
-
-  dynamic groupValue;
+class _RadioButtonJFormFieldState
+    extends PropertyFieldState<dynamic, RadioButtonJFormField> {
+  late List<dynamic> values;
+  late List<String> names;
 
   @override
   void initState() {
-    log(widget.property.defaultValue.toString());
-
     // fill enum property
-    if (widget.property.enumm == null) {
-      switch (widget.property.type) {
-        case SchemaType.boolean:
-          widget.property.enumm = [true, false];
-          break;
-        default:
-          widget.property.enumm =
-              widget.property.enumNames?.map((e) => e.toString()).toList() ??
-                  [];
-      }
-    }
+    values = widget.property.type == SchemaType.boolean
+        ? [true, false]
+        : (widget.property.enumm ?? widget.property.enumNames ?? []);
+    names =
+        widget.property.enumNames ?? values.map((v) => v.toString()).toList();
 
-    // fill groupValue
-    if (widget.property.type == SchemaType.boolean) {
-      groupValue = widget.property.defaultValue;
-    } else {
-      groupValue = widget.property.defaultValue ?? 0;
-    }
-
-    widget.triggerDefaultValue();
     super.initState();
   }
 
@@ -56,21 +41,16 @@ class _RadioButtonJFormFieldState extends State<RadioButtonJFormField> {
   Widget build(BuildContext context) {
     assert(widget.property.enumm != null, 'enum is required');
     assert(
-      () {
-        if (widget.property.enumNames != null) {
-          return widget.property.enumNames!.length ==
-              widget.property.enumm!.length;
-        }
-        return true;
-      }(),
-      '[enumNames] and [enum]  must be the same size ',
+      values.length == names.length,
+      '[enumNames] and [enum] must be the same size ',
     );
-
+    final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     inspect(widget.property);
+
     return FormField<dynamic>(
       key: Key(widget.property.idKey),
       autovalidateMode: AutovalidateMode.onUserInteraction,
-      initialValue: groupValue,
+      initialValue: super.getDefaultValue(),
       onSaved: (newValue) {
         widget.onSaved(newValue);
       },
@@ -83,34 +63,32 @@ class _RadioButtonJFormFieldState extends State<RadioButtonJFormField> {
       builder: (field) {
         return WrapFieldWithLabel(
           property: widget.property,
-          ignoreFieldLabel: true,
+          ignoreFieldLabel: uiConfig.labelPosition != LabelPosition.table,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: List<Widget>.generate(
-                  widget.property.enumNames?.length ?? 0,
+                  names.length,
                   (int i) => RadioListTile(
-                    value: widget.property.enumm != null
-                        ? widget.property.enumm![i]
-                        : i,
+                    key: Key('${widget.property.idKey}_$i'),
+                    value: values[i],
                     title: Text(
-                      widget.property.enumNames![i],
+                      names[i],
                       style: widget.property.readOnly
                           ? const TextStyle(color: Colors.grey)
-                          : WidgetBuilderInherited.of(context).uiConfig.label,
+                          : uiConfig.label,
                     ),
-                    groupValue: groupValue,
+                    groupValue: field.value,
                     onChanged: widget.property.readOnly
                         ? null
                         : (dynamic value) {
                             log(value.toString());
-                            groupValue = value;
                             if (value != null) {
-                              field.didChange(groupValue);
+                              field.didChange(value);
                               if (widget.onChanged != null) {
-                                widget.onChanged!(groupValue!);
+                                widget.onChanged!(value!);
                               }
                             }
                           },

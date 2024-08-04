@@ -22,13 +22,7 @@ class FileJFormField extends PropertyFieldWidget<dynamic> {
   _FileJFormFieldState createState() => _FileJFormFieldState();
 }
 
-class _FileJFormFieldState extends State<FileJFormField> {
-  @override
-  void initState() {
-    widget.triggerDefaultValue();
-    super.initState();
-  }
-
+class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
   @override
   Widget build(BuildContext context) {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;

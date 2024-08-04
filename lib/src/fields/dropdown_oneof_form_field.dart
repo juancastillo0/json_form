@@ -23,7 +23,8 @@ class DropdownOneOfJFormField extends PropertyFieldWidget<dynamic> {
   _SelectedFormFieldState createState() => _SelectedFormFieldState();
 }
 
-class _SelectedFormFieldState extends State<DropdownOneOfJFormField> {
+class _SelectedFormFieldState
+    extends PropertyFieldState<dynamic, DropdownOneOfJFormField> {
   final listOfModel = <OneOfModel>[];
   Map<String, dynamic> indexedData = {};
   OneOfModel? valueSelected;
@@ -71,7 +72,6 @@ class _SelectedFormFieldState extends State<DropdownOneOfJFormField> {
       valueSelected = null;
     }
 
-    widget.triggerDefaultValue();
     super.initState();
   }
 
