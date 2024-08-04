@@ -8,6 +8,8 @@ class TestUtils {
 
   TestUtils(this.tester);
 
+  static const scrollViewKey = Key('JsonForm_scrollView');
+
   Future<Finder> findAndEnterText(String key, String text) async {
     final input = find.byKey(Key(key));
     expect(input, findsOneWidget);
@@ -16,19 +18,39 @@ class TestUtils {
     return input;
   }
 
-  Finder findSubmitButton() {
-    final submitButton = find.byKey(const Key('JsonForm_submitButton'));
-    expect(submitButton, findsOneWidget);
-    return submitButton;
+  Future<Finder> tapSubmitButton() async {
+    return tapButton('JsonForm_submitButton');
+  }
+
+  Future<Finder> tapButton(String key) async {
+    final button = find.byKey(Key(key));
+    expect(button, findsOneWidget);
+    try {
+      await tester.dragUntilVisible(
+        button.hitTestable(),
+        find.byKey(scrollViewKey),
+        const Offset(0, 100),
+      );
+    } catch (_) {
+      await tester.dragUntilVisible(
+        button.hitTestable(),
+        find.byKey(scrollViewKey),
+        const Offset(0, -100),
+      );
+    }
+    await tester.tap(button);
+    await tester.pump();
+    return button;
   }
 }
 
 void main() {
-  testWidgets('primitives', (tester) async {
+  testWidgets('primitives and labels/titles', (tester) async {
     final utils = TestUtils(tester);
     late void Function(void Function()) setState;
     LabelPosition labelPosition = LabelPosition.top;
     Object? data = {};
+    // TODO: file, color
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
@@ -38,6 +60,7 @@ void main() {
               return JsonForm(
                 jsonSchema: '''{
           "type": "object",
+          "title": "My Form",
           "properties": {
             "string": {
               "type": "string",
@@ -54,6 +77,26 @@ void main() {
             "boolean": {
               "type": "boolean",
               "title": "booleanTitle"
+            },
+            "enum": {
+              "type": "string",
+              "title": "enumTitle",
+              "enum": ["a", "b", "c", "d"]
+            },
+            "enumRadio": {
+              "type": "integer",
+              "title": "enumRadioTitle",
+              "enum": [2, 4, 6]
+            },
+            "date": {
+              "type": "string",
+              "format": "date",
+              "title": "dateTitle"
+            },
+            "dateTime": {
+              "type": "string",
+              "format": "date-time",
+              "title": "dateTimeTitle"
             }
           }
         }''',
@@ -61,6 +104,11 @@ void main() {
                 uiConfig: JsonFormSchemaUiConfig(
                   labelPosition: labelPosition,
                 ),
+                uiSchema: '''{
+                  "enumRadio": {
+                    "ui:widget": "radio"
+                  }
+                }''',
               );
             },
           ),
@@ -74,15 +122,15 @@ void main() {
     final numberInput = await utils.findAndEnterText('number', '2');
     expect(data, {});
 
-    final submitButton = utils.findSubmitButton();
-    await tester.tap(submitButton);
-    await tester.pump();
+    final submitButton = await utils.tapSubmitButton();
     expect(
       data,
       {
         'string': 'hello',
         'number': 2.0,
         'boolean': false,
+        'enum': null,
+        'enumRadio': null,
       },
     );
 
@@ -92,9 +140,7 @@ void main() {
     await tester.enterText(numberInput, '.2');
     await tester.pump();
 
-    final booleanInput = find.byKey(const Key('boolean'));
-    expect(booleanInput, findsOneWidget);
-    await tester.tap(booleanInput);
+    await utils.tapButton('boolean');
     await tester.tap(submitButton);
     await tester.pump();
     expect(
@@ -104,12 +150,68 @@ void main() {
         'number': 0.2,
         'integer': -3,
         'boolean': true,
+        'enum': null,
+        'enumRadio': null,
+      },
+    );
+
+    final enumDropDown = find.byKey(const Key('enum'));
+    expect(enumDropDown, findsOneWidget);
+    await tester.tap(enumDropDown);
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('enum_1')), warnIfMissed: false);
+    await tester.pump();
+    await utils.tapSubmitButton();
+    await tester.pump();
+    expect(
+      data,
+      {
+        'string': 'hello',
+        'number': 0.2,
+        'integer': -3,
+        'boolean': true,
+        'enum': 'b',
+        'enumRadio': null,
+      },
+    );
+
+    final radio0 = find.byKey(const Key('enumRadio_0'));
+    expect(radio0, findsOneWidget);
+    await tester.tap(radio0);
+    await tester.tap(submitButton);
+    await tester.pump();
+    expect(
+      data,
+      {
+        'string': 'hello',
+        'number': 0.2,
+        'integer': -3,
+        'boolean': true,
+        'enum': 'b',
+        'enumRadio': 2,
+      },
+    );
+
+    await utils.findAndEnterText('date', '2023-04-02');
+    await utils.findAndEnterText('dateTime', '2021-12-27 13:01:49');
+    await tester.tap(submitButton);
+    await tester.pump();
+    expect(
+      data,
+      {
+        'string': 'hello',
+        'number': 0.2,
+        'integer': -3,
+        'boolean': true,
+        'enum': 'b',
+        'enumRadio': 2,
+        'date': '2023-04-02',
+        'dateTime': '2021-12-27 13:01:49',
       },
     );
 
     int i = 0;
     for (final position in LabelPosition.values) {
-      i++;
       setState(() {
         labelPosition = position;
       });
@@ -118,22 +220,39 @@ void main() {
       expect(find.text('numberTitle'), findsOneWidget);
       expect(find.text('integerTitle'), findsOneWidget);
       expect(find.text('booleanTitle'), findsOneWidget);
+      expect(find.text('enumTitle'), findsOneWidget);
+      expect(find.text('enumRadioTitle'), findsOneWidget);
+      expect(find.text('dateTitle'), findsOneWidget);
+      expect(find.text('dateTimeTitle'), findsOneWidget);
 
       await utils.findAndEnterText('string', 'hello$i');
       await utils.findAndEnterText('number', '$i');
       await utils.findAndEnterText('integer', '$i');
-      await tester.tap(booleanInput);
-      await tester.tap(submitButton);
+      await utils.tapButton('boolean');
+
+      await utils.tapButton('enum');
+      await tester.tap(find.byKey(Key('enum_${i % 4}')), warnIfMissed: false);
       await tester.pump();
+      await utils.tapButton('enumRadio_${i % 3}');
+      await utils.findAndEnterText('date', '2023-04-0${i + 1}');
+      await utils.findAndEnterText('dateTime', '2021-12-2${i + 1} 13:01:49');
+
+      await utils.tapSubmitButton();
       expect(
         data,
         {
           'string': 'hello$i',
           'number': i.toDouble(),
           'integer': i,
-          'boolean': i.isEven,
+          // table label position changes key state
+          'boolean': i.isOdd, // i >=2  ? i.isEven :
+          'enum': const ['a', 'b', 'c', 'd'][i % 4],
+          'enumRadio': ((i % 3) + 1) * 2,
+          'date': '2023-04-0${i + 1}',
+          'dateTime': '2021-12-2${i + 1} 13:01:49',
         },
       );
+      i++;
     }
   });
 
@@ -163,6 +282,10 @@ void main() {
                 "properties": {
                   "value": {
                     "type": "boolean"
+                  },
+                  "value2": {
+                    "type": "boolean",
+                    "default": true
                   }
                 }
               }
@@ -178,17 +301,115 @@ void main() {
       ),
     );
 
-    final submitButton = utils.findSubmitButton();
-    await tester.tap(submitButton);
-    await tester.pump();
+    await utils.tapSubmitButton();
     expect(find.text('You must add at least 2 items'), findsOneWidget);
 
     final arrayAdd = find.byKey(const Key('addItem_array'));
     expect(arrayAdd, findsOneWidget);
     await tester.tap(arrayAdd);
     await tester.pump();
+    final array0Input = await utils.findAndEnterText('array.0', 'text0');
 
-    final array0Input = utils.findAndEnterText('array.0', 'text0');
+    await tester.tap(arrayAdd);
+    await tester.pump();
+    final array1Input = await utils.findAndEnterText('array.1', 'text1');
+    expect(data, {});
+    await utils.tapSubmitButton();
+    expect(data, {
+      'array': ['text0', 'text1'],
+      'arrayWithObjects': [],
+    });
+
+    await tester.enterText(array1Input, 'text0');
+    await utils.tapSubmitButton();
+    expect(find.text('Items must be unique'), findsOneWidget);
+
+    await tester.tap(arrayAdd);
+    await tester.pump();
+    await utils.findAndEnterText('array.2', 'text2');
+
+    final array1Remove = find.byKey(const Key('removeItem_array.1'));
+    expect(array1Remove, findsOneWidget);
+    await tester.tap(array1Remove);
+    await tester.pump();
+    expect(find.byKey(const Key('removeItem_array.1')), findsNothing);
+
+    await tester.tap(arrayAdd);
+    await tester.pump();
+
+    await tester.enterText(array0Input, 'text00');
+    expect(data, {
+      'array': ['text00', 'text2', null],
+      'arrayWithObjects': [],
+    });
+
+    await utils.tapSubmitButton();
+    expect(data, {
+      'array': ['text00', 'text2', ''],
+      'arrayWithObjects': [],
+    });
+    expect(find.text('Items must be unique'), findsNothing);
+
+    expect(find.byTooltip('You can only add 3 items'), findsOneWidget);
+    await tester.tap(arrayAdd);
+    await tester.pump();
+    // No item added
+    expect(data, {
+      'array': ['text00', 'text2', ''],
+      'arrayWithObjects': [],
+    });
+
+    await utils.findAndEnterText('array.3', 'text3');
+    await utils.tapSubmitButton();
+    expect(data, {
+      'array': ['text00', 'text2', 'text3'],
+      'arrayWithObjects': [],
+    });
+    expect(find.byTooltip('You can only add 3 items'), findsOneWidget);
+
+    final array3Remove = find.byKey(const Key('removeItem_array.3'));
+    expect(array3Remove, findsOneWidget);
+    await tester.tap(array3Remove);
+    await utils.tapSubmitButton();
+    await tester.pump();
+    expect(data, {
+      'array': ['text00', 'text2'],
+      'arrayWithObjects': [],
+    });
+
+    final arrayWithObjectsAdd =
+        find.byKey(const Key('addItem_arrayWithObjects'));
+    expect(arrayWithObjectsAdd, findsOneWidget);
+    await tester.tap(arrayWithObjectsAdd);
+    await tester.pump();
+
+    await utils.findAndEnterText('integer', '2');
+
+    await utils.tapSubmitButton();
+    expect(data, {
+      'array': ['text00', 'text2'],
+      'arrayWithObjects': [
+        {'value': false, 'value2': true},
+      ],
+      'integer': 2,
+    });
+
+    final arrayWithObjectsValue =
+        find.byKey(const Key('arrayWithObjects.0.value'));
+    expect(arrayWithObjectsValue, findsOneWidget);
+    await tester.tap(arrayWithObjectsValue);
+    final arrayWithObjectsValue2 =
+        find.byKey(const Key('arrayWithObjects.0.value2'));
+    expect(arrayWithObjectsValue2, findsOneWidget);
+    await tester.tap(arrayWithObjectsValue2);
+    await utils.tapSubmitButton();
+    expect(data, {
+      'array': ['text00', 'text2'],
+      'arrayWithObjects': [
+        {'value': true, 'value2': false},
+      ],
+      'integer': 2,
+    });
   });
 
   testWidgets('nested object', (tester) async {
