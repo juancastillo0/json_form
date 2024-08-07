@@ -427,18 +427,28 @@ void main() {
               "properties": {
                 "objectNested": {
                   "type": "object",
+                  "required": ["value"],
                   "properties": {
                     "valueNested": {
                       "type": "boolean"
+                    },
+                    "value": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2,
+                      "pattern": "^[a-b]+\$"
                     }
                   }
                 }
+              }
             },
             "object2": {
               "type": "object",
               "properties": {
-                "value2": {
-                  type: "string"
+                "value": {
+                  "type": "string",
+                  "default": "default",
+                  "minLength": 2
                 }
               }
             }
@@ -449,9 +459,60 @@ void main() {
         ),
       ),
     );
+
+    await utils.tapSubmitButton();
+    expect(data, {});
+    expect(find.text('Required'), findsOneWidget);
+
+    final valueNested =
+        find.byKey(const Key('object1.objectNested.valueNested'));
+    expect(valueNested, findsOneWidget);
+    await tester.tap(valueNested);
+    await utils.findAndEnterText('object1.objectNested.value', 'a');
+
+    await utils.tapSubmitButton();
+    expect(data, {
+      'object1': {
+        'objectNested': {'valueNested': true, 'value': 'a'},
+      },
+      'object2': {'value': 'default'},
+    });
+
+    await tester.tap(valueNested);
+    await utils.findAndEnterText('object1.objectNested.value', 'abc');
+    await utils.findAndEnterText('object2.value', 'd');
+
+    await utils.tapSubmitButton();
+    // expect(
+    //   find.text('Should be less than 2 characters\nNo match for ^[a-b]+\$'),
+    //   findsOneWidget,
+    // );
+    expect(find.text('Should be at least 2 characters'), findsOneWidget);
+
+    await utils.findAndEnterText('object1.objectNested.value', 'ac');
+    await utils.findAndEnterText('object2.value', 'd2');
+    await utils.tapSubmitButton();
+    // expect(find.text('No match for ^[a-b]+\$'), findsOneWidget);
+    expect(find.text('Should be at least 2 characters'), findsNothing);
+    expect(data, {
+      'object1': {
+        'objectNested': {'valueNested': false, 'value': 'a'},
+      },
+      'object2': {'value': 'd2'},
+    });
+
+    await utils.findAndEnterText('object1.objectNested.value', 'ab');
+    await utils.tapSubmitButton();
+    expect(find.text('No match for ^[a-b]+\$'), findsNothing);
+    expect(data, {
+      'object1': {
+        'objectNested': {'valueNested': false, 'value': 'ab'}
+      },
+      'object2': {'value': 'd2'},
+    });
   });
 
-  testWidgets('metadata: title and description', (tester) async {
+  testWidgets('metadata: title, description and ui', (tester) async {
     final utils = TestUtils(tester);
     Object? data = {};
     await tester.pumpWidget(

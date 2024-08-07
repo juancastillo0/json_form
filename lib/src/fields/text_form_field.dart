@@ -45,18 +45,18 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
           readOnly: property.readOnly,
           onChanged: widget.onChanged,
           validator: (String? value) {
-            if (property.requiredNotNull && value != null) {
-              final validated = inputValidationJsonSchema(
-                localizedTexts: uiConfig.localizedTexts,
-                newValue: value,
-                property: property,
-              );
-              if (validated != null) return validated;
+            if (property.requiredNotNull && (value == null || value.isEmpty)) {
+              return uiConfig.localizedTexts.required();
             }
-
             if (widget.customValidator != null)
               return widget.customValidator!(value);
-
+            if (value != null && value.isNotEmpty) {
+              final error = uiConfig.localizedTexts.stringError(
+                property,
+                value,
+              );
+              if (error != null) return error;
+            }
             return null;
           },
           style: property.readOnly
