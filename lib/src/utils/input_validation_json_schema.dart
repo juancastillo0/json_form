@@ -67,7 +67,6 @@ bool isValidFormat(PropertyFormat format, String value) {
     case PropertyFormat.jsonPointer:
     case PropertyFormat.relativeJsonPointer:
     case PropertyFormat.general:
-    case PropertyFormat.password:
       return true;
   }
 }

@@ -35,7 +35,8 @@ class PropertySchemaBuilder extends StatelessWidget {
     final schemaPropertySorted = schemaProperty;
     final customValidator = _getCustomValidator(context, schemaProperty.idKey);
 
-    if (schemaProperty.widget == 'radio') {
+    final enumNames = schemaProperty.uiSchema.enumNames;
+    if (schemaProperty.uiSchema.widget == 'radio') {
       _field = RadioButtonJFormField(
         property: schemaPropertySorted,
         onChanged: (value) {
@@ -50,8 +51,7 @@ class PropertySchemaBuilder extends StatelessWidget {
       );
     } else if (schemaProperty.enumm != null &&
         (schemaProperty.enumm!.isNotEmpty ||
-            (schemaProperty.enumNames != null &&
-                schemaProperty.enumNames!.isNotEmpty))) {
+            (enumNames != null && enumNames.isNotEmpty))) {
       _field = DropDownJFormField(
         property: schemaPropertySorted,
         customPickerHandler: _getCustomPickerHandler(

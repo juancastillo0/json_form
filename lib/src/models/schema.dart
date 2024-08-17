@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../models/models.dart';
 // Esto transforma el JSON a Modelos
 
@@ -59,7 +61,7 @@ abstract class Schema {
     this.requiredProperty = false,
     String? title,
     this.description,
-    this.parentIdKey,
+    this.parent,
     List<String>? dependentsAddedBy,
   })  : dependentsAddedBy = dependentsAddedBy ?? [],
         title = title ?? kNoTitle;
@@ -97,6 +99,10 @@ abstract class Schema {
         break;
     }
 
+    final uiSchema = json['ui:options'] as Map<String, dynamic>?;
+    if (uiSchema != null) {
+      schema.setUiSchema(uiSchema, fromOptions: true);
+    }
     return schema;
   }
 
@@ -111,11 +117,18 @@ abstract class Schema {
 
   bool get requiredNotNull => requiredProperty && !nullable;
 
-  String get titleOrId => title != kNoTitle ? title : id;
+  String get titleOrId => title != kNoTitle
+      ? title
+      : parent is SchemaArray && int.tryParse(id) != null
+          ? '${(parent as SchemaArray).items.indexOf(this) + 1}.'
+          : id;
 
   // util props
-  final String? parentIdKey;
+  final Schema? parent;
+  String? get parentIdKey => parent?.idKey;
   final List<String> dependentsAddedBy;
+
+  final UiSchemaData uiSchema = UiSchemaData();
 
   /// it lets us know the key in the formData Map {key}
   String get idKey {
@@ -132,18 +145,29 @@ abstract class Schema {
 
   Schema copyWith({
     required String id,
-    String? parentIdKey,
+    Schema? parent,
     List<String>? dependentsAddedBy,
   });
+
+  @mustCallSuper
+  void setUiSchema(
+    Map<String, dynamic> data, {
+    required bool fromOptions,
+  }) {
+    uiSchema.setUi(data, parent: parent?.uiSchema, fromOptions: fromOptions);
+    title = uiSchema.title ?? title;
+    description = uiSchema.description ?? description;
+  }
 }
 
+// TODO: validate
 // Solucion temporal y personalizada
 class SchemaEnum extends Schema {
   SchemaEnum({
     String? id,
     required this.enumm,
     required super.nullable,
-    super.parentIdKey,
+    super.parent,
     super.dependentsAddedBy,
   }) : super(
           id: id ?? kNoIdKey,
@@ -156,14 +180,14 @@ class SchemaEnum extends Schema {
   @override
   Schema copyWith({
     required String id,
-    String? parentIdKey,
+    Schema? parent,
     List<String>? dependentsAddedBy,
   }) {
     return SchemaEnum(
       id: id,
       enumm: enumm,
       nullable: nullable,
-      parentIdKey: parentIdKey ?? this.parentIdKey,
+      parent: parent ?? this.parent,
       dependentsAddedBy: dependentsAddedBy ?? this.dependentsAddedBy,
     );
   }

@@ -11,7 +11,7 @@ class SchemaObject extends Schema {
     super.description,
     required super.nullable,
     super.requiredProperty,
-    super.parentIdKey,
+    super.parent,
     super.dependentsAddedBy,
   }) : super(title: title ?? kNoTitle, type: SchemaType.object);
 
@@ -28,42 +28,24 @@ class SchemaObject extends Schema {
           json["required"] != null ? List<String>.from(json["required"]) : [],
       nullable: SchemaType.isNullable(json['type']),
       dependencies: json['dependencies'],
-      parentIdKey: parent?.idKey,
+      parent: parent,
     );
     schema.dependentsAddedBy.addAll(parent?.dependentsAddedBy ?? []);
 
     if (json['properties'] != null) {
-      schema.setProperties(json['properties'], schema);
+      schema._setProperties(json['properties']);
     }
     if (json['oneOf'] != null) {
-      schema.setOneOf(json['oneOf'], schema);
+      schema._setOneOf(json['oneOf']);
     }
 
     return schema;
   }
 
-  void setUi(Map<String, dynamic> uiSchema) {
-    uiSchema.forEach((key, data) {
-      switch (key) {
-        case "ui:order":
-          order = List<String>.from(data);
-          break;
-        case "ui:title":
-          title = data as String;
-          break;
-        case "ui:description":
-          description = data as String;
-          break;
-        default:
-          break;
-      }
-    });
-  }
-
   @override
   Schema copyWith({
     required String id,
-    String? parentIdKey,
+    Schema? parent,
     List<String>? dependentsAddedBy,
   }) {
     final newSchema = SchemaObject(
@@ -72,24 +54,21 @@ class SchemaObject extends Schema {
       description: description,
       required: required,
       nullable: nullable,
-      parentIdKey: parentIdKey ?? this.parentIdKey,
+      parent: parent ?? this.parent,
       dependentsAddedBy: dependentsAddedBy ?? this.dependentsAddedBy,
-    )
-      ..dependencies = dependencies
-      ..oneOf = oneOf
-      ..order = order;
+      dependencies: dependencies,
+    )..oneOf = oneOf;
 
-    final otherProperties = properties!; //.map((p) => p.copyWith(id: p.id));
-
-    newSchema.properties = otherProperties
-        .map(
-          (e) => e.copyWith(
-            id: e.id,
-            parentIdKey: newSchema.idKey,
-            dependentsAddedBy: newSchema.dependentsAddedBy,
-          ),
-        )
-        .toList();
+    newSchema.properties.addAll(
+      properties.map(
+        (e) => e.copyWith(
+          id: e.id,
+          parent: newSchema,
+          dependentsAddedBy: newSchema.dependentsAddedBy,
+        ),
+      ),
+    );
+    newSchema.setUiSchema(uiSchema.toJson(), fromOptions: false);
 
     return newSchema;
   }
@@ -100,78 +79,68 @@ class SchemaObject extends Schema {
   bool isOneOf = false;
 
   /// array of required keys
-  List<String> required;
-  List<Schema>? properties;
-  List<String>? order;
+  final List<String> required;
+  final List<Schema> properties = [];
 
   /// the dependencies keyword from an earlier draft of JSON Schema
   /// (note that this is not part of the latest JSON Schema spec, though).
   /// Dependencies can be used to create dynamic schemas that change fields based on what data is entered
-  Map<String, dynamic>? dependencies;
+  final Map<String, dynamic>? dependencies;
 
   /// A [Schema] with [oneOf] is valid if exactly one of the subschemas is valid.
   List<Schema>? oneOf;
 
-  void setUiSchema(Map<String, dynamic>? uiSchema) {
-    if (uiSchema == null) return;
-    if (properties != null && properties!.isEmpty) return;
-
-    // set UI Schema to this ObjectSchema
-    setUi(uiSchema);
-
+  @override
+  void setUiSchema(
+    Map<String, dynamic> data, {
+    required bool fromOptions,
+  }) {
+    super.setUiSchema(data, fromOptions: fromOptions);
     // set UI Schema to their properties
-    properties?.forEach((_property) {
-      if (_property is SchemaObject) {
-        _property.setUi(uiSchema);
-      } else if (_property is SchemaProperty) {
-        _property.setUi(uiSchema);
+    for (var _property in properties) {
+      final v = data[_property.id] as Map<String, dynamic>?;
+      if (v != null) {
+        _property.setUiSchema(v, fromOptions: false);
+        uiSchema.children[_property.id] = _property.uiSchema;
       }
-    });
+    }
 
     // order logic
+    final order = uiSchema.order;
     if (order != null) {
-      properties!.sort((a, b) {
-        return order!.indexOf(a.id) - order!.indexOf(b.id);
+      properties.sort((a, b) {
+        return order.indexOf(a.id) - order.indexOf(b.id);
       });
     }
   }
 
-  void setProperties(
-    Map<String, dynamic>? properties,
-    SchemaObject schema,
-  ) {
-    if (properties == null) return;
-    final props = <Schema>[];
-
+  void _setProperties(Map<String, dynamic> properties) {
     properties.forEach((key, _property) {
-      final isRequired = schema.required.contains(key);
+      final isRequired = required.contains(key);
 
       final property = Schema.fromJson(
         _property,
         id: key,
-        parent: schema,
+        parent: this,
       );
 
       if (property is SchemaProperty) {
         property.requiredProperty = isRequired;
         // Asignamos las propiedades que dependen de este
-        property.setDependents(schema);
+        property.setDependents(this);
       } else {
         property.requiredProperty = isRequired;
       }
 
-      props.add(property);
+      this.properties.add(property);
     });
-
-    this.properties = props;
   }
 
-  void setOneOf(List<dynamic>? oneOf, SchemaObject schema) {
-    if (oneOf == null) return;
+  void _setOneOf(List<dynamic> oneOf) {
     final oneOfs = <Schema>[];
     for (Map<String, dynamic> element in oneOf.cast()) {
       log(element.toString());
-      oneOfs.add(Schema.fromJson(element, parent: schema));
+      oneOfs.add(Schema.fromJson(element, parent: this));
     }
 
     this.oneOf = oneOfs;

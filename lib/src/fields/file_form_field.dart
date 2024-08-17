@@ -29,6 +29,7 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
 
     return FormField<List<XFile>>(
       key: Key(widget.property.idKey),
+      enabled: enabled,
       validator: (value) {
         if ((value == null || value.isEmpty) &&
             widget.property.requiredNotNull) {
@@ -72,21 +73,23 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
                         .string,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: widget.property.readOnly
+                    style: readOnly
                         ? const TextStyle(color: Colors.grey)
                         : uiConfig.label,
                   ),
                   trailing: IconButton(
                     icon: const Icon(Icons.close, size: 14),
-                    onPressed: () {
-                      change(
-                        field,
-                        field.value!
-                          ..removeWhere(
-                            (element) => element.path == file.path,
-                          ),
-                      );
-                    },
+                    onPressed: enabled
+                        ? () {
+                            change(
+                              field,
+                              field.value!
+                                ..removeWhere(
+                                  (element) => element.path == file.path,
+                                ),
+                            );
+                          }
+                        : null,
                   ),
                 );
               },
@@ -110,7 +113,7 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
   }
 
   VoidCallback? _onTap(FormFieldState<List<XFile>> field) {
-    if (widget.property.readOnly) return null;
+    if (!enabled) return null;
 
     return () async {
       final result = await widget.fileHandler();

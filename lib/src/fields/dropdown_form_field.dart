@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_jsonschema_builder/src/builder/logic/widget_builder_logic.dart';
 import 'package:flutter_jsonschema_builder/src/fields/fields.dart';
@@ -30,14 +28,14 @@ class _DropDownJFormFieldState
 
   @override
   void initState() {
+    super.initState();
+    final enumNames = widget.property.uiSchema.enumNames;
     values = widget.property.type == SchemaType.boolean
         ? [true, false]
-        : (widget.property.enumm ?? widget.property.enumNames ?? []);
-    names =
-        widget.property.enumNames ?? values.map((v) => v.toString()).toList();
+        : (widget.property.enumm ?? enumNames ?? []);
+    names = enumNames ?? values.map((v) => v.toString()).toList();
 
     value = super.getDefaultValue();
-    super.initState();
   }
 
   @override
@@ -50,7 +48,7 @@ class _DropDownJFormFieldState
     return WrapFieldWithLabel(
       property: widget.property,
       child: GestureDetector(
-        onTap: _onTap,
+        onTap: enabled ? _onTap : null,
         child: AbsorbPointer(
           absorbing: widget.customPickerHandler != null,
           child: DropdownButtonFormField<dynamic>(
@@ -68,11 +66,10 @@ class _DropDownJFormFieldState
             },
             items: _buildItems(),
             value: value,
-            onChanged: _onChanged,
+            onChanged: enabled ? _onChanged : null,
             onSaved: widget.onSaved,
-            style: widget.property.readOnly
-                ? const TextStyle(color: Colors.grey)
-                : uiConfig.label,
+            style:
+                readOnly ? const TextStyle(color: Colors.grey) : uiConfig.label,
             decoration: uiConfig.inputDecoration(widget.property),
           ),
         ),
@@ -81,15 +78,12 @@ class _DropDownJFormFieldState
   }
 
   void _onTap() async {
-    log('ontap');
     if (widget.customPickerHandler == null) return;
     final response = await widget.customPickerHandler!(_getItems());
     if (response != null) _onChanged(response);
   }
 
   void _onChanged(dynamic value) {
-    if (widget.property.readOnly) return;
-
     if (widget.onChanged != null) widget.onChanged!(value);
     setState(() {
       this.value = value;
@@ -101,6 +95,8 @@ class _DropDownJFormFieldState
       return DropdownMenuItem(
         key: Key('${widget.property.idKey}_$i'),
         value: values[i],
+        enabled: !(widget.property.uiSchema.enumDisabled?.contains(values[i]) ??
+            false),
         child: Text(names[i]),
       );
     });

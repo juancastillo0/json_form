@@ -47,13 +47,13 @@ class ObjectSchemaInherited extends InheritedWidget {
       // Eliminamos los nuevos inputs agregados
       await _removeCreatedItemsSafeMode(schemaProperty);
       // Obtenemos el index del actual property para añadir a abajo de él
-      final indexProperty = schemaObject.properties!.indexOf(schemaProperty);
+      final indexProperty = schemaObject.properties.indexOf(schemaProperty);
       final dependents = schemaProperty.dependents;
       if (dependents is List) {
         dev.log('case 1');
 
         // Cuando es una Lista de String y todos ellos ahoran serán requeridos
-        for (var element in schemaObject.properties!) {
+        for (var element in schemaObject.properties) {
           if (dependents.contains(element.id)) {
             if (element is SchemaProperty) {
               dev.log('Este element ${element.id} es ahora $active');
@@ -94,7 +94,7 @@ class ObjectSchemaInherited extends InheritedWidget {
                 parent: schemaObject,
               );
 
-              final newProperties = tempSchema.properties!
+              final newProperties = tempSchema.properties
                   // Quitamos el key del mismo para que no se agregue al arbol de widgets
                   .where((e) => e.id != schemaProperty.id)
                   // Agregamos que fue dependiente de este, para que luego pueda ser eliminado.
@@ -108,7 +108,7 @@ class ObjectSchemaInherited extends InheritedWidget {
                 return e;
               }).toList();
 
-              schemaObject.properties!
+              schemaObject.properties
                   .insertAll(indexProperty + 1, newProperties);
             }
           }
@@ -122,9 +122,9 @@ class ObjectSchemaInherited extends InheritedWidget {
         final _schema = dependents;
 
         if (active) {
-          schemaObject.properties!.add(_schema);
+          schemaObject.properties.add(_schema);
         } else {
-          schemaObject.properties!
+          schemaObject.properties
               .removeWhere((element) => element.id == _schema.idKey);
         }
 
@@ -143,8 +143,8 @@ class ObjectSchemaInherited extends InheritedWidget {
     bool filter(Schema element) =>
         element.dependentsAddedBy.contains(schemaProperty.id);
 
-    if (schemaObject.properties!.any(filter)) {
-      schemaObject.properties!.removeWhere(filter);
+    if (schemaObject.properties.any(filter)) {
+      schemaObject.properties.removeWhere(filter);
 
       listen(ObjectSchemaDependencyEvent(schemaObject: schemaObject));
       await Future<void>.delayed(Duration.zero);

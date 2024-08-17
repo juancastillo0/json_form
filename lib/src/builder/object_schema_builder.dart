@@ -32,7 +32,7 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder> {
 
   @override
   Widget build(BuildContext context) {
-    final properties = widget.schemaObject.properties ?? [];
+    final properties = widget.schemaObject.properties;
     final directionality = Directionality.of(context);
     final widgetBuilderInherited = WidgetBuilderInherited.of(context);
     final isTableLabel =

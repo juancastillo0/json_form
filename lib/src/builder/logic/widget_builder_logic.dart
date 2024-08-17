@@ -21,6 +21,12 @@ class WidgetBuilderInherited extends InheritedWidget {
   final CustomValidatorHandler? customValidatorHandler;
   late final JsonFormSchemaUiConfig uiConfig;
 
+  // use description for field help message
+  // use id as title for array items
+
+  // implement not-required object
+  // validate nullable and required combinations
+
   void setJsonFormSchemaStyle(
     BuildContext context,
     JsonFormSchemaUiConfig? uiConfig,
@@ -171,9 +177,8 @@ class JsonFormController extends ChangeNotifier {
         }
         schema = schema.items[_keyNumeric];
       } else {
-        schema = (schema as SchemaObject)
-            .properties!
-            .firstWhere((p) => p.id == _key);
+        schema =
+            (schema as SchemaObject).properties.firstWhere((p) => p.id == _key);
       }
 
       if (i == stack.length - 1) {

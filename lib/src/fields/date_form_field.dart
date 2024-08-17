@@ -52,7 +52,7 @@ class _DateJFormFieldState
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     final dateIcon = IconButton(
       icon: const Icon(Icons.date_range_outlined),
-      onPressed: widget.property.readOnly ? null : _openCalendar,
+      onPressed: enabled ? _openCalendar : null,
     );
 
     return WrapFieldWithLabel(
@@ -61,6 +61,8 @@ class _DateJFormFieldState
         key: Key(widget.property.idKey),
         controller: txtDateCtrl,
         keyboardType: TextInputType.phone,
+        autofocus: widget.property.uiSchema.autoFocus,
+        enableSuggestions: widget.property.uiSchema.autoComplete,
         validator: (value) {
           if (widget.property.requiredNotNull &&
               (value == null || value.isEmpty)) {
@@ -76,22 +78,24 @@ class _DateJFormFieldState
           return null;
         },
         // inputFormatters: [DateTextInputJsonFormatter()],
-        readOnly: widget.property.readOnly,
-        style: widget.property.readOnly
-            ? const TextStyle(color: Colors.grey)
-            : uiConfig.label,
+        readOnly: readOnly,
+        enabled: enabled,
+        style: readOnly ? const TextStyle(color: Colors.grey) : uiConfig.label,
         onSaved: (value) {
           if (value != null && value.isNotEmpty)
             widget.onSaved(formatter.parse(value));
         },
-        onChanged: (value) {
-          try {
-            if (widget.onChanged != null && DateTime.tryParse(value) != null)
-              widget.onChanged!(formatter.parse(value));
-          } catch (e) {
-            return;
-          }
-        },
+        onChanged: enabled
+            ? (value) {
+                try {
+                  if (widget.onChanged != null &&
+                      DateTime.tryParse(value) != null)
+                    widget.onChanged!(formatter.parse(value));
+                } catch (e) {
+                  return;
+                }
+              }
+            : null,
         decoration: uiConfig.inputDecoration(widget.property).copyWith(
               hintText: formatter.pattern!.toUpperCase(),
               suffixIcon: isDateTime
@@ -101,8 +105,7 @@ class _DateJFormFieldState
                         dateIcon,
                         IconButton(
                           icon: const Icon(Icons.access_time_rounded),
-                          onPressed:
-                              widget.property.readOnly ? null : _openTime,
+                          onPressed: enabled ? _openTime : null,
                         ),
                       ],
                     )
@@ -113,13 +116,28 @@ class _DateJFormFieldState
   }
 
   void _openCalendar() async {
-    final tempDate = parseDate();
-    // TODO: configure params
+    DateTime tempDate = parseDate();
+    final defaultYearsRange = [1900, 2099];
+    List<int> yearsRange =
+        widget.property.uiSchema.yearsRange ?? defaultYearsRange;
+    if (yearsRange.isEmpty) yearsRange = defaultYearsRange;
+    yearsRange.sort();
+    final firstDate = DateTime(yearsRange.first);
+    final lastDate = DateTime(
+      yearsRange.last == yearsRange.first
+          ? yearsRange.last + 1
+          : yearsRange.last,
+    );
+    if (lastDate.isBefore(tempDate) || firstDate.isAfter(tempDate)) {
+      tempDate = lastDate;
+    }
+
     DateTime? date = await showDatePicker(
       context: context,
       initialDate: tempDate,
-      firstDate: DateTime(1900),
-      lastDate: DateTime(2099),
+      firstDate: firstDate,
+      lastDate: lastDate,
+      helpText: widget.property.uiSchema.help,
     );
     if (date == null) return;
     date = date.copyWith(
@@ -136,8 +154,10 @@ class _DateJFormFieldState
     final time = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(date),
+      helpText: widget.property.uiSchema.help,
     );
     if (time == null) return;
+    // TODO: seconds
     date = date.copyWith(hour: time.hour, minute: time.minute);
     txtDateCtrl.text = formatter.format(date);
     widget.onSaved(date);

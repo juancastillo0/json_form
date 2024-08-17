@@ -29,6 +29,7 @@ class _CheckboxJFormFieldState
       autovalidateMode: AutovalidateMode.onUserInteraction,
       onSaved: widget.onSaved,
       validator: widget.customValidator,
+      enabled: enabled,
       builder: (field) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,6 +37,7 @@ class _CheckboxJFormFieldState
             CheckboxListTile(
               isError: field.hasError,
               value: field.value ?? false,
+              enabled: enabled,
               controlAffinity: uiConfig.labelPosition == LabelPosition.table
                   ? ListTileControlAffinity.leading
                   : ListTileControlAffinity.platform,
@@ -43,18 +45,18 @@ class _CheckboxJFormFieldState
                   ? null
                   : Text(
                       uiConfig.labelText(widget.property),
-                      style: widget.property.readOnly
+                      style: readOnly
                           ? const TextStyle(color: Colors.grey)
                           : WidgetBuilderInherited.of(context).uiConfig.label,
                     ),
-              onChanged: widget.property.readOnly
-                  ? null
-                  : (bool? value) {
+              onChanged: enabled
+                  ? (bool? value) {
                       field.didChange(value);
                       if (widget.onChanged != null && value != null) {
                         widget.onChanged!(value);
                       }
-                    },
+                    }
+                  : null,
             ),
             if (field.hasError) CustomErrorText(text: field.errorText!),
           ],

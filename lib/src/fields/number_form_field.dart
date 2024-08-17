@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_jsonschema_builder/src/builder/logic/widget_builder_logic.dart';
 import 'package:flutter_jsonschema_builder/src/fields/fields.dart';
 import 'package:flutter_jsonschema_builder/src/fields/shared.dart';
+import 'package:flutter_jsonschema_builder/src/models/property_schema.dart';
 import 'package:flutter_jsonschema_builder/src/models/schema.dart';
 
 class NumberJFormField extends PropertyFieldWidget<num?> {
@@ -27,18 +28,20 @@ class _NumberJFormFieldState
         : double.tryParse(value);
   }
 
+  SchemaProperty get property => widget.property;
+
   @override
   Widget build(BuildContext context) {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
-    final numberProperties = widget.property.numberProperties;
+    final numberProperties = property.numberProperties;
     final signed = (numberProperties.minimum ?? -1) < 0 &&
         (numberProperties.exclusiveMinimum ?? -1) < 0;
-    final decimal = widget.property.type == SchemaType.number;
+    final decimal = property.type == SchemaType.number;
 
     return WrapFieldWithLabel(
-      property: widget.property,
+      property: property,
       child: TextFormField(
-        key: Key(widget.property.idKey),
+        key: Key(property.idKey),
         keyboardType: TextInputType.numberWithOptions(
           decimal: decimal,
           signed: signed,
@@ -49,39 +52,43 @@ class _NumberJFormFieldState
           ),
         ],
         initialValue: super.getDefaultValue()?.toString() ?? '',
-        autofocus: false,
+        autofocus: property.uiSchema.autoFocus,
+        enableSuggestions: property.uiSchema.autoComplete,
         onSaved: (value) {
+          value = value == null || value.isEmpty
+              ? property.uiSchema.emptyValue
+              : value;
           final v = parseValue(value);
           if (v == null) return;
           widget.onSaved(v);
         },
         autovalidateMode: AutovalidateMode.onUserInteraction,
-        readOnly: widget.property.readOnly,
+        readOnly: readOnly,
         onChanged: (value) {
           final v = parseValue(value);
           if (v == null) return;
           if (widget.onChanged != null) widget.onChanged!(v);
         },
-        style: widget.property.readOnly
-            ? const TextStyle(color: Colors.grey)
-            : uiConfig.label,
+        enabled: enabled,
+        style: readOnly ? const TextStyle(color: Colors.grey) : uiConfig.label,
         validator: (String? value) {
-          if (widget.property.requiredNotNull &&
+          if (property.requiredNotNull &&
+              property.uiSchema.emptyValue != null &&
               value != null &&
               value.isEmpty) {
             return uiConfig.localizedTexts.required();
           }
-          if (widget.property.minLength != null &&
+          if (property.minLength != null &&
               value != null &&
               value.isNotEmpty &&
-              value.length <= widget.property.minLength!) {
+              value.length <= property.minLength!) {
             return uiConfig.localizedTexts
-                .minLength(minLength: widget.property.minLength!);
+                .minLength(minLength: property.minLength!);
           }
           final parsed = parseValue(value);
           if (parsed != null) {
             final error = uiConfig.localizedTexts.numberPropertiesError(
-              widget.property.numberProperties,
+              property.numberProperties,
               parsed,
             );
             if (error != null) return error;
@@ -91,7 +98,7 @@ class _NumberJFormFieldState
             return widget.customValidator!(value);
           return null;
         },
-        decoration: uiConfig.inputDecoration(widget.property),
+        decoration: uiConfig.inputDecoration(property),
       ),
     );
   }

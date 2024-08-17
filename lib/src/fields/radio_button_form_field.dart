@@ -28,11 +28,11 @@ class _RadioButtonJFormFieldState
   @override
   void initState() {
     // fill enum property
+    final enumNames = widget.property.uiSchema.enumNames;
     values = widget.property.type == SchemaType.boolean
         ? [true, false]
-        : (widget.property.enumm ?? widget.property.enumNames ?? []);
-    names =
-        widget.property.enumNames ?? values.map((v) => v.toString()).toList();
+        : (widget.property.enumm ?? enumNames ?? []);
+    names = enumNames ?? values.map((v) => v.toString()).toList();
 
     super.initState();
   }
@@ -60,6 +60,7 @@ class _RadioButtonJFormFieldState
 
         return null;
       },
+      enabled: enabled,
       builder: (field) {
         return WrapFieldWithLabel(
           property: widget.property,
@@ -76,14 +77,13 @@ class _RadioButtonJFormFieldState
                     value: values[i],
                     title: Text(
                       names[i],
-                      style: widget.property.readOnly
+                      style: readOnly
                           ? const TextStyle(color: Colors.grey)
                           : uiConfig.label,
                     ),
                     groupValue: field.value,
-                    onChanged: widget.property.readOnly
-                        ? null
-                        : (dynamic value) {
+                    onChanged: enabled
+                        ? (dynamic value) {
                             log(value.toString());
                             if (value != null) {
                               field.didChange(value);
@@ -91,7 +91,8 @@ class _RadioButtonJFormFieldState
                                 widget.onChanged!(value!);
                               }
                             }
-                          },
+                          }
+                        : null,
                   ),
                 ),
               ),

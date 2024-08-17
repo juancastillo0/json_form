@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_jsonschema_builder/src/builder/logic/widget_builder_logic.dart';
 import 'package:flutter_jsonschema_builder/src/fields/fields.dart';
 import 'package:flutter_jsonschema_builder/src/fields/shared.dart';
-import 'package:flutter_jsonschema_builder/src/utils/input_validation_json_schema.dart';
 
 import '../utils/utils.dart';
 import '../models/models.dart';
@@ -27,48 +26,56 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
   @override
   Widget build(BuildContext context) {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
+    final uiSchema = property.uiSchema;
     return WrapFieldWithLabel(
       property: property,
-      child: AbsorbPointer(
-        absorbing: property.disabled ?? false,
-        child: TextFormField(
-          key: Key(property.idKey),
-          autofocus: (property.autoFocus ?? false),
-          keyboardType: getTextInputTypeFromFormat(property.format),
-          maxLines: property.widget == "textarea" ? null : 1,
-          obscureText: property.format == PropertyFormat.password,
-          initialValue: super.getDefaultValue() ?? '',
-          onSaved: widget.onSaved,
-          maxLength: property.maxLength,
-          inputFormatters: [textInputCustomFormatter(property.format)],
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          readOnly: property.readOnly,
-          onChanged: widget.onChanged,
-          validator: (String? value) {
-            if (property.requiredNotNull && (value == null || value.isEmpty)) {
-              return uiConfig.localizedTexts.required();
-            }
-            if (widget.customValidator != null)
-              return widget.customValidator!(value);
-            if (value != null && value.isNotEmpty) {
-              final error = uiConfig.localizedTexts.stringError(
-                property,
-                value,
-              );
-              if (error != null) return error;
-            }
-            return null;
-          },
-          style: property.readOnly
-              ? const TextStyle(color: Colors.grey)
-              : uiConfig.label,
-          decoration: uiConfig.inputDecoration(property),
+      child: TextFormField(
+        key: Key(property.idKey),
+        autofocus: uiSchema.autoFocus,
+        enableSuggestions: uiSchema.autoComplete,
+        keyboardType: getTextInputTypeFromFormat(
+          property.format,
+          uiSchema.widget,
         ),
+        enabled: enabled,
+        maxLines: uiSchema.widget == "textarea" ? null : 1,
+        obscureText: uiSchema.widget == "password",
+        initialValue: super.getDefaultValue() ?? '',
+        onSaved: (v) => widget.onSaved(
+          v == null || v.isEmpty ? property.uiSchema.emptyValue : v,
+        ),
+        maxLength: property.maxLength,
+        inputFormatters: [textInputCustomFormatter(property.format)],
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        readOnly: readOnly,
+        onChanged: widget.onChanged,
+        validator: (String? value) {
+          if (property.requiredNotNull &&
+              property.uiSchema.emptyValue != null &&
+              (value == null || value.isEmpty)) {
+            return uiConfig.localizedTexts.required();
+          }
+          if (widget.customValidator != null)
+            return widget.customValidator!(value);
+          if (value != null && value.isNotEmpty) {
+            final error = uiConfig.localizedTexts.stringError(
+              property,
+              value,
+            );
+            if (error != null) return error;
+          }
+          return null;
+        },
+        style: readOnly ? const TextStyle(color: Colors.grey) : uiConfig.label,
+        decoration: uiConfig.inputDecoration(property),
       ),
     );
   }
 
-  TextInputType getTextInputTypeFromFormat(PropertyFormat format) {
+  TextInputType getTextInputTypeFromFormat(
+    PropertyFormat format,
+    String? widget,
+  ) {
     switch (format) {
       case PropertyFormat.general:
       case PropertyFormat.time:
@@ -80,9 +87,9 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
       case PropertyFormat.jsonPointer:
       case PropertyFormat.relativeJsonPointer:
       case PropertyFormat.regex:
-        return TextInputType.text;
-      case PropertyFormat.password:
-        return TextInputType.visiblePassword;
+        return widget == 'password'
+            ? TextInputType.visiblePassword
+            : TextInputType.text;
       case PropertyFormat.date:
         return TextInputType.datetime;
       case PropertyFormat.dateTime:

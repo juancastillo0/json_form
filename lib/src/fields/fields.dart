@@ -33,6 +33,9 @@ abstract class PropertyFieldWidget<T> extends StatefulWidget {
 
 abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
     extends State<W> {
+  bool get readOnly => widget.property.uiSchema.readOnly;
+  bool get enabled => !widget.property.uiSchema.disabled && !readOnly;
+
   @override
   void initState() {
     super.initState();

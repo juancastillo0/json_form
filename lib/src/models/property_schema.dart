@@ -1,10 +1,7 @@
-import 'dart:developer';
-
 import '../models/models.dart';
 
 enum PropertyFormat {
   general,
-  password,
   date,
   dateTime,
   time,
@@ -28,8 +25,6 @@ enum PropertyFormat {
 
 PropertyFormat propertyFormatFromString(String? value) {
   switch (value) {
-    case 'password':
-      return PropertyFormat.password;
     case 'date':
       return PropertyFormat.date;
     case 'date-time':
@@ -99,7 +94,6 @@ class SchemaProperty extends Schema {
     this.defaultValue,
     this.examples,
     this.enumm,
-    this.enumNames,
     super.requiredProperty = false,
     required super.nullable,
     this.format = PropertyFormat.general,
@@ -108,8 +102,7 @@ class SchemaProperty extends Schema {
     this.maxLength,
     this.pattern,
     this.oneOf,
-    this.readOnly = false,
-    super.parentIdKey,
+    super.parent,
     super.dependentsAddedBy,
   }) : super(
           title: title ?? kNoTitle,
@@ -129,14 +122,12 @@ class SchemaProperty extends Schema {
       examples: json['examples'],
       description: json['description'],
       enumm: json['enum'],
-      enumNames: (json['enumNames'] as List?)?.cast(),
       minLength: json['minLength'],
       maxLength: json['maxLength'],
       pattern: json['pattern'],
       numberProperties: NumberProperties.fromJson(json),
       oneOf: json['oneOf'],
-      readOnly: json['readOnly'] ?? false,
-      parentIdKey: parent?.idKey,
+      parent: parent,
       nullable: SchemaType.isNullable(json['type']),
     );
     property.dependentsAddedBy.addAll(parent?.dependentsAddedBy ?? const []);
@@ -144,20 +135,10 @@ class SchemaProperty extends Schema {
     return property;
   }
 
-  void setUi(Map<String, dynamic> uiSchema) {
-    // set general ui schema
-    setUiToProperty(uiSchema);
-
-    // set custom ui schema for property
-    if (uiSchema.containsKey(id)) {
-      setUiToProperty(uiSchema[id]);
-    }
-  }
-
   @override
   SchemaProperty copyWith({
     required String id,
-    String? parentIdKey,
+    Schema? parent,
     List<String>? dependentsAddedBy,
   }) {
     final newSchema = SchemaProperty(
@@ -167,25 +148,18 @@ class SchemaProperty extends Schema {
       description: description,
       format: format,
       defaultValue: defaultValue,
-      enumNames: enumNames,
       enumm: enumm,
       requiredProperty: requiredProperty,
       nullable: nullable,
       oneOf: oneOf,
-      parentIdKey: parentIdKey ?? this.parentIdKey,
+      parent: parent ?? this.parent,
       dependentsAddedBy: dependentsAddedBy ?? this.dependentsAddedBy,
     )
-      ..autoFocus = autoFocus
-      ..order = order
-      ..widget = widget
-      ..disabled = disabled
-      ..emptyValue = emptyValue
-      ..help = help
       ..maxLength = maxLength
       ..minLength = minLength
-      ..widget = widget
       ..dependents = dependents
       ..isMultipleFile = isMultipleFile;
+    newSchema.setUiSchema(uiSchema.toJson(), fromOptions: false);
 
     return newSchema;
   }
@@ -195,28 +169,20 @@ class SchemaProperty extends Schema {
   /// it means enum
   List<dynamic>? enumm;
 
-  /// displayed as text if is not empty
-  List<String>? enumNames;
-
   dynamic defaultValue;
   List<dynamic>? examples;
 
   // propiedades que se llenan con el json
-  bool? disabled;
-  List<String>? order;
-  bool? autoFocus;
-  int? minLength, maxLength;
+  int? minLength;
+  int? maxLength;
   final NumberProperties numberProperties;
   String? pattern;
   dynamic dependents;
-  bool readOnly;
   bool isMultipleFile = false;
 
   /// indica si sus dependentes han sido activados por XDependencies
   bool isDependentsActive = false;
 
-  // not suported yet
-  String? widget, emptyValue, help;
   List<dynamic>? oneOf;
 
   void setDependents(SchemaObject schema) {
@@ -236,40 +202,6 @@ class SchemaProperty extends Schema {
         );
       }
     }
-  }
-
-  void setUiToProperty(Map<String, dynamic> uiSchema) {
-    uiSchema.forEach((key, data) {
-      switch (key) {
-        case "ui:disabled":
-          log('aplicamos pues ctmr');
-          disabled = data as bool;
-          break;
-        case "ui:order":
-          order = List<String>.from(data);
-          break;
-        case "ui:autofocus":
-          autoFocus = data as bool;
-          break;
-        case "ui:emptyValue":
-          emptyValue = data as String;
-          break;
-        case "ui:title":
-          title = data as String;
-          break;
-        case "ui:description":
-          description = data as String;
-          break;
-        case "ui:help":
-          help = data as String;
-          break;
-        case "ui:widget":
-          widget = data as String;
-          break;
-        default:
-          break;
-      }
-    });
   }
 }
 

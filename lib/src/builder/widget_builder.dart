@@ -67,13 +67,16 @@ class _JsonFormState extends State<JsonForm> {
         return;
       }
     }
-    final mainSchema = (Schema.fromJson(
+    final mainSchema = Schema.fromJson(
       json.decode(widget.jsonSchema),
       id: kGenesisIdKey,
-    ) as SchemaObject)
-      ..setUiSchema(
-        widget.uiSchema != null ? json.decode(widget.uiSchema!) : null,
-      );
+    );
+    final map = widget.uiSchema != null
+        ? json.decode(widget.uiSchema!) as Map<String, Object?>
+        : null;
+    if (map != null) {
+      mainSchema.setUiSchema(map, fromOptions: false);
+    }
     controller.mainSchema = mainSchema;
   }
 
@@ -196,6 +199,9 @@ class FormFromSchemaBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (schema.uiSchema.hidden) {
+      return const SizedBox.shrink();
+    }
     if (schema is SchemaProperty) {
       return PropertySchemaBuilder(
         mainSchema: mainSchema,

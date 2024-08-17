@@ -39,9 +39,10 @@ class _SelectedFormFieldState
           widget.property.enumm = [true, false];
           break;
         default:
-          widget.property.enumm =
-              widget.property.enumNames?.map((e) => e.toString()).toList() ??
-                  [];
+          widget.property.enumm = widget.property.uiSchema.enumNames
+                  ?.map((e) => e.toString())
+                  .toList() ??
+              [];
       }
     }
 
@@ -119,7 +120,7 @@ class _SelectedFormFieldState
   }
 
   void _onChanged(OneOfModel? value) {
-    if (widget.property.readOnly) return;
+    if (readOnly) return;
 
     setState(() {
       valueSelected = value;
@@ -138,7 +139,7 @@ class _SelectedFormFieldState
             value: item,
             child: Text(
               item.title ?? '',
-              style: widget.property.readOnly
+              style: readOnly
                   ? const TextStyle(color: Colors.grey)
                   : WidgetBuilderInherited.of(context).uiConfig.label,
             ),
