@@ -15,6 +15,7 @@ class LocalizedTexts {
   String select() => 'Select';
   String removeItem() => 'Remove item';
   String addItem() => 'Add item';
+  String copyItem() => 'Copy';
   String addFile() => 'Add file';
   String shouldBeUri() => 'Should be a valid URL';
   String submit() => 'Submit';
@@ -106,7 +107,6 @@ class LocalizedTexts {
       case PropertyFormat.relativeJsonPointer:
       // TODO:
       case PropertyFormat.general:
-      case PropertyFormat.password:
         return 'Invalid format';
     }
   }

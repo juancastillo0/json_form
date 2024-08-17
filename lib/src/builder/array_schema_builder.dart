@@ -3,6 +3,7 @@ import 'package:flutter_jsonschema_builder/flutter_jsonschema_builder.dart';
 import 'package:flutter_jsonschema_builder/src/builder/general_subtitle_widget.dart';
 import 'package:flutter_jsonschema_builder/src/builder/logic/widget_builder_logic.dart';
 import 'package:flutter_jsonschema_builder/src/fields/shared.dart';
+import 'package:flutter_jsonschema_builder/src/helpers/helpers.dart';
 import 'package:flutter_jsonschema_builder/src/models/models.dart';
 
 class ArraySchemaBuilder extends StatefulWidget {
@@ -19,7 +20,8 @@ class ArraySchemaBuilder extends StatefulWidget {
 
 class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
   SchemaArray get schemaArray => widget.schemaArray;
-  int lastItemId = 0;
+  int lastItemId = 1;
+  bool showItems = true;
 
   String generateItemId() => (lastItemId++).toString();
 
@@ -40,6 +42,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
       },
       onSaved: (_) {
         if (schemaArray.items.isEmpty) {
+          // TODO:  && schemaArray.requiredNotNull
           widgetBuilderInherited.controller.updateObjectData(
             schemaArray.idKey,
             [],
@@ -48,6 +51,49 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
       },
       builder: (field) {
         int _index = 0;
+        final items = schemaArray.items.map((schemaLoop) {
+          final index = _index++;
+          return Column(
+            key: Key('JsonForm_item_${schemaLoop.idKey}'),
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  const SizedBox(height: 5),
+                  if (schemaArray.uiSchema.copyable)
+                    uiConfig.copyItemWidget(
+                      schemaLoop,
+                      () => _copyItem(index),
+                    ),
+                  if (schemaArray.uiSchema.removable)
+                    uiConfig.removeItemWidget(
+                      schemaLoop,
+                      () => _removeItem(index),
+                    ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 5.0, left: 5.0),
+                // TODO: improve this, necessary for ReorderableListView
+                child: WidgetBuilderInherited(
+                  controller: widgetBuilderInherited.controller,
+                  customPickerHandler:
+                      widgetBuilderInherited.customPickerHandler,
+                  customValidatorHandler:
+                      widgetBuilderInherited.customValidatorHandler,
+                  fileHandler: widgetBuilderInherited.fileHandler,
+                  child: FormFromSchemaBuilder(
+                    mainSchema: widget.mainSchema,
+                    schema: schemaLoop,
+                  ),
+                )..uiConfig = widgetBuilderInherited.uiConfig,
+              ),
+            ],
+          );
+        });
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -55,29 +101,47 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
             GeneralSubtitle(
               field: schemaArray,
               mainSchema: widget.mainSchema,
+              trailing: IconButton(
+                visualDensity: VisualDensity.compact,
+                onPressed: () {
+                  setState(() {
+                    showItems = !showItems;
+                  });
+                },
+                icon: showItems
+                    ? const Icon(Icons.arrow_drop_up_outlined)
+                    : const Icon(Icons.arrow_drop_down_outlined),
+              ),
             ),
-            ...schemaArray.items.map((schemaLoop) {
-              final index = _index++;
-              return Column(
-                key: Key('JsonForm_item_${schemaLoop.idKey}'),
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  RemoveItemInherited(
-                    removeItem: MapEntry(
-                      schemaLoop.idKey,
-                      () => _removeItem(index),
-                    ),
-                    schema: schemaLoop,
-                    child: FormFromSchemaBuilder(
-                      mainSchema: widget.mainSchema,
-                      schema: schemaLoop,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                ],
-              );
-            }),
+            if (!showItems)
+              const SizedBox()
+            else if (schemaArray.uiSchema.orderable)
+              ReorderableListView(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                onReorder: (oldIndex, newIndex) {
+                  setState(() {
+                    final pItem = schemaArray.items[oldIndex];
+                    schemaArray.items[oldIndex] = schemaArray.items[newIndex];
+                    schemaArray.items[newIndex] = pItem;
+
+                    WidgetBuilderInherited.of(context)
+                        .controller
+                        .updateDataInPlace(
+                      schemaArray.idKey,
+                      (array) {
+                        if (array is! List) return;
+                        final prev = array[oldIndex];
+                        array[oldIndex] = array[newIndex];
+                        array[newIndex] = prev;
+                      },
+                    );
+                  });
+                },
+                children: items.toList(growable: false),
+              )
+            else
+              ...items,
             if (field.hasError) CustomErrorText(text: field.errorText!),
           ],
         );
@@ -88,7 +152,8 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
       child: Column(
         children: [
           widgetBuilder,
-          if (!schemaArray.isArrayMultipleFile())
+          if (!schemaArray.isArrayMultipleFile() &&
+              schemaArray.uiSchema.addable)
             Align(
               alignment: Alignment.centerRight,
               child: uiConfig.addItemWidget(
@@ -107,11 +172,10 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
             schemaArray.idKey,
             (array) => (array as List? ?? [])..add(null),
           );
-      if (schemaArray.items.isEmpty) {
-        _addFirstItem();
-      } else {
-        _addItemFromFirstSchema();
-      }
+
+      final newItem =
+          schemaArray.itemsBaseSchema.copyWith(id: generateItemId());
+      schemaArray.items.add(newItem);
     });
   }
 
@@ -125,38 +189,20 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
     });
   }
 
-  void _addFirstItem() {
-    final itemsBaseSchema = schemaArray.itemsBaseSchema;
-    if (itemsBaseSchema is Map<String, dynamic>) {
-      final newSchema = Schema.fromJson(
-        itemsBaseSchema,
-        id: generateItemId(),
-        parent: schemaArray,
+  void _copyItem(int index) {
+    setState(() {
+      final schemaLoop = schemaArray.items[index];
+      final widgetBuilderInherited = WidgetBuilderInherited.of(context);
+      final item = widgetBuilderInherited.controller
+          .retrieveObjectData(schemaArray.idKey) as List?;
+      final newItem = copyJson(item![index]);
+      widgetBuilderInherited.controller.updateDataInPlace(
+        schemaArray.idKey,
+        (array) => (array as List? ?? [])..add(newItem),
       );
-
-      schemaArray.items.add(newSchema);
-    } else {
-      schemaArray.items.addAll(
-        (itemsBaseSchema as List).cast<Map<String, dynamic>>().map(
-              (e) => Schema.fromJson(
-                e,
-                id: generateItemId(),
-                parent: schemaArray,
-              ),
-            ),
+      schemaArray.items.add(
+        schemaLoop.copyWith(id: generateItemId()),
       );
-    }
-  }
-
-  void _addItemFromFirstSchema() {
-    final itemsBaseSchema = schemaArray.itemsBaseSchema is Map<String, dynamic>
-        ? schemaArray.itemsBaseSchema
-        : (schemaArray.itemsBaseSchema as List).first;
-    final newSchema = Schema.fromJson(
-      itemsBaseSchema as Map<String, dynamic>,
-      id: generateItemId(),
-      parent: schemaArray,
-    );
-    schemaArray.items.add(newSchema);
+    });
   }
 }

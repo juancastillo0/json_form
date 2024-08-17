@@ -81,48 +81,6 @@ class WidgetBuilderInherited extends InheritedWidget {
   }
 }
 
-// ignore: must_be_immutable
-class RemoveItemInherited extends InheritedWidget {
-  RemoveItemInherited({
-    super.key,
-    required super.child,
-    required this.removeItem,
-    required this.schema,
-  });
-
-  final MapEntry<String, void Function()> removeItem;
-  final Schema schema;
-  BuildContext? _context;
-
-  static MapEntry<String, void Function()>? getRemoveItem(
-    BuildContext context,
-    Schema schema,
-  ) {
-    final removeItemInherited = RemoveItemInherited.maybeOf(context);
-
-    if (removeItemInherited == null ||
-        removeItemInherited._context != null &&
-            removeItemInherited._context!.mounted &&
-            removeItemInherited._context != context ||
-        removeItemInherited.schema != schema) {
-      return null;
-    }
-
-    removeItemInherited._context = context;
-    return removeItemInherited.removeItem;
-  }
-
-  static RemoveItemInherited? maybeOf(BuildContext context) {
-    final result =
-        context.dependOnInheritedWidgetOfExactType<RemoveItemInherited>();
-    return result;
-  }
-
-  @override
-  bool updateShouldNotify(covariant RemoveItemInherited oldWidget) =>
-      removeItem != oldWidget.removeItem || schema != oldWidget.schema;
-}
-
 class JsonFormController extends ChangeNotifier {
   Schema? mainSchema;
   final Map data;

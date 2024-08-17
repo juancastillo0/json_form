@@ -3,17 +3,21 @@ import '../models/models.dart';
 class SchemaArray extends Schema {
   SchemaArray({
     required super.id,
-    required this.itemsBaseSchema,
+    required dynamic itemsBaseSchema,
     String? title,
     super.description,
     this.arrayProperties = const ArrayProperties(),
     List<Schema>? items,
     super.requiredProperty,
     required super.nullable,
-    super.parentIdKey,
+    super.parent,
     super.dependentsAddedBy,
   })  : items = items ?? [],
-        super(title: title ?? kNoTitle, type: SchemaType.array);
+        super(title: title ?? kNoTitle, type: SchemaType.array) {
+    this.itemsBaseSchema = itemsBaseSchema is Schema
+        ? itemsBaseSchema.copyWith(id: kNoIdKey, parent: this)
+        : Schema.fromJson(itemsBaseSchema, parent: this);
+  }
 
   factory SchemaArray.fromJson(
     String id,
@@ -26,7 +30,7 @@ class SchemaArray extends Schema {
       description: json['description'],
       arrayProperties: ArrayProperties.fromJson(json),
       itemsBaseSchema: json['items'],
-      parentIdKey: parent?.idKey,
+      parent: parent,
       nullable: SchemaType.isNullable(json['type']),
     );
     schemaArray.dependentsAddedBy.addAll(parent?.dependentsAddedBy ?? const []);
@@ -37,7 +41,7 @@ class SchemaArray extends Schema {
   @override
   SchemaArray copyWith({
     required String id,
-    String? parentIdKey,
+    Schema? parent,
     List<String>? dependentsAddedBy,
   }) {
     final newSchema = SchemaArray(
@@ -48,18 +52,19 @@ class SchemaArray extends Schema {
       itemsBaseSchema: itemsBaseSchema,
       requiredProperty: requiredProperty,
       nullable: nullable,
-      parentIdKey: parentIdKey ?? this.parentIdKey,
+      parent: parent ?? this.parent,
       dependentsAddedBy: dependentsAddedBy ?? this.dependentsAddedBy,
     );
     newSchema.items.addAll(
       items.map(
         (e) => e.copyWith(
           id: e.id,
-          parentIdKey: newSchema.idKey,
+          parent: newSchema,
           dependentsAddedBy: newSchema.dependentsAddedBy,
         ),
       ),
     );
+    newSchema.setUiSchema(uiSchema.toJson(), fromOptions: false);
 
     return newSchema;
   }
@@ -68,13 +73,13 @@ class SchemaArray extends Schema {
   final List<Schema> items;
 
   // it allow us
-  final dynamic itemsBaseSchema;
+  late final Schema itemsBaseSchema;
 
   final ArrayProperties arrayProperties;
 
   bool isArrayMultipleFile() {
-    return itemsBaseSchema is Map &&
-        (itemsBaseSchema as Map)['format'] == 'data-url';
+    final s = itemsBaseSchema;
+    return s is SchemaProperty && s.format == PropertyFormat.dataUrl;
   }
 
   SchemaProperty toSchemaPropertyMultipleFiles() {
@@ -86,9 +91,22 @@ class SchemaArray extends Schema {
       requiredProperty: requiredProperty,
       nullable: nullable,
       description: description,
-      parentIdKey: parentIdKey,
+      parent: parent,
       dependentsAddedBy: dependentsAddedBy,
     )..isMultipleFile = true;
+  }
+
+  @override
+  void setUiSchema(
+    Map<String, dynamic> data, {
+    required bool fromOptions,
+  }) {
+    super.setUiSchema(data, fromOptions: fromOptions);
+    final items = data['items'] as Map<String, Object?>?;
+    if (items != null) {
+      itemsBaseSchema.setUiSchema(items, fromOptions: false);
+      uiSchema.children['items'] = itemsBaseSchema.uiSchema;
+    }
   }
 }
 
@@ -96,7 +114,7 @@ enum ArrayPropertiesError {
   minItems,
   maxItems,
   uniqueItems,
-  // contains, prefixItems
+  // TODO: contains, prefixItems
 }
 
 class ArrayProperties {

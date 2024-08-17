@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_jsonschema_builder/flutter_jsonschema_builder.dart';
-import 'package:flutter_jsonschema_builder/src/builder/logic/widget_builder_logic.dart';
 import 'package:flutter_jsonschema_builder/src/models/models.dart';
 
 class JsonFormSchemaUiConfig {
@@ -63,20 +62,18 @@ class JsonFormSchemaUiConfig {
     return InputDecoration(
       errorStyle: error,
       labelText: fieldLabelText(property),
-      helperText: property.help ??
+      hintText: property.uiSchema.placeholder,
+      helperText: property.uiSchema.help ??
           (labelPosition == LabelPosition.table ? null : property.description),
     );
   }
 
-  Widget? removeItemWidget(BuildContext context, Schema property) {
-    final removeItem = RemoveItemInherited.getRemoveItem(context, property);
-    if (removeItem == null) return null;
-
+  Widget removeItemWidget(Schema property, void Function() removeItem) {
     return removeItemBuilder != null
-        ? removeItemBuilder!(removeItem.value, removeItem.key)
+        ? removeItemBuilder!(removeItem, property.idKey)
         : TextButton.icon(
-            key: Key('removeItem_${removeItem.key}'),
-            onPressed: removeItem.value,
+            key: Key('removeItem_${property.idKey}'),
+            onPressed: removeItem,
             icon: const Icon(Icons.remove),
             label: Text(localizedTexts.removeItem()),
           );
@@ -99,6 +96,16 @@ class JsonFormSchemaUiConfig {
               label: Text(localizedTexts.addItem()),
             ),
           );
+  }
+
+  Widget copyItemWidget(Schema itemSchema, void Function() copyItem) {
+    // TODO: copyItemBuilder
+    return TextButton.icon(
+      key: Key('copyItem_${itemSchema.idKey}'),
+      onPressed: copyItem,
+      icon: const Icon(Icons.copy),
+      label: Text(localizedTexts.copyItem()),
+    );
   }
 
   @override
@@ -154,10 +161,8 @@ class FieldWrapperParams {
   const FieldWrapperParams({
     required this.property,
     required this.input,
-    required this.removeItem,
   });
 
   final SchemaProperty property;
   final Widget input;
-  final Widget? removeItem;
 }

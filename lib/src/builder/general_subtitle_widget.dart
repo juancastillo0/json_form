@@ -8,16 +8,17 @@ class GeneralSubtitle extends StatelessWidget {
     required this.field,
     this.mainSchema,
     this.omitDivider = false,
+    this.trailing,
   });
 
   final Schema field;
   final Schema? mainSchema;
   final bool omitDivider;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
-    final removeItem = uiConfig.removeItemWidget(context, field);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -33,7 +34,7 @@ class GeneralSubtitle extends StatelessWidget {
                 field.titleOrId,
                 style: uiConfig.subtitle,
               ),
-              if (removeItem != null) removeItem,
+              if (trailing != null) trailing!,
             ],
           ),
           if (!omitDivider) const Divider(),
