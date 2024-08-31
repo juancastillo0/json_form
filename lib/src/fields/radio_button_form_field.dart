@@ -27,28 +27,35 @@ class _RadioButtonJFormFieldState
 
   @override
   void initState() {
-    // fill enum property
-    final enumNames = widget.property.uiSchema.enumNames;
-    values = widget.property.type == SchemaType.boolean
-        ? [true, false]
-        : (widget.property.enumm ?? enumNames ?? []);
-    names = enumNames ?? values.map((v) => v.toString()).toList();
-
     super.initState();
+    // fill enum property
+    final enumNames = property.uiSchema.enumNames;
+    switch (property.type) {
+      case SchemaType.boolean:
+        values = [true, false];
+        break;
+      case SchemaType.integer:
+      case SchemaType.number:
+        values = property.enumm ?? property.numberProperties.options();
+        break;
+      default:
+        values = (property.enumm ?? enumNames)!;
+    }
+    names =
+        enumNames ?? values.map((v) => v.toString()).toList(growable: false);
   }
 
   @override
   Widget build(BuildContext context) {
-    assert(widget.property.enumm != null, 'enum is required');
     assert(
       values.length == names.length,
       '[enumNames] and [enum] must be the same size ',
     );
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
-    inspect(widget.property);
+    inspect(property);
 
     return FormField<dynamic>(
-      key: Key(widget.property.idKey),
+      key: Key(property.idKey),
       autovalidateMode: AutovalidateMode.onUserInteraction,
       initialValue: super.getDefaultValue(),
       onSaved: (newValue) {
@@ -63,7 +70,7 @@ class _RadioButtonJFormFieldState
       enabled: enabled,
       builder: (field) {
         return WrapFieldWithLabel(
-          property: widget.property,
+          property: property,
           ignoreFieldLabel: uiConfig.labelPosition != LabelPosition.table,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,7 +80,7 @@ class _RadioButtonJFormFieldState
                 children: List<Widget>.generate(
                   names.length,
                   (int i) => RadioListTile(
-                    key: Key('${widget.property.idKey}_$i'),
+                    key: Key('${property.idKey}_$i'),
                     value: values[i],
                     title: Text(
                       names[i],

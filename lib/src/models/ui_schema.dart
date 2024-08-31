@@ -126,7 +126,7 @@ class UiSchemaData {
         case "placeholder":
           placeholder = data as String;
           break;
-        case "readOnly":
+        case "readonly":
           readOnly = data as bool;
           break;
         case "hidden":

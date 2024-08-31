@@ -515,51 +515,276 @@ void main() {
   testWidgets('metadata: title, description and ui', (tester) async {
     final utils = TestUtils(tester);
     Object? data = {};
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Material(
-          child: JsonForm(
-            jsonSchema: '''{
+    late void Function(void Function()) setState;
+    // TODO: imports
+    JsonFormController? controller;
+    const jsonSchemaString = '''{
           "type": "object",
-          "title": "My Form",
-          "description": "This is a form",
           "properties": {
-            "object": {
-              "title": "My Object",
-              "description": "This is an object",
-              "type": "object",
-              "properties": {
-                "value": {
-                  "title": "My String",
-                  "description": "This is a string",
-                  type: "string"
-                },
-                "boolean1": {
-                  "title": "My Boolean",
-                  "description": "This is a boolean",
-                  type: "boolean"
-                }
+            "stringTop": {
+              "type": "string"
+            },
+            "integerRange": {
+              "type": "integer",
+              "minimum": -3,
+              "maximum": 5,
+              "multipleOf": 2
+            },
+            "integerRadio": {
+              "type": "integer",
+              "minimum": -1,
+              "maximum": 3
+            },
+            "enumValues": {
+              "type": "string",
+              "enum": ["n1", "n2", "n3"]
+            },
+            "arrayCheckbox": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": ["n1", "n2", "n3"]
               }
             },
-            "array1": {
-              "title": "My Array",
-              "description": "This is an array",
+            "arrayString": {
               "type": "array",
               "items": {
                 "type": "string"
               }
             },
-            "integer1": {
-              "title": "My Integer",
-              "description": "This is an integer",
-              "type": "integer"
+            "object": {
+              "type": "object",
+              "properties": {
+                "nameEnabled": {
+                  "type": "string"
+                },
+                "nameDisabled": {
+                  "type": "string",
+                  "default": "disabled default"
+                },
+                "boolReadOnly": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "nameHidden": {
+                  "type": "string"
+                }
+              }
             }
           }
-        }''',
-            onFormDataSaved: (p) => data = p,
+        }''';
+    String? uiSchemaString = '''{
+          "ui:order": [
+                      "integerRadio",
+                      "stringTop",
+                      "integerRange",
+                      "arrayString",
+                      "enumValues",
+                      "arrayCheckbox",
+                      "object"],
+          "stringTop": {
+            "ui:autoFocus": true,
+            "ui:autoComplete": true,
+            "ui:placeholder": "My Object Placeholder"
+          },
+          "integerRange": {
+            "ui:widget": "range"
+          },
+          "integerRadio": {
+            "ui:widget": "radio"
+          },
+          "object": {
+            "ui:options": {
+              "description": "My Description",
+              "order": ["nameDisabled", "nameEnabled", "boolReadOnly"]
+            },
+            "ui:title": "My Object UI",
+            "ui:help": "My Object Help",
+            "nameDisabled": {
+              "ui:disabled": true
+            },
+            "boolReadOnly": {
+              "ui:readonly": true
+            },
+            "nameHidden": {
+              "ui:emptyValue": "empty",
+              "ui:hidden": true
+            }
+          },
+          "arrayCheckbox": {
+            "ui:widget": "checkboxes",
+            "ui:inline": true
+          },
+          "arrayString": {
+            "ui:orderable": true,
+            "ui:copyable": true
+          },
+          "enumValues": {
+            "ui:options": {
+              "enumNames": ["n1", "n2", "n3"],
+              "enumDisabled": ["n2"]
+            }
+          }
+        }''';
+    // TODO: inline
+    final uiSchema = UiSchemaData()
+      ..setUi(
+        jsonDecode(uiSchemaString) as Map<String, Object?>,
+        parent: null,
+      );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: StatefulBuilder(
+            builder: (context, _setState) {
+              setState = _setState;
+              return JsonForm(
+                jsonSchema: jsonSchemaString,
+                uiSchema: uiSchemaString,
+                controller: controller,
+                onFormDataSaved: (p) => data = p,
+              );
+            },
           ),
         ),
       ),
     );
+    final currentData = {
+      'object': {
+        'nameDisabled': 'disabled default',
+        'boolReadOnly': true,
+        'nameEnabled': null,
+      },
+      'integerRadio': null,
+      'integerRange': null,
+      'arrayString': [],
+      'arrayCheckbox': [],
+      'stringTop': null,
+      'enumValues': null,
+    };
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+
+    await utils.tapButton('integerRadio_0');
+    currentData['integerRadio'] = -1;
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+
+    expect(find.text('My Object Placeholder'), findsOneWidget);
+
+    final rangeSlider = await utils.tapButton('integerRange');
+    await tester.drag(rangeSlider, const Offset(100, 0));
+    currentData['integerRange'] = 2;
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+
+    /// Array
+    await utils.tapButton('addItem_arrayString');
+    await tester.pump();
+
+    currentData['arrayString'] = [null];
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+
+    final arrayCopy = find.byKey(const Key('copyItem_arrayString.1'));
+    expect(arrayCopy, findsOneWidget);
+    await utils.findAndEnterText('arrayString.1', 'text0');
+
+    currentData['arrayString'] = ['text0'];
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+
+    await utils.tapButton('copyItem_arrayString.1');
+    await tester.pump();
+
+    currentData['arrayString'] = ['text0', 'text0'];
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+
+    expect(find.text('text0'), findsExactly(2));
+    await utils.findAndEnterText('arrayString.2', 'text1');
+    expect(find.text('text0'), findsOneWidget);
+
+    currentData['arrayString'] = ['text0', 'text1'];
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+    // TODO: test reorder/draggable
+
+    final enumDropDown = find.byKey(const Key('enumValues'));
+    expect(enumDropDown, findsOneWidget);
+    await tester.tap(enumDropDown);
+    await tester.pump();
+    await tester.tap(
+      find.byKey(const Key('enumValues_1')),
+      warnIfMissed: false,
+    );
+    await tester.pump();
+
+    // // no change since enumValues_1 is disabled
+    // currentData['enumValues'] = null;
+    // await utils.tapSubmitButton();
+    // expect(data, currentData);
+
+    await tester.tap(
+      find.byKey(const Key('enumValues_0')),
+      warnIfMissed: false,
+    );
+    await tester.pump();
+
+    currentData['enumValues'] = 'n1';
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+
+    final checkbox0 = find.byKey(const Key('JsonForm_item_arrayCheckbox_0'));
+    expect(checkbox0, findsOneWidget);
+    await tester.tap(checkbox0);
+
+    currentData['arrayCheckbox'] = ['n1'];
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+
+    final checkbox1 = find.byKey(const Key('JsonForm_item_arrayCheckbox_1'));
+    expect(checkbox1, findsOneWidget);
+    await tester.tap(checkbox1);
+
+    currentData['arrayCheckbox'] = ['n1', 'n2'];
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+
+    await tester.tap(checkbox0);
+    currentData['arrayCheckbox'] = ['n2'];
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+
+    for (int i = 0; i < 2; i++) {
+      switch (i) {
+        case 0:
+          setState(() {
+            uiSchemaString = jsonEncode(uiSchema.toJson());
+          });
+          break;
+        case 1:
+          setState(() {
+            uiSchemaString = null;
+            final mainSchema = Schema.fromJson(
+              jsonDecode(jsonSchemaString) as Map<String, Object?>,
+            );
+            mainSchema.setUiSchema(uiSchema.toJson(), fromOptions: false);
+            controller = JsonFormController(
+              data: data as Map<String, dynamic>,
+              mainSchema: mainSchema,
+            );
+          });
+          break;
+        default:
+      }
+      await tester.pump();
+    }
   });
+
+  // TODO:
+  // format
+  // readOnly
 }

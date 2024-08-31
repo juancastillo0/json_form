@@ -56,7 +56,10 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder> {
             if (isTableLabel)
               Table(
                 children: [
-                  ...properties.whereType<SchemaProperty>().map(
+                  ...properties
+                      .whereType<SchemaProperty>()
+                      .where((p) => !p.uiSchema.hidden)
+                      .map(
                     (e) {
                       final title = Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

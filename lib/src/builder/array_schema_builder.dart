@@ -50,6 +50,39 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
         }
       },
       builder: (field) {
+        if (schemaArray.uiSchema.widget == 'checkboxes') {
+          final schema = schemaArray.itemsBaseSchema as SchemaProperty;
+          final options = schema.enumm ?? schema.numberProperties.options();
+          int _index = 0;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GeneralSubtitle(
+                field: schemaArray,
+                mainSchema: widget.mainSchema,
+              ),
+              Wrap(
+                children: options.map((option) {
+                  final index = _index++;
+                  final title = schema.uiSchema.enumNames != null
+                      ? schema.uiSchema.enumNames![index]
+                      : option.toString();
+                  return CheckboxListTile(
+                    key: Key('JsonForm_item_${schemaArray.idKey}_$index'),
+                    title: Text(title),
+                    value: field.value != null &&
+                        (field.value as List).contains(option),
+                    onChanged: (_) {
+                      selectCheckbox(field, option);
+                    },
+                  );
+                }).toList(growable: false),
+              ),
+              if (field.hasError) CustomErrorText(text: field.errorText!),
+            ],
+          );
+        }
+
         int _index = 0;
         final items = schemaArray.items.map((schemaLoop) {
           final index = _index++;
@@ -61,6 +94,12 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  if (uiConfig.labelPosition == LabelPosition.table)
+                    Text(
+                      schemaLoop.titleOrId,
+                      style: uiConfig.label,
+                    ),
+                  const Spacer(),
                   const SizedBox(height: 5),
                   if (schemaArray.uiSchema.copyable)
                     uiConfig.copyItemWidget(
@@ -153,7 +192,8 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
         children: [
           widgetBuilder,
           if (!schemaArray.isArrayMultipleFile() &&
-              schemaArray.uiSchema.addable)
+              schemaArray.uiSchema.addable &&
+              schemaArray.uiSchema.widget != 'checkboxes')
             Align(
               alignment: Alignment.centerRight,
               child: uiConfig.addItemWidget(
@@ -202,6 +242,27 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
       );
       schemaArray.items.add(
         schemaLoop.copyWith(id: generateItemId()),
+      );
+    });
+  }
+
+  void selectCheckbox(FormFieldState<Object?> field, Object? option) {
+    setState(() {
+      WidgetBuilderInherited.of(context).controller.updateDataInPlace(
+        schemaArray.idKey,
+        (a) {
+          final valueList = (a as List?)?.toList() ?? [];
+          final i = valueList.indexOf(option);
+          if (i != -1) {
+            valueList.removeAt(i);
+            _removeItem(i);
+          } else {
+            valueList.add(option);
+            _addItem();
+          }
+          field.didChange(valueList);
+          return valueList;
+        },
       );
     });
   }

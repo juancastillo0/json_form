@@ -83,7 +83,7 @@ class WidgetBuilderInherited extends InheritedWidget {
 
 class JsonFormController extends ChangeNotifier {
   Schema? mainSchema;
-  final Map data;
+  final Map<String, Object?> data;
 
   JsonFormController({
     required this.data,

@@ -10,6 +10,7 @@ import 'package:flutter_jsonschema_builder/src/builder/widget_builder.dart';
 import 'package:flutter_jsonschema_builder/src/fields/fields.dart';
 import 'package:flutter_jsonschema_builder/src/fields/radio_button_form_field.dart';
 import 'package:flutter_jsonschema_builder/src/fields/dropdown_oneof_form_field.dart';
+import 'package:flutter_jsonschema_builder/src/fields/slider_form_field.dart';
 import 'package:flutter_jsonschema_builder/src/models/models.dart';
 import 'package:flutter_jsonschema_builder/src/models/one_of_model.dart';
 import 'package:flutter_jsonschema_builder/src/utils/date_text_input_json_formatter.dart';
@@ -45,6 +46,19 @@ class PropertySchemaBuilder extends StatelessWidget {
         },
         onSaved: (val) {
           log('onSaved: RadioButtonJFormField ${schemaProperty.idKey}  : $val');
+          updateData(context, val);
+        },
+        customValidator: customValidator,
+      );
+    } else if (schemaProperty.uiSchema.widget == 'range') {
+      _field = SliderJFormField(
+        property: schemaPropertySorted,
+        onChanged: (value) {
+          dispatchBooleanEventToParent(context, value != null);
+          updateData(context, value);
+        },
+        onSaved: (val) {
+          log('onSaved: RangeButtonJFormField ${schemaProperty.idKey}  : $val');
           updateData(context, val);
         },
         customValidator: customValidator,
@@ -131,7 +145,6 @@ class PropertySchemaBuilder extends StatelessWidget {
             },
             customValidator: customValidator,
           );
-
           break;
         case SchemaType.string:
         default:

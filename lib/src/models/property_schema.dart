@@ -252,4 +252,17 @@ class NumberProperties {
       errors.add(NumberPropertiesError.exclusiveMaximum);
     return errors;
   }
+
+  List<num> options() {
+    final mi = (minimum != null ? minimum! : exclusiveMinimum! + 1);
+    final ma = (maximum != null ? maximum! : exclusiveMaximum! - 1);
+    final mof = multipleOf;
+    if (mof == null) {
+      return List.generate((ma - mi).toInt(), (i) => mi + i);
+    }
+    final mi2 = mi % mof == 0 ? mi : mi + mof - mi % mof;
+    final ma2 = ma % mof == 0 ? ma : ma - ma % mof;
+    final range = (ma2 - mi2) ~/ mof;
+    return List.generate(range + 1, (i) => mi2 + i * mof);
+  }
 }

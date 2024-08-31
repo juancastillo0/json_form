@@ -41,9 +41,12 @@ class GeneralSubtitle extends StatelessWidget {
         ],
         if (field.description != null &&
             field.description != mainSchema?.description)
-          Text(
-            field.description!,
-            style: uiConfig.description,
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: Text(
+              field.description!,
+              style: uiConfig.description,
+            ),
           ),
       ],
     );
