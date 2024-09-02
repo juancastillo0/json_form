@@ -169,10 +169,11 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
                         .updateDataInPlace(
                       schemaArray.idKey,
                       (array) {
-                        if (array is! List) return;
+                        if (array is! List) return null;
                         final prev = array[oldIndex];
                         array[oldIndex] = array[newIndex];
                         array[newIndex] = prev;
+                        return array;
                       },
                     );
                   });
