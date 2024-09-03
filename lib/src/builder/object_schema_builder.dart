@@ -49,10 +49,11 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GeneralSubtitle(
-              field: widget.schemaObject,
-              mainSchema: widget.mainSchema,
-            ),
+            if (!isTableLabel || widget.schemaObject.parent is! SchemaArray)
+              GeneralSubtitle(
+                field: widget.schemaObject,
+                mainSchema: widget.mainSchema,
+              ),
             if (isTableLabel)
               Table(
                 children: [

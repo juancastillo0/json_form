@@ -19,6 +19,18 @@ class GeneralSubtitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
+    final f = field;
+    String? description = field.description != null &&
+            field.description != mainSchema?.description
+        ? field.description
+        : null;
+    if (f is SchemaArray && f.itemsBaseSchema.description != null) {
+      description = description == null
+          ? f.itemsBaseSchema.description
+          : '\n${f.itemsBaseSchema.description}';
+    } else if (f is SchemaObject && f.parent is SchemaArray) {
+      description = null;
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,12 +51,11 @@ class GeneralSubtitle extends StatelessWidget {
           ),
           if (!omitDivider) const Divider(),
         ],
-        if (field.description != null &&
-            field.description != mainSchema?.description)
+        if (description != null)
           Padding(
             padding: const EdgeInsets.only(bottom: 12.0),
             child: Text(
-              field.description!,
+              description,
               style: uiConfig.description,
             ),
           ),
