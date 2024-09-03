@@ -61,12 +61,23 @@ class UiSchemaData {
         for (final e in children.entries) e.key: e.value.toJson(),
       };
 
+  void setGlobalOptions(Map<String, Object?> data) {
+    globalOptions ??= UiSchemaData();
+    globalOptions!.setUi(data, parent: this);
+    setUi(data, parent: null);
+  }
+
   void setUi(
     Map<String, dynamic> uiSchema, {
     required UiSchemaData? parent,
     bool fromOptions = false,
   }) {
     this.parent = parent ?? this.parent;
+    if (parent != null &&
+        parent.globalOptions != null &&
+        this != parent.globalOptions) {
+      setGlobalOptions(parent.globalOptions!.toJson());
+    }
     // if (fromOptions) {
     //   final options = asJson['ui:options'] as Map<String, Object?>? ?? {};
     //   asJson['ui:options'] = options;
@@ -172,8 +183,7 @@ class UiSchemaData {
           saveInJson = false;
           break;
         case "globalOptions":
-          globalOptions ??= UiSchemaData();
-          globalOptions!.setUi(data as Map<String, Object?>, parent: this);
+          setGlobalOptions(data as Map<String, Object?>);
           break;
         default:
           saveInJson = false;
