@@ -110,4 +110,7 @@ class LocalizedTexts {
         return 'Invalid format';
     }
   }
+
+  String showItems() => 'Show items';
+  String hideItems() => 'Hide items';
 }

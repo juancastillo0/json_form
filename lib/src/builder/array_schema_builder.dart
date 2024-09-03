@@ -111,6 +111,11 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
                       schemaLoop,
                       () => _removeItem(index),
                     ),
+                  if (schemaArray.uiSchema.orderable)
+                    ReorderableDragStartListener(
+                      index: index,
+                      child: const Icon(Icons.drag_handle),
+                    ),
                 ],
               ),
               Padding(
@@ -141,15 +146,26 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
               field: schemaArray,
               mainSchema: widget.mainSchema,
               trailing: IconButton(
+                tooltip: showItems
+                    ? uiConfig.localizedTexts.hideItems()
+                    : uiConfig.localizedTexts.showItems(),
                 visualDensity: VisualDensity.compact,
                 onPressed: () {
                   setState(() {
                     showItems = !showItems;
                   });
                 },
-                icon: showItems
-                    ? const Icon(Icons.arrow_drop_up_outlined)
-                    : const Icon(Icons.arrow_drop_down_outlined),
+                icon: Row(
+                  children: [
+                    Text(
+                      schemaArray.items.length.toString(),
+                      style: uiConfig.subtitle,
+                    ),
+                    showItems
+                        ? const Icon(Icons.arrow_drop_up_outlined)
+                        : const Icon(Icons.arrow_drop_down_outlined),
+                  ],
+                ),
               ),
             ),
             if (!showItems)
@@ -157,12 +173,17 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
             else if (schemaArray.uiSchema.orderable)
               ReorderableListView(
                 shrinkWrap: true,
+                buildDefaultDragHandles: false,
                 physics: const NeverScrollableScrollPhysics(),
                 onReorder: (oldIndex, newIndex) {
                   setState(() {
-                    final pItem = schemaArray.items[oldIndex];
-                    schemaArray.items[oldIndex] = schemaArray.items[newIndex];
-                    schemaArray.items[newIndex] = pItem;
+                    final toRemove =
+                        newIndex > oldIndex ? oldIndex : oldIndex + 1;
+                    schemaArray.items.insert(
+                      newIndex,
+                      schemaArray.items[oldIndex],
+                    );
+                    schemaArray.items.removeAt(toRemove);
 
                     WidgetBuilderInherited.of(context)
                         .controller
@@ -170,9 +191,8 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
                       schemaArray.idKey,
                       (array) {
                         if (array is! List) return null;
-                        final prev = array[oldIndex];
-                        array[oldIndex] = array[newIndex];
-                        array[newIndex] = prev;
+                        array.insert(newIndex, array[oldIndex]);
+                        array.removeAt(toRemove);
                         return array;
                       },
                     );
