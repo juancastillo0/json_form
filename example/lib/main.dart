@@ -16,11 +16,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Json Form',
       theme: ThemeData(
+        appBarTheme: const AppBarTheme(
+          toolbarHeight: 34,
+        ),
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Json Form Demo'),
     );
   }
 }
@@ -68,8 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
   JsonFormSchemaUiConfig customUiConfig() {
     return JsonFormSchemaUiConfig(
       labelPosition: labelPosition,
-      // TODO: fieldWrapperBuilder vs padding and title with labelPosition
-      fieldWrapperBuilder: (params) => Padding(
+      inputWrapperBuilder: (params) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 5),
         child: params.input,
       ),
@@ -536,9 +538,7 @@ const uiSchemaUiSchema = '''{
   },
   "arrayCheckbox": {
     "ui:widget": "checkboxes",
-    "ui:inline": true,
-    "ui:orderable": true,
-    "ui:copyable": true
+    "ui:inline": true
   },
   "arrayString": {
     "ui:orderable": true,

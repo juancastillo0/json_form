@@ -48,6 +48,7 @@ class WidgetBuilderInherited extends InheritedWidget {
       label: uiConfig?.label,
       debugMode: uiConfig?.debugMode,
       fieldWrapperBuilder: uiConfig?.fieldWrapperBuilder,
+      inputWrapperBuilder: uiConfig?.inputWrapperBuilder,
       formSectionBuilder: uiConfig?.formSectionBuilder,
       localizedTexts: uiConfig?.localizedTexts,
       labelPosition: uiConfig?.labelPosition,

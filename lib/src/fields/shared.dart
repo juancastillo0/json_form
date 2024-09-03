@@ -36,6 +36,17 @@ class WrapFieldWithLabel extends StatelessWidget {
     final directionality = Directionality.of(context);
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
 
+    Widget child = this.child;
+    if (uiConfig.inputWrapperBuilder != null) {
+      final wrapped = uiConfig.inputWrapperBuilder!(
+        FieldWrapperParams(
+          property: property,
+          input: child,
+        ),
+      );
+      if (wrapped != null) child = wrapped;
+    }
+
     if (uiConfig.fieldWrapperBuilder != null) {
       final wrapped = uiConfig.fieldWrapperBuilder!(
         FieldWrapperParams(

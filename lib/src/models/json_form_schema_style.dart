@@ -17,6 +17,7 @@ class JsonFormSchemaUiConfig {
     this.addFileButtonBuilder,
     this.formSectionBuilder,
     this.fieldWrapperBuilder,
+    this.inputWrapperBuilder,
     LocalizedTexts? localizedTexts,
     bool? debugMode,
     LabelPosition? labelPosition,
@@ -49,6 +50,7 @@ class JsonFormSchemaUiConfig {
 
   final Widget Function(Widget child)? formSectionBuilder;
   final Widget? Function(FieldWrapperParams params)? fieldWrapperBuilder;
+  final Widget? Function(FieldWrapperParams params)? inputWrapperBuilder;
 
   String labelText(SchemaProperty property) =>
       '${property.titleOrId}${property.requiredNotNull ? "*" : ""}';
@@ -126,7 +128,8 @@ class JsonFormSchemaUiConfig {
         other.submitButtonBuilder == submitButtonBuilder &&
         other.addFileButtonBuilder == addFileButtonBuilder &&
         other.formSectionBuilder == formSectionBuilder &&
-        other.fieldWrapperBuilder == fieldWrapperBuilder;
+        other.fieldWrapperBuilder == fieldWrapperBuilder&&
+        other.inputWrapperBuilder == inputWrapperBuilder;
   }
 
   @override
@@ -147,6 +150,7 @@ class JsonFormSchemaUiConfig {
         addFileButtonBuilder,
         formSectionBuilder,
         fieldWrapperBuilder,
+        inputWrapperBuilder,
       );
 }
 
