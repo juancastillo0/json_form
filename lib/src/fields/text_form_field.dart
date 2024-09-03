@@ -51,7 +51,7 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
         onChanged: widget.onChanged,
         validator: (String? value) {
           if (property.requiredNotNull &&
-              property.uiSchema.emptyValue != null &&
+              property.uiSchema.emptyValue == null &&
               (value == null || value.isEmpty)) {
             return uiConfig.localizedTexts.required();
           }

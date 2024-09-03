@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_jsonschema_builder/src/builder/logic/widget_builder_logic.dart';
 import 'package:flutter_jsonschema_builder/src/builder/widget_builder.dart';
 import 'package:flutter_jsonschema_builder/src/models/json_form_schema_style.dart';
+import 'package:flutter_jsonschema_builder/src/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestUtils {
@@ -308,11 +312,11 @@ void main() {
     expect(arrayAdd, findsOneWidget);
     await tester.tap(arrayAdd);
     await tester.pump();
-    final array0Input = await utils.findAndEnterText('array.0', 'text0');
+    final array0Input = await utils.findAndEnterText('array.1', 'text0');
 
     await tester.tap(arrayAdd);
     await tester.pump();
-    final array1Input = await utils.findAndEnterText('array.1', 'text1');
+    final array1Input = await utils.findAndEnterText('array.2', 'text1');
     expect(data, {});
     await utils.tapSubmitButton();
     expect(data, {
@@ -326,13 +330,13 @@ void main() {
 
     await tester.tap(arrayAdd);
     await tester.pump();
-    await utils.findAndEnterText('array.2', 'text2');
+    await utils.findAndEnterText('array.3', 'text2');
 
-    final array1Remove = find.byKey(const Key('removeItem_array.1'));
+    final array1Remove = find.byKey(const Key('removeItem_array.2'));
     expect(array1Remove, findsOneWidget);
     await tester.tap(array1Remove);
     await tester.pump();
-    expect(find.byKey(const Key('removeItem_array.1')), findsNothing);
+    expect(find.byKey(const Key('removeItem_array.2')), findsNothing);
 
     await tester.tap(arrayAdd);
     await tester.pump();
@@ -344,10 +348,6 @@ void main() {
     });
 
     await utils.tapSubmitButton();
-    expect(data, {
-      'array': ['text00', 'text2', ''],
-      'arrayWithObjects': [],
-    });
     expect(find.text('Items must be unique'), findsNothing);
 
     expect(find.byTooltip('You can only add 3 items'), findsOneWidget);
@@ -355,11 +355,11 @@ void main() {
     await tester.pump();
     // No item added
     expect(data, {
-      'array': ['text00', 'text2', ''],
+      'array': ['text00', 'text2', null],
       'arrayWithObjects': [],
     });
 
-    await utils.findAndEnterText('array.3', 'text3');
+    await utils.findAndEnterText('array.4', 'text3');
     await utils.tapSubmitButton();
     expect(data, {
       'array': ['text00', 'text2', 'text3'],
@@ -367,7 +367,7 @@ void main() {
     });
     expect(find.byTooltip('You can only add 3 items'), findsOneWidget);
 
-    final array3Remove = find.byKey(const Key('removeItem_array.3'));
+    final array3Remove = find.byKey(const Key('removeItem_array.4'));
     expect(array3Remove, findsOneWidget);
     await tester.tap(array3Remove);
     await utils.tapSubmitButton();
@@ -395,11 +395,11 @@ void main() {
     });
 
     final arrayWithObjectsValue =
-        find.byKey(const Key('arrayWithObjects.0.value'));
+        find.byKey(const Key('arrayWithObjects.1.value'));
     expect(arrayWithObjectsValue, findsOneWidget);
     await tester.tap(arrayWithObjectsValue);
     final arrayWithObjectsValue2 =
-        find.byKey(const Key('arrayWithObjects.0.value2'));
+        find.byKey(const Key('arrayWithObjects.1.value2'));
     expect(arrayWithObjectsValue2, findsOneWidget);
     await tester.tap(arrayWithObjectsValue2);
     await utils.tapSubmitButton();

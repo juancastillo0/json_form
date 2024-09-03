@@ -73,7 +73,7 @@ class _NumberJFormFieldState
         style: readOnly ? const TextStyle(color: Colors.grey) : uiConfig.label,
         validator: (String? value) {
           if (property.requiredNotNull &&
-              property.uiSchema.emptyValue != null &&
+              property.uiSchema.emptyValue == null &&
               value != null &&
               value.isEmpty) {
             return uiConfig.localizedTexts.required();
