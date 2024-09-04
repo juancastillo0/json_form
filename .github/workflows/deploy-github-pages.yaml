@@ -28,7 +28,7 @@ jobs:
       # - name: Run code generation
       #   run: flutter pub run build_runner build --delete-conflicting-outputs
 
-      - run: flutter build web --release --web-renderer canvaskit --base-href /wasm_run/
+      - run: flutter build web --release --web-renderer canvaskit --base-href /json_form/
         working-directory: example
 
       # - name: patch service worker
