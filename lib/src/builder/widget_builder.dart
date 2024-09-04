@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_print
-
 import 'dart:convert';
 import 'dart:developer';
 
@@ -106,39 +104,45 @@ class _JsonFormState extends State<JsonForm> {
           final widgetBuilderInherited = WidgetBuilderInherited.of(context);
           final uiConfig = widgetBuilderInherited.uiConfig;
 
+          final formChild = Column(
+            children: <Widget>[
+              if (uiConfig.debugMode)
+                TextButton(
+                  onPressed: () {
+                    inspect(mainSchema);
+                  },
+                  child: const Text('INSPECT'),
+                ),
+              _buildHeaderTitle(context),
+              FormFromSchemaBuilder(
+                mainSchema: mainSchema,
+                schema: mainSchema,
+              ),
+              uiConfig.submitButtonBuilder == null
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: ElevatedButton(
+                        key: const Key('JsonForm_submitButton'),
+                        onPressed: onSubmit,
+                        child: Text(
+                          uiConfig.localizedTexts.submit(),
+                        ),
+                      ),
+                    )
+                  : uiConfig.submitButtonBuilder!(onSubmit),
+            ],
+          );
+
           return SingleChildScrollView(
             key: const Key('JsonForm_scrollView'),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: <Widget>[
-                  if (uiConfig.debugMode)
-                    TextButton(
-                      onPressed: () {
-                        inspect(mainSchema);
-                      },
-                      child: const Text('INSPECT'),
-                    ),
-                  _buildHeaderTitle(context),
-                  FormFromSchemaBuilder(
-                    mainSchema: mainSchema,
-                    schema: mainSchema,
+            child: uiConfig.formBuilder?.call(_formKey, formChild) ??
+                Form(
+                  key: _formKey,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: formChild,
                   ),
-                  uiConfig.submitButtonBuilder == null
-                      ? Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: ElevatedButton(
-                            key: const Key('JsonForm_submitButton'),
-                            onPressed: onSubmit,
-                            child: Text(
-                              uiConfig.localizedTexts.submit(),
-                            ),
-                          ),
-                        )
-                      : uiConfig.submitButtonBuilder!(onSubmit),
-                ],
-              ),
-            ),
+                ),
           );
         },
       ),

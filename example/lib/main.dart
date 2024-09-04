@@ -143,69 +143,65 @@ class _MyHomePageState extends State<MyHomePage> {
     final formWidget = Column(
       children: <Widget>[
         Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: JsonForm(
-              jsonSchema: json,
-              uiSchema: uiSchema,
-              controller: jsonFormController,
-              onFormDataSaved: onFormDataSaved,
-              fileHandler: () => {
-                'files': defaultCustomFileHandler,
-                'file': () async {
-                  return [
-                    XFile(
-                      'https://cdn.mos.cms.futurecdn.net/LEkEkAKZQjXZkzadbHHsVj-970-80.jpg',
-                    )
-                  ];
-                },
-                '*': defaultCustomFileHandler
+          child: JsonForm(
+            jsonSchema: json,
+            uiSchema: uiSchema,
+            controller: jsonFormController,
+            onFormDataSaved: onFormDataSaved,
+            fileHandler: () => {
+              'files': defaultCustomFileHandler,
+              'file': () async {
+                return [
+                  XFile(
+                    'https://cdn.mos.cms.futurecdn.net/LEkEkAKZQjXZkzadbHHsVj-970-80.jpg',
+                  )
+                ];
               },
-              // customPickerHandler: () => {
-              //   '*': (data) async {
-              //     return showDialog(
-              //       context: context,
-              //       builder: (context) {
-              //         return Scaffold(
-              //           body: Container(
-              //             margin: const EdgeInsets.all(20),
-              //             child: Column(
-              //               children: [
-              //                 const Text('My Custom Picker'),
-              //                 ListView.builder(
-              //                   shrinkWrap: true,
-              //                   itemCount: data.keys.length,
-              //                   itemBuilder: (context, index) {
-              //                     return ListTile(
-              //                       title: Text(
-              //                           data.values.toList()[index].toString()),
-              //                       onTap: () => Navigator.pop(
-              //                           context, data.keys.toList()[index]),
-              //                     );
-              //                   },
-              //                 ),
-              //               ],
-              //             ),
-              //           ),
-              //         );
-              //       },
-              //     );
-              //   }
-              // },
-              uiConfig: customUIConfig
-                  ? customUiConfig()
-                  : JsonFormSchemaUiConfig(
-                      labelPosition: labelPosition,
-                      submitButtonBuilder: customOutsideSubmitButton
-                          ? submitButtonBuilder
-                          : null,
-                    ),
-              customValidatorHandler: () => {
-                'files': (value) {
-                  return null;
-                }
-              },
-            ),
+              '*': defaultCustomFileHandler
+            },
+            // customPickerHandler: () => {
+            //   '*': (data) async {
+            //     return showDialog(
+            //       context: context,
+            //       builder: (context) {
+            //         return Scaffold(
+            //           body: Container(
+            //             margin: const EdgeInsets.all(20),
+            //             child: Column(
+            //               children: [
+            //                 const Text('My Custom Picker'),
+            //                 ListView.builder(
+            //                   shrinkWrap: true,
+            //                   itemCount: data.keys.length,
+            //                   itemBuilder: (context, index) {
+            //                     return ListTile(
+            //                       title: Text(
+            //                           data.values.toList()[index].toString()),
+            //                       onTap: () => Navigator.pop(
+            //                           context, data.keys.toList()[index]),
+            //                     );
+            //                   },
+            //                 ),
+            //               ],
+            //             ),
+            //           ),
+            //         );
+            //       },
+            //     );
+            //   }
+            // },
+            uiConfig: customUIConfig
+                ? customUiConfig()
+                : JsonFormSchemaUiConfig(
+                    labelPosition: labelPosition,
+                    submitButtonBuilder:
+                        customOutsideSubmitButton ? submitButtonBuilder : null,
+                  ),
+            customValidatorHandler: () => {
+              'files': (value) {
+                return null;
+              }
+            },
           ),
         ),
         if (customOutsideSubmitButton)

@@ -15,6 +15,7 @@ class JsonFormSchemaUiConfig {
     this.removeItemBuilder,
     this.submitButtonBuilder,
     this.addFileButtonBuilder,
+    this.formBuilder,
     this.formSectionBuilder,
     this.fieldWrapperBuilder,
     this.inputWrapperBuilder,
@@ -48,6 +49,7 @@ class JsonFormSchemaUiConfig {
   final Widget? Function(VoidCallback? onPressed, String key)?
       addFileButtonBuilder;
 
+  final Form Function(GlobalKey<FormState> formKey, Widget child)? formBuilder;
   final Widget Function(Widget child)? formSectionBuilder;
   final Widget? Function(FieldWrapperParams params)? fieldWrapperBuilder;
   final Widget? Function(FieldWrapperParams params)? inputWrapperBuilder;
@@ -125,6 +127,7 @@ class JsonFormSchemaUiConfig {
         other.removeItemBuilder == removeItemBuilder &&
         other.submitButtonBuilder == submitButtonBuilder &&
         other.addFileButtonBuilder == addFileButtonBuilder &&
+        other.formBuilder == formBuilder &&
         other.formSectionBuilder == formSectionBuilder &&
         other.fieldWrapperBuilder == fieldWrapperBuilder &&
         other.inputWrapperBuilder == inputWrapperBuilder;
@@ -146,6 +149,7 @@ class JsonFormSchemaUiConfig {
         removeItemBuilder,
         submitButtonBuilder,
         addFileButtonBuilder,
+        formBuilder,
         formSectionBuilder,
         fieldWrapperBuilder,
         inputWrapperBuilder,
