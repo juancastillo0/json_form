@@ -25,7 +25,9 @@ class MyApp extends StatelessWidget {
         appBarTheme: const AppBarTheme(
           toolbarHeight: 34,
         ),
-        primarySwatch: Colors.blue,
+        colorScheme: const ColorScheme.light(
+          primary: Colors.blueAccent,
+        ),
       ),
       home: const MyHomePage(title: 'Json Form Demo'),
     );
@@ -294,8 +296,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     }),
                     isSelected: [!showUISchema, showUISchema],
                     children: const [
-                      Text('JsonSchema'),
-                      Text('UISchema'),
+                      Text('Json Schema'),
+                      Text('UI Schema'),
                     ],
                   ),
                 Expanded(
@@ -328,39 +330,48 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
             Expanded(
-              child: Row(
-                children: [
-                  if (!showUISchema || isLarge)
-                    Expanded(
-                      child: TextFormField(
-                        maxLines: 1000,
-                        controller: textController,
-                        onChanged: (value) {
-                          try {
-                            jsonDecode(value);
-                            setState(() {
-                              json = value;
-                            });
-                          } catch (_) {}
-                        },
+              child: Padding(
+                padding: const EdgeInsets.only(left: 6.0),
+                child: Row(
+                  children: [
+                    if (!showUISchema || isLarge)
+                      Expanded(
+                        child: TextFormField(
+                          maxLines: 1000,
+                          controller: textController,
+                          decoration: const InputDecoration(
+                            label: Text('Json Schema'),
+                          ),
+                          onChanged: (value) {
+                            try {
+                              jsonDecode(value);
+                              setState(() {
+                                json = value;
+                              });
+                            } catch (_) {}
+                          },
+                        ),
                       ),
-                    ),
-                  if (showUISchema || isLarge)
-                    Expanded(
-                      child: TextFormField(
-                        maxLines: 1000,
-                        controller: uiTextController,
-                        onChanged: (value) {
-                          try {
-                            jsonDecode(value);
-                            setState(() {
-                              uiSchema = value;
-                            });
-                          } catch (_) {}
-                        },
+                    if (showUISchema || isLarge)
+                      Expanded(
+                        child: TextFormField(
+                          maxLines: 1000,
+                          controller: uiTextController,
+                          decoration: const InputDecoration(
+                            label: Text('UI Schema'),
+                          ),
+                          onChanged: (value) {
+                            try {
+                              jsonDecode(value);
+                              setState(() {
+                                uiSchema = value;
+                              });
+                            } catch (_) {}
+                          },
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 10),
@@ -387,7 +398,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ToggleButtons(
               constraints: const BoxConstraints.tightForFinite(
                 height: 30,
-                width: 100,
+                width: 75,
               ),
               onPressed: (index) => setState(() {
                 showForm = !showForm;
