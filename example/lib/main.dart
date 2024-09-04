@@ -56,10 +56,12 @@ class _MyHomePageState extends State<MyHomePage> {
   bool showUISchema = false;
   bool showForm = true;
   bool customUIConfig = false;
+  bool customOutsideSubmitButton = true;
   late final textController = TextEditingController(text: json);
   late final uiTextController = TextEditingController(text: uiSchema);
   String json = primitivesJsonSchema;
   String uiSchema = primitivesUiSchema;
+  JsonFormController jsonFormController = JsonFormController(data: {});
 
   Future<List<XFile>?> defaultCustomFileHandler() async {
     await Future.delayed(const Duration(seconds: 3));
@@ -74,6 +76,15 @@ class _MyHomePageState extends State<MyHomePage> {
     return [file1, file2, file3];
   }
 
+  Widget submitButtonBuilder(void Function() onSubmit) =>
+      customOutsideSubmitButton
+          ? const SizedBox()
+          : TextButton.icon(
+              onPressed: onSubmit,
+              icon: const Icon(Icons.heart_broken),
+              label: const Text('Custom Submit'),
+            );
+
   JsonFormSchemaUiConfig customUiConfig() {
     return JsonFormSchemaUiConfig(
       labelPosition: labelPosition,
@@ -87,11 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
         fontSize: 24,
       ),
       fieldTitle: const TextStyle(color: Colors.pink, fontSize: 12),
-      submitButtonBuilder: (onSubmit) => TextButton.icon(
-        onPressed: onSubmit,
-        icon: const Icon(Icons.heart_broken),
-        label: const Text('Custom Submit'),
-      ),
+      submitButtonBuilder: submitButtonBuilder,
       addItemBuilder: (onPressed, key) => TextButton.icon(
         onPressed: onPressed,
         icon: const Icon(Icons.plus_one),
@@ -121,74 +128,95 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  void onFormDataSaved(Object data) {
+    inspect(data);
+    setState(() {
+      this.data = data;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final screen = MediaQuery.of(context).size;
     final isSmall = screen.width < 700;
 
     final formWidget = Column(
-      mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        JsonForm(
-          jsonSchema: json,
-          uiSchema: uiSchema,
-          onFormDataSaved: (data) {
-            inspect(data);
-            setState(() {
-              this.data = data;
-            });
-          },
-          fileHandler: () => {
-            'files': defaultCustomFileHandler,
-            'file': () async {
-              return [
-                XFile(
-                  'https://cdn.mos.cms.futurecdn.net/LEkEkAKZQjXZkzadbHHsVj-970-80.jpg',
-                )
-              ];
-            },
-            '*': defaultCustomFileHandler
-          },
-          // customPickerHandler: () => {
-          //   '*': (data) async {
-          //     return showDialog(
-          //       context: context,
-          //       builder: (context) {
-          //         return Scaffold(
-          //           body: Container(
-          //             margin: const EdgeInsets.all(20),
-          //             child: Column(
-          //               children: [
-          //                 const Text('My Custom Picker'),
-          //                 ListView.builder(
-          //                   shrinkWrap: true,
-          //                   itemCount: data.keys.length,
-          //                   itemBuilder: (context, index) {
-          //                     return ListTile(
-          //                       title: Text(
-          //                           data.values.toList()[index].toString()),
-          //                       onTap: () => Navigator.pop(
-          //                           context, data.keys.toList()[index]),
-          //                     );
-          //                   },
-          //                 ),
-          //               ],
-          //             ),
-          //           ),
-          //         );
-          //       },
-          //     );
-          //   }
-          // },
-          uiConfig: !customUIConfig
-              ? JsonFormSchemaUiConfig(labelPosition: labelPosition)
-              : customUiConfig(),
-          customValidatorHandler: () => {
-            'files': (value) {
-              return null;
-            }
-          },
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: JsonForm(
+              jsonSchema: json,
+              uiSchema: uiSchema,
+              controller: jsonFormController,
+              onFormDataSaved: onFormDataSaved,
+              fileHandler: () => {
+                'files': defaultCustomFileHandler,
+                'file': () async {
+                  return [
+                    XFile(
+                      'https://cdn.mos.cms.futurecdn.net/LEkEkAKZQjXZkzadbHHsVj-970-80.jpg',
+                    )
+                  ];
+                },
+                '*': defaultCustomFileHandler
+              },
+              // customPickerHandler: () => {
+              //   '*': (data) async {
+              //     return showDialog(
+              //       context: context,
+              //       builder: (context) {
+              //         return Scaffold(
+              //           body: Container(
+              //             margin: const EdgeInsets.all(20),
+              //             child: Column(
+              //               children: [
+              //                 const Text('My Custom Picker'),
+              //                 ListView.builder(
+              //                   shrinkWrap: true,
+              //                   itemCount: data.keys.length,
+              //                   itemBuilder: (context, index) {
+              //                     return ListTile(
+              //                       title: Text(
+              //                           data.values.toList()[index].toString()),
+              //                       onTap: () => Navigator.pop(
+              //                           context, data.keys.toList()[index]),
+              //                     );
+              //                   },
+              //                 ),
+              //               ],
+              //             ),
+              //           ),
+              //         );
+              //       },
+              //     );
+              //   }
+              // },
+              uiConfig: customUIConfig
+                  ? customUiConfig()
+                  : JsonFormSchemaUiConfig(
+                      labelPosition: labelPosition,
+                      submitButtonBuilder: customOutsideSubmitButton
+                          ? submitButtonBuilder
+                          : null,
+                    ),
+              customValidatorHandler: () => {
+                'files': (value) {
+                  return null;
+                }
+              },
+            ),
+          ),
         ),
+        if (customOutsideSubmitButton)
+          ElevatedButton(
+            onPressed: () {
+              final data = jsonFormController.submit();
+              if (data != null) onFormDataSaved(data);
+            },
+            child: const Text('Outside Submit'),
+          ),
+        const SizedBox(height: 10),
       ],
     );
 
@@ -203,6 +231,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 dense: true,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 10),
                 visualDensity: VisualDensity.compact,
+                value: customOutsideSubmitButton,
+                onChanged: (value) => setState(() {
+                  customOutsideSubmitButton = value == true;
+                }),
+                title: const Text('Outside Submit'),
+              ),
+            ),
+            SizedBox(
+              width: 130,
+              child: CheckboxListTile(
+                dense: true,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                visualDensity: VisualDensity.compact,
                 value: customUIConfig,
                 onChanged: (value) => setState(() {
                   customUIConfig = value == true;
@@ -211,12 +252,13 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             SizedBox(
-              width: 200,
+              width: 110,
               child: DropdownButtonFormField<LabelPosition>(
                 value: labelPosition,
                 decoration: const InputDecoration(
                   labelText: 'Label Position',
                 ),
+                padding: const EdgeInsets.symmetric(horizontal: 5),
                 items: LabelPosition.values
                     .map(
                       (e) => DropdownMenuItem(
@@ -234,11 +276,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
-        Expanded(
-          child: SingleChildScrollView(
-            child: formWidget,
-          ),
-        ),
+        Expanded(child: formWidget),
       ],
     );
 

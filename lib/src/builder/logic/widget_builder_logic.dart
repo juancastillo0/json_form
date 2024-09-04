@@ -85,6 +85,7 @@ class WidgetBuilderInherited extends InheritedWidget {
 class JsonFormController extends ChangeNotifier {
   Schema? mainSchema;
   final Map<String, Object?> data;
+  late GlobalKey<FormState> formKey;
 
   JsonFormController({
     required this.data,
@@ -162,5 +163,15 @@ class JsonFormController extends ChangeNotifier {
         }
       }
     }
+  }
+
+  Map<String, Object?>? submit() {
+    if (formKey.currentState != null && formKey.currentState!.validate()) {
+      formKey.currentState!.save();
+
+      log(data.toString());
+      return data;
+    }
+    return null;
   }
 }

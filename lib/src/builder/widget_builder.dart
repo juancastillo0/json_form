@@ -34,7 +34,7 @@ class JsonForm extends StatefulWidget {
   });
 
   final String jsonSchema;
-  final void Function(dynamic) onFormDataSaved;
+  final void Function(Object) onFormDataSaved;
 
   final JsonFormController? controller;
   final String? uiSchema;
@@ -63,6 +63,7 @@ class _JsonFormState extends State<JsonForm> {
   void initMainSchema({required bool controllerChanged}) {
     if (controllerChanged) {
       controller = widget.controller ?? JsonFormController(data: {});
+      controller.formKey = _formKey;
       if (controller.mainSchema != null) {
         return;
       }
@@ -109,36 +110,33 @@ class _JsonFormState extends State<JsonForm> {
             key: const Key('JsonForm_scrollView'),
             child: Form(
               key: _formKey,
-              child: Container(
-                padding: const EdgeInsets.all(15.0),
-                child: Column(
-                  children: <Widget>[
-                    if (uiConfig.debugMode)
-                      TextButton(
-                        onPressed: () {
-                          inspect(mainSchema);
-                        },
-                        child: const Text('INSPECT'),
-                      ),
-                    _buildHeaderTitle(context),
-                    FormFromSchemaBuilder(
-                      mainSchema: mainSchema,
-                      schema: mainSchema,
+              child: Column(
+                children: <Widget>[
+                  if (uiConfig.debugMode)
+                    TextButton(
+                      onPressed: () {
+                        inspect(mainSchema);
+                      },
+                      child: const Text('INSPECT'),
                     ),
-                    const SizedBox(height: 20),
-                    uiConfig.submitButtonBuilder == null
-                        ? ElevatedButton(
+                  _buildHeaderTitle(context),
+                  FormFromSchemaBuilder(
+                    mainSchema: mainSchema,
+                    schema: mainSchema,
+                  ),
+                  uiConfig.submitButtonBuilder == null
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: ElevatedButton(
                             key: const Key('JsonForm_submitButton'),
-                            onPressed: () => onSubmit(widgetBuilderInherited),
+                            onPressed: onSubmit,
                             child: Text(
                               uiConfig.localizedTexts.submit(),
                             ),
-                          )
-                        : uiConfig.submitButtonBuilder!(
-                            () => onSubmit(widgetBuilderInherited),
                           ),
-                  ],
-                ),
+                        )
+                      : uiConfig.submitButtonBuilder!(onSubmit),
+                ],
               ),
             ),
           );
@@ -175,12 +173,9 @@ class _JsonFormState extends State<JsonForm> {
   }
 
   //  Form methods
-  void onSubmit(WidgetBuilderInherited widgetBuilderInherited) {
-    if (_formKey.currentState != null && _formKey.currentState!.validate()) {
-      _formKey.currentState?.save();
-
-      final data = widgetBuilderInherited.controller.data;
-      log(data.toString());
+  void onSubmit() {
+    final data = controller.submit();
+    if (data != null) {
       widget.onFormDataSaved(data);
     }
   }

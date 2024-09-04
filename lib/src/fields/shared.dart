@@ -58,7 +58,7 @@ class WrapFieldWithLabel extends StatelessWidget {
     }
     // configured in the field itself
     final showLabel = ignoreFieldLabel ||
-        uiConfig.labelPosition != LabelPosition.fieldInputDecoration &&
+        uiConfig.labelPosition != LabelPosition.input &&
             uiConfig.labelPosition != LabelPosition.table;
     if (!showLabel) return child;
 

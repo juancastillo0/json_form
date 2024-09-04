@@ -23,7 +23,7 @@ class JsonFormSchemaUiConfig {
     LabelPosition? labelPosition,
   })  : localizedTexts = localizedTexts ?? const LocalizedTexts(),
         debugMode = debugMode ?? false,
-        labelPosition = labelPosition ?? LabelPosition.fieldInputDecoration;
+        labelPosition = labelPosition ?? LabelPosition.input;
 
   final TextStyle? fieldTitle;
   final TextStyle? error;
@@ -56,9 +56,7 @@ class JsonFormSchemaUiConfig {
       '${property.titleOrId}${property.requiredNotNull ? "*" : ""}';
 
   String? fieldLabelText(SchemaProperty property) =>
-      labelPosition == LabelPosition.fieldInputDecoration
-          ? labelText(property)
-          : null;
+      labelPosition == LabelPosition.input ? labelText(property) : null;
 
   InputDecoration inputDecoration(SchemaProperty property) {
     return InputDecoration(
@@ -155,10 +153,18 @@ class JsonFormSchemaUiConfig {
 }
 
 enum LabelPosition {
+  /// Labels are on top of the input
   top,
+
+  /// Labels are on the left or right of the input,
+  /// depending on the Directionality
   side,
+
+  /// Labels are all in one column
   table,
-  fieldInputDecoration,
+
+  /// Label is in the Field Input Decoration
+  input,
 }
 
 class FieldWrapperParams {
