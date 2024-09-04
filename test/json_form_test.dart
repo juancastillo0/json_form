@@ -617,6 +617,7 @@ void main() {
             "ui:inline": true
           },
           "arrayString": {
+            "ui:orderable": true
           },
           "enumValues": {
             "ui:options": {
