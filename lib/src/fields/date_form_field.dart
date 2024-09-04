@@ -2,12 +2,12 @@ import 'package:extended_masked_text/extended_masked_text.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'package:flutter_jsonschema_builder/src/builder/logic/widget_builder_logic.dart';
-import 'package:flutter_jsonschema_builder/src/fields/fields.dart';
-import 'package:flutter_jsonschema_builder/src/fields/shared.dart';
-import 'package:flutter_jsonschema_builder/src/models/property_schema.dart';
+import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
+import 'package:json_form/src/fields/fields.dart';
+import 'package:json_form/src/fields/shared.dart';
+import 'package:json_form/src/models/property_schema.dart';
 
-import 'package:flutter_jsonschema_builder/src/utils/date_text_input_json_formatter.dart';
+import 'package:json_form/src/utils/date_text_input_json_formatter.dart';
 
 class DateJFormField extends PropertyFieldWidget<DateTime> {
   const DateJFormField({

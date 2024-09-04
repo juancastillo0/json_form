@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_jsonschema_builder/src/builder/logic/widget_builder_logic.dart';
-import 'package:flutter_jsonschema_builder/src/models/property_schema.dart';
-import 'package:flutter_jsonschema_builder/src/utils/date_text_input_json_formatter.dart';
+import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
+import 'package:json_form/src/models/property_schema.dart';
+import 'package:json_form/src/utils/date_text_input_json_formatter.dart';
 import 'package:intl/intl.dart';
 
 export 'checkbox_form_field.dart';

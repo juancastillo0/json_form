@@ -1,7 +1,7 @@
 import 'dart:developer' as dev;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_jsonschema_builder/src/models/models.dart';
+import 'package:json_form/src/models/models.dart';
 
 class ObjectSchemaEvent {
   const ObjectSchemaEvent({required this.schemaObject});

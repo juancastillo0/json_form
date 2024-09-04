@@ -1,10 +1,10 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_jsonschema_builder/flutter_jsonschema_builder.dart';
-import 'package:flutter_jsonschema_builder/src/builder/logic/widget_builder_logic.dart';
-import 'package:flutter_jsonschema_builder/src/fields/fields.dart';
-import 'package:flutter_jsonschema_builder/src/fields/shared.dart';
+import 'package:json_form/json_form.dart';
+import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
+import 'package:json_form/src/fields/fields.dart';
+import 'package:json_form/src/fields/shared.dart';
 import '../models/models.dart';
 
 class RadioButtonJFormField extends PropertyFieldWidget<dynamic> {

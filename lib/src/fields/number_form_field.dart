@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_jsonschema_builder/src/builder/logic/widget_builder_logic.dart';
-import 'package:flutter_jsonschema_builder/src/fields/fields.dart';
-import 'package:flutter_jsonschema_builder/src/fields/shared.dart';
-import 'package:flutter_jsonschema_builder/src/models/property_schema.dart';
-import 'package:flutter_jsonschema_builder/src/models/schema.dart';
+import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
+import 'package:json_form/src/fields/fields.dart';
+import 'package:json_form/src/fields/shared.dart';
+import 'package:json_form/src/models/property_schema.dart';
+import 'package:json_form/src/models/schema.dart';
 
 class NumberJFormField extends PropertyFieldWidget<num?> {
   const NumberJFormField({

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_jsonschema_builder/flutter_jsonschema_builder.dart';
-import 'package:flutter_jsonschema_builder/src/models/models.dart';
+import 'package:json_form/json_form.dart';
+import 'package:json_form/src/models/models.dart';
 
 class JsonFormSchemaUiConfig {
   const JsonFormSchemaUiConfig({

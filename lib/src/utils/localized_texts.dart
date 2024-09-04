@@ -1,6 +1,6 @@
-import 'package:flutter_jsonschema_builder/src/models/array_schema.dart';
-import 'package:flutter_jsonschema_builder/src/models/property_schema.dart';
-import 'package:flutter_jsonschema_builder/src/utils/input_validation_json_schema.dart';
+import 'package:json_form/src/models/array_schema.dart';
+import 'package:json_form/src/models/property_schema.dart';
+import 'package:json_form/src/utils/input_validation_json_schema.dart';
 
 class LocalizedTexts {
   const LocalizedTexts();

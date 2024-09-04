@@ -1,11 +1,11 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_jsonschema_builder/flutter_jsonschema_builder.dart';
-import 'package:flutter_jsonschema_builder/src/builder/logic/widget_builder_logic.dart';
-import 'package:flutter_jsonschema_builder/src/fields/fields.dart';
-import 'package:flutter_jsonschema_builder/src/fields/shared.dart';
-import 'package:flutter_jsonschema_builder/src/models/models.dart';
+import 'package:json_form/json_form.dart';
+import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
+import 'package:json_form/src/fields/fields.dart';
+import 'package:json_form/src/fields/shared.dart';
+import 'package:json_form/src/models/models.dart';
 
 class SliderJFormField extends PropertyFieldWidget<num> {
   const SliderJFormField({

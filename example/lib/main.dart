@@ -3,7 +3,7 @@ import 'dart:developer';
 
 import 'package:cross_file/cross_file.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_jsonschema_builder/flutter_jsonschema_builder.dart';
+import 'package:json_form/json_form.dart';
 
 void main() {
   runApp(const MyApp());

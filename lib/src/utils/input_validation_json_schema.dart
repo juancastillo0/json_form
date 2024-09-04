@@ -1,5 +1,5 @@
 import 'package:validators/validators.dart' as validators;
-import 'package:flutter_jsonschema_builder/src/models/property_schema.dart';
+import 'package:json_form/src/models/property_schema.dart';
 
 enum StringValidationError {
   minLength,
