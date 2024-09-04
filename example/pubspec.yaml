@@ -30,6 +30,8 @@ dependencies:
   flutter:
     sdk: flutter
 
+  url_launcher: ^6.3.0
+  flutter_resizable_container: ^2.0.0
   json_form:
       path: ../
 
