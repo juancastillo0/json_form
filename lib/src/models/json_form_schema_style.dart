@@ -128,7 +128,7 @@ class JsonFormSchemaUiConfig {
         other.submitButtonBuilder == submitButtonBuilder &&
         other.addFileButtonBuilder == addFileButtonBuilder &&
         other.formSectionBuilder == formSectionBuilder &&
-        other.fieldWrapperBuilder == fieldWrapperBuilder&&
+        other.fieldWrapperBuilder == fieldWrapperBuilder &&
         other.inputWrapperBuilder == inputWrapperBuilder;
   }
 

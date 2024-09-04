@@ -3,7 +3,9 @@ import 'dart:developer';
 
 import 'package:cross_file/cross_file.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_resizable_container/flutter_resizable_container.dart';
 import 'package:json_form/json_form.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() {
   runApp(const MyApp());
@@ -16,8 +18,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Json Form',
       theme: ThemeData(
+        useMaterial3: true,
         appBarTheme: const AppBarTheme(
           toolbarHeight: 34,
         ),
@@ -50,8 +54,10 @@ class _MyHomePageState extends State<MyHomePage> {
   LabelPosition labelPosition = LabelPosition.table;
   Object data = {};
   bool showUISchema = false;
+  bool showForm = true;
   bool customUIConfig = false;
   late final textController = TextEditingController(text: json);
+  late final uiTextController = TextEditingController(text: uiSchema);
   String json = primitivesJsonSchema;
   String uiSchema = primitivesUiSchema;
 
@@ -117,219 +123,262 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final screen = MediaQuery.of(context).size;
+    final isSmall = screen.width < 700;
+
     final formWidget = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        Material(
-          child: JsonForm(
-            jsonSchema: json,
-            uiSchema: uiSchema,
-            onFormDataSaved: (data) {
-              inspect(data);
-              setState(() {
-                this.data = data;
-              });
+        JsonForm(
+          jsonSchema: json,
+          uiSchema: uiSchema,
+          onFormDataSaved: (data) {
+            inspect(data);
+            setState(() {
+              this.data = data;
+            });
+          },
+          fileHandler: () => {
+            'files': defaultCustomFileHandler,
+            'file': () async {
+              return [
+                XFile(
+                  'https://cdn.mos.cms.futurecdn.net/LEkEkAKZQjXZkzadbHHsVj-970-80.jpg',
+                )
+              ];
             },
-            fileHandler: () => {
-              'files': defaultCustomFileHandler,
-              'file': () async {
-                return [
-                  XFile(
-                    'https://cdn.mos.cms.futurecdn.net/LEkEkAKZQjXZkzadbHHsVj-970-80.jpg',
-                  )
-                ];
-              },
-              '*': defaultCustomFileHandler
-            },
-            // customPickerHandler: () => {
-            //   '*': (data) async {
-            //     return showDialog(
-            //       context: context,
-            //       builder: (context) {
-            //         return Scaffold(
-            //           body: Container(
-            //             margin: const EdgeInsets.all(20),
-            //             child: Column(
-            //               children: [
-            //                 const Text('My Custom Picker'),
-            //                 ListView.builder(
-            //                   shrinkWrap: true,
-            //                   itemCount: data.keys.length,
-            //                   itemBuilder: (context, index) {
-            //                     return ListTile(
-            //                       title: Text(
-            //                           data.values.toList()[index].toString()),
-            //                       onTap: () => Navigator.pop(
-            //                           context, data.keys.toList()[index]),
-            //                     );
-            //                   },
-            //                 ),
-            //               ],
-            //             ),
-            //           ),
-            //         );
-            //       },
-            //     );
-            //   }
-            // },
-            uiConfig: !customUIConfig
-                ? JsonFormSchemaUiConfig(labelPosition: labelPosition)
-                : customUiConfig(),
-            customValidatorHandler: () => {
-              'files': (value) {
-                return null;
-              }
-            },
-          ),
-        )
+            '*': defaultCustomFileHandler
+          },
+          // customPickerHandler: () => {
+          //   '*': (data) async {
+          //     return showDialog(
+          //       context: context,
+          //       builder: (context) {
+          //         return Scaffold(
+          //           body: Container(
+          //             margin: const EdgeInsets.all(20),
+          //             child: Column(
+          //               children: [
+          //                 const Text('My Custom Picker'),
+          //                 ListView.builder(
+          //                   shrinkWrap: true,
+          //                   itemCount: data.keys.length,
+          //                   itemBuilder: (context, index) {
+          //                     return ListTile(
+          //                       title: Text(
+          //                           data.values.toList()[index].toString()),
+          //                       onTap: () => Navigator.pop(
+          //                           context, data.keys.toList()[index]),
+          //                     );
+          //                   },
+          //                 ),
+          //               ],
+          //             ),
+          //           ),
+          //         );
+          //       },
+          //     );
+          //   }
+          // },
+          uiConfig: !customUIConfig
+              ? JsonFormSchemaUiConfig(labelPosition: labelPosition)
+              : customUiConfig(),
+          customValidatorHandler: () => {
+            'files': (value) {
+              return null;
+            }
+          },
+        ),
       ],
     );
 
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
-      body: Row(
-        children: [
-          Expanded(
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    ToggleButtons(
-                      constraints: const BoxConstraints.tightForFinite(
-                        height: 30,
-                        width: 100,
+    final formColumnWidget = Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            SizedBox(
+              width: 130,
+              child: CheckboxListTile(
+                dense: true,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                visualDensity: VisualDensity.compact,
+                value: customUIConfig,
+                onChanged: (value) => setState(() {
+                  customUIConfig = value == true;
+                }),
+                title: const Text('Custom UI Config'),
+              ),
+            ),
+            SizedBox(
+              width: 200,
+              child: DropdownButtonFormField<LabelPosition>(
+                value: labelPosition,
+                decoration: const InputDecoration(
+                  labelText: 'Label Position',
+                ),
+                items: LabelPosition.values
+                    .map(
+                      (e) => DropdownMenuItem(
+                        value: e,
+                        child: Text(e.name),
                       ),
-                      onPressed: (index) => setState(() {
-                        showUISchema = !showUISchema;
-                        textController.text = showUISchema ? uiSchema : json;
-                      }),
-                      isSelected: [!showUISchema, showUISchema],
-                      children: const [
-                        Text('JsonSchema'),
-                        Text('UISchema'),
+                    )
+                    .toList(),
+                onChanged: (v) {
+                  setState(() {
+                    labelPosition = v!;
+                  });
+                },
+              ),
+            ),
+          ],
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            child: formWidget,
+          ),
+        ),
+      ],
+    );
+
+    final schemaInputWidget = LayoutBuilder(
+      builder: (context, box) {
+        final isLarge = box.maxWidth > 500;
+        return Column(
+          children: [
+            Row(
+              children: [
+                if (!isLarge && (!isSmall || !showForm))
+                  ToggleButtons(
+                    constraints: const BoxConstraints.tightForFinite(
+                      height: 30,
+                      width: 100,
+                    ),
+                    onPressed: (index) => setState(() {
+                      showUISchema = !showUISchema;
+                    }),
+                    isSelected: [!showUISchema, showUISchema],
+                    children: const [
+                      Text('JsonSchema'),
+                      Text('UISchema'),
+                    ],
+                  ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        const SizedBox(width: 10),
+                        Text(
+                          'Examples: ',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        ...FormExample.allExamples.map(
+                          (e) => TextButton(
+                            onPressed: () {
+                              setState(() {
+                                json = e.jsonSchema;
+                                uiSchema = e.uiSchema;
+                                textController.text = json;
+                                uiTextController.text = uiSchema;
+                              });
+                            },
+                            child: Text(e.name),
+                          ),
+                        ),
                       ],
                     ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            const SizedBox(width: 10),
-                            const Text('Examples: '),
-                            ...FormExample.allExamples.map(
-                              (e) => TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    json = e.jsonSchema;
-                                    uiSchema = e.uiSchema;
-                                    textController.text =
-                                        showUISchema ? uiSchema : json;
-                                  });
-                                },
-                                child: Text(e.name),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: TextFormField(
-                    maxLines: 1000,
-                    controller: textController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter some text';
-                      }
-                      try {
-                        jsonDecode(value);
-                        return null;
-                      } catch (e) {
-                        return 'Invalid JSON';
-                      }
-                    },
-                    onChanged: (value) {
-                      try {
-                        jsonDecode(value);
-                        setState(() {
-                          if (showUISchema) {
-                            uiSchema = value;
-                          } else {
-                            json = value;
-                          }
-                        });
-                      } catch (_) {}
-                    },
                   ),
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  'Form Output',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                SizedBox(
-                  height: 100,
-                  child: SingleChildScrollView(
-                    child: SelectableText(data.toString()),
-                  ),
-                )
               ],
             ),
-          ),
-          Expanded(
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    SizedBox(
-                      width: 130,
-                      child: CheckboxListTile(
-                        dense: true,
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 10),
-                        visualDensity: VisualDensity.compact,
-                        value: customUIConfig,
-                        onChanged: (value) => setState(() {
-                          customUIConfig = value == true;
-                        }),
-                        title: const Text('Custom UI Config'),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 200,
-                      child: DropdownButtonFormField<LabelPosition>(
-                        value: labelPosition,
-                        decoration: const InputDecoration(
-                          labelText: 'Label Position',
-                        ),
-                        items: LabelPosition.values
-                            .map(
-                              (e) => DropdownMenuItem(
-                                value: e,
-                                child: Text(e.name),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (v) {
-                          setState(() {
-                            labelPosition = v!;
-                          });
+            Expanded(
+              child: Row(
+                children: [
+                  if (!showUISchema || isLarge)
+                    Expanded(
+                      child: TextFormField(
+                        maxLines: 1000,
+                        controller: textController,
+                        onChanged: (value) {
+                          try {
+                            jsonDecode(value);
+                            setState(() {
+                              json = value;
+                            });
+                          } catch (_) {}
                         },
                       ),
                     ),
-                  ],
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: formWidget,
-                  ),
-                ),
+                  if (showUISchema || isLarge)
+                    Expanded(
+                      child: TextFormField(
+                        maxLines: 1000,
+                        controller: uiTextController,
+                        onChanged: (value) {
+                          try {
+                            jsonDecode(value);
+                            setState(() {
+                              uiSchema = value;
+                            });
+                          } catch (_) {}
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Form Output',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            SizedBox(
+              height: 100,
+              child: SingleChildScrollView(
+                child: SelectableText(data.toString()),
+              ),
+            )
+          ],
+        );
+      },
+    );
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        actions: [
+          if (isSmall)
+            ToggleButtons(
+              constraints: const BoxConstraints.tightForFinite(
+                height: 30,
+                width: 100,
+              ),
+              onPressed: (index) => setState(() {
+                showForm = !showForm;
+              }),
+              isSelected: [!showForm, showForm],
+              children: const [
+                Text('Schema'),
+                Text('Form'),
               ],
             ),
+          TextButton(
+            onPressed: () {
+              launchUrl(
+                Uri.parse('https://github.com/juancastillo0/json_form'),
+              );
+            },
+            child: const Text('Code Repo'),
           ),
+        ],
+      ),
+      body: ResizableContainer(
+        direction: Axis.horizontal,
+        children: [
+          if (!showForm || !isSmall) ResizableChild(child: schemaInputWidget),
+          if (showForm || !isSmall) ResizableChild(child: formColumnWidget),
         ],
       ),
     );
