@@ -1,6 +1,6 @@
 import 'package:json_form/src/models/array_schema.dart';
 import 'package:json_form/src/models/property_schema.dart';
-import 'package:json_form/src/utils/input_validation_json_schema.dart';
+import 'package:json_form/src/utils/string_validation.dart';
 
 class LocalizedTexts {
   const LocalizedTexts();
@@ -59,7 +59,7 @@ class LocalizedTexts {
     SchemaProperty property,
     String value,
   ) {
-    final errors = inputValidationJsonSchema(
+    final errors = validateJsonSchemaString(
       newValue: value,
       property: property,
     );

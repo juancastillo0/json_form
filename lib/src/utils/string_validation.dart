@@ -8,7 +8,7 @@ enum StringValidationError {
   format,
 }
 
-List<StringValidationError> inputValidationJsonSchema({
+List<StringValidationError> validateJsonSchemaString({
   required String newValue,
   required SchemaProperty property,
 }) {
