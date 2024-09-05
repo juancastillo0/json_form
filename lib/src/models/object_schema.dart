@@ -5,6 +5,7 @@ import '../models/models.dart';
 class SchemaObject extends Schema {
   SchemaObject({
     required super.id,
+    required super.defs,
     this.required = const [],
     this.dependencies,
     String? title,
@@ -28,6 +29,7 @@ class SchemaObject extends Schema {
           json["required"] != null ? List<String>.from(json["required"]) : [],
       nullable: SchemaType.isNullable(json['type']),
       dependencies: json['dependencies'],
+      defs: ((json['\$defs'] ?? json['definitions']) as Map?)?.cast(),
       parent: parent,
     );
     schema.dependentsAddedBy.addAll(parent?.dependentsAddedBy ?? []);
@@ -50,6 +52,7 @@ class SchemaObject extends Schema {
   }) {
     final newSchema = SchemaObject(
       id: id,
+      defs: defs,
       title: title,
       description: description,
       required: required,

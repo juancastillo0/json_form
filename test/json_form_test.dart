@@ -786,4 +786,67 @@ void main() {
   // TODO:
   // format
   // readOnly
+
+  testWidgets('defs', (tester) async {
+    final utils = TestUtils(tester);
+    Object? data = {};
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: JsonForm(
+            jsonSchema: '''{
+  "type": "object",
+  "properties": {
+    "user": {
+      "\$ref": "#/\$defs/user"
+    },
+    "parent": {
+      "\$ref": "#/\$defs/user"
+    },
+    "address": {
+      "\$ref": "#/\$defs/address"
+    }
+  },
+  "\$defs": {
+    "user": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "location": {
+          "\$ref": "#/\$defs/address"
+        }
+      }
+    },
+    "address": {
+      "type": "string"
+    }
+  }
+}''',
+            onFormDataSaved: (p) => data = p,
+          ),
+        ),
+      ),
+    );
+
+    final Map<String, Object?> currentData = {
+      'user': <String, Object?>{'name': null, 'location': null},
+      'parent': <String, Object?>{'name': null, 'location': null},
+      'address': null,
+    };
+
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+
+    await utils.findAndEnterText('user.name', 'un');
+    (currentData['user'] as Map)['name'] = 'un';
+    await utils.findAndEnterText('parent.location', 'pl');
+    (currentData['parent'] as Map)['location'] = 'pl';
+    await utils.findAndEnterText('address', 'a');
+    currentData['address'] = 'a';
+
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+  });
 }

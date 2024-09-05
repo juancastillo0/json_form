@@ -61,8 +61,8 @@ class _MyHomePageState extends State<MyHomePage> {
   bool customOutsideSubmitButton = true;
   late final textController = TextEditingController(text: json);
   late final uiTextController = TextEditingController(text: uiSchema);
-  String json = primitivesJsonSchema;
-  String uiSchema = primitivesUiSchema;
+  String json = FormExample.allExamples.first.jsonSchema;
+  String uiSchema = FormExample.allExamples.first.uiSchema;
   JsonFormController jsonFormController = JsonFormController(data: {});
 
   Future<List<XFile>?> defaultCustomFileHandler() async {
@@ -447,6 +447,7 @@ class FormExample {
   static const uiSchemaExample =
       FormExample('uiSchema', uiSchemaJsonSchema, uiSchemaUiSchema);
   static const oneOfExample = FormExample('oneOf', oneOfJsonSchema, '{}');
+  static const defsExample = FormExample('defs', defsJsonSchema, '{}');
 
   static const allExamples = [
     primitivesExample,
@@ -455,6 +456,7 @@ class FormExample {
     nestedObjectExample,
     uiSchemaExample,
     oneOfExample,
+    defsExample,
   ];
 }
 
@@ -830,5 +832,36 @@ const primitivesJsonSchema = '''{
 const primitivesUiSchema = '''{
   "enumRadio": {
     "ui:widget": "radio"
+  }
+}''';
+
+const defsJsonSchema = '''{
+  "type": "object",
+  "properties": {
+    "user": {
+      "\$ref": "#/\$defs/user"
+    },
+    "parent": {
+      "\$ref": "#/\$defs/user"
+    },
+    "address": {
+      "\$ref": "#/\$defs/address"
+    }
+  },
+  "\$defs": {
+    "user": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "location": {
+          "\$ref": "#/\$defs/address"
+        }
+      }
+    },
+    "address": {
+      "type": "string"
+    }
   }
 }''';

@@ -3,6 +3,7 @@ import '../models/models.dart';
 class SchemaArray extends Schema {
   SchemaArray({
     required super.id,
+    required super.defs,
     required dynamic itemsBaseSchema,
     String? title,
     super.description,
@@ -26,6 +27,7 @@ class SchemaArray extends Schema {
   }) {
     final schemaArray = SchemaArray(
       id: id,
+      defs: ((json['\$defs'] ?? json['definitions']) as Map?)?.cast(),
       title: json['title'],
       description: json['description'],
       arrayProperties: ArrayProperties.fromJson(json),
@@ -46,6 +48,7 @@ class SchemaArray extends Schema {
   }) {
     final newSchema = SchemaArray(
       id: id,
+      defs: defs,
       title: title,
       description: description,
       arrayProperties: arrayProperties,

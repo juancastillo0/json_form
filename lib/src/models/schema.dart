@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:json_form/src/utils/either.dart';
 
 import '../models/models.dart';
 // Esto transforma el JSON a Modelos
@@ -58,6 +59,7 @@ abstract class Schema {
     required this.id,
     required this.type,
     required this.nullable,
+    required this.defs,
     this.requiredProperty = false,
     String? title,
     this.description,
@@ -72,6 +74,15 @@ abstract class Schema {
     Schema? parent,
   }) {
     Schema schema;
+
+    final ref = json['\$ref'] as String?;
+    if (ref != null) {
+      final result = _resolveRef(ref, parent);
+      if (result.isLeft) {
+        return result.left!;
+      }
+      json = result.right!;
+    }
 
 // Solucion temporal y personalizada
     final enumm = json['enum'];
@@ -111,6 +122,7 @@ abstract class Schema {
   String title;
   String? description;
   final SchemaType type;
+  final Map<String, Map<String, Object?>>? defs;
 
   bool requiredProperty;
   final bool nullable;
@@ -160,6 +172,33 @@ abstract class Schema {
   }
 }
 
+Either<Schema, Map<String, Object?>> _resolveRef(String ref, Schema? parent) {
+  if (parent == null) {
+    throw ArgumentError('Reference "$ref" not supported without parent');
+  }
+  Schema root = parent;
+  while (root.parent != null) {
+    root = root.parent!;
+  }
+  if (!ref.startsWith('#')) {
+    throw ArgumentError('Reference "$ref" not supported');
+  } else if (ref == '#') {
+    return Either.left(root);
+  } else if (!ref.startsWith('#/definitions/') &&
+      !ref.startsWith('#/\$defs/')) {
+    throw ArgumentError(
+      'Relative reference "$ref" outside of "defs" is not supported',
+    );
+  }
+
+  final refKey = ref.split('/').last;
+  final j = root.defs?[refKey];
+  if (j == null) {
+    throw ArgumentError('Reference "$ref" not found in definitions');
+  }
+  return Either.right(j);
+}
+
 // TODO: validate
 // Solucion temporal y personalizada
 class SchemaEnum extends Schema {
@@ -173,6 +212,7 @@ class SchemaEnum extends Schema {
           id: id ?? kNoIdKey,
           title: kNoTitle,
           type: SchemaType.enumm,
+          defs: null,
         );
 
   final List<String> enumm;

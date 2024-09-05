@@ -106,6 +106,7 @@ class SchemaProperty extends Schema {
     super.dependentsAddedBy,
   }) : super(
           title: title ?? kNoTitle,
+          defs: null,
         );
 
   factory SchemaProperty.fromJson(
