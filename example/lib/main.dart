@@ -23,7 +23,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         appBarTheme: const AppBarTheme(
-          toolbarHeight: 34,
+          toolbarHeight: 36,
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          border: const UnderlineInputBorder(),
+          filled: true,
+          fillColor: Colors.grey.withOpacity(0.1),
         ),
         colorScheme: const ColorScheme.light(
           primary: Colors.blueAccent,
@@ -207,12 +212,15 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
         if (customOutsideSubmitButton)
-          ElevatedButton(
-            onPressed: () {
-              final data = jsonFormController.submit();
-              if (data != null) onFormDataSaved(data);
-            },
-            child: const Text('Outside Submit'),
+          Padding(
+            padding: const EdgeInsets.only(top: 6.0),
+            child: ElevatedButton(
+              onPressed: () {
+                final data = jsonFormController.submit();
+                if (data != null) onFormDataSaved(data);
+              },
+              child: const Text('Outside Submit'),
+            ),
           ),
         const SizedBox(height: 10),
       ],
@@ -250,13 +258,12 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             SizedBox(
-              width: 110,
+              width: 130,
               child: DropdownButtonFormField<LabelPosition>(
                 value: labelPosition,
                 decoration: const InputDecoration(
                   labelText: 'Label Position',
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 5),
                 items: LabelPosition.values
                     .map(
                       (e) => DropdownMenuItem(
@@ -331,7 +338,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.only(left: 6.0),
+                padding: const EdgeInsets.only(left: 6.0, top: 6.0, right: 6.0),
                 child: Row(
                   children: [
                     if (!showUISchema || isLarge)
@@ -379,8 +386,9 @@ class _MyHomePageState extends State<MyHomePage> {
               'Form Output',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
-            SizedBox(
+            Container(
               height: 100,
+              padding: const EdgeInsets.all(6),
               child: SingleChildScrollView(
                 child: SelectableText(data.toString()),
               ),
