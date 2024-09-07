@@ -52,10 +52,7 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '${widget.property.titleOrId} ${widget.property.requiredNotNull ? "*" : ""}',
-              style: uiConfig.fieldTitle,
-            ),
+            Text(uiConfig.labelText(property), style: uiConfig.subtitle),
             const SizedBox(height: 10),
             _buildButton(uiConfig, field),
             const SizedBox(height: 10),
@@ -73,9 +70,7 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
                         .string,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: readOnly
-                        ? const TextStyle(color: Colors.grey)
-                        : uiConfig.label,
+                    style: readOnly ? uiConfig.labelReadOnly : uiConfig.label,
                   ),
                   trailing: IconButton(
                     icon: const Icon(Icons.close, size: 14),

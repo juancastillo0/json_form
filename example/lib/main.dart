@@ -104,7 +104,6 @@ class _MyHomePageState extends State<MyHomePage> {
         fontWeight: FontWeight.bold,
         fontSize: 24,
       ),
-      fieldTitle: const TextStyle(color: Colors.pink, fontSize: 12),
       submitButtonBuilder: submitButtonBuilder,
       addItemBuilder: (onPressed, key) => TextButton.icon(
         onPressed: onPressed,
@@ -383,7 +382,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             const SizedBox(height: 10),
             Text(
-              'Form Output',
+              'Form Submit Output',
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             Container(

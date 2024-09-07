@@ -80,7 +80,7 @@ class _DateJFormFieldState
         // inputFormatters: [DateTextInputJsonFormatter()],
         readOnly: readOnly,
         enabled: enabled,
-        style: readOnly ? const TextStyle(color: Colors.grey) : uiConfig.label,
+        style: readOnly ? uiConfig.labelReadOnly : uiConfig.label,
         onSaved: (value) {
           if (value != null && value.isNotEmpty)
             widget.onSaved(formatter.parse(value));

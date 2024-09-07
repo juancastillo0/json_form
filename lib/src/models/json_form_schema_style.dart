@@ -4,15 +4,16 @@ import 'package:json_form/src/models/models.dart';
 
 class JsonFormSchemaUiConfig {
   const JsonFormSchemaUiConfig({
-    this.fieldTitle,
-    this.error,
     this.title,
     this.titleAlign,
     this.subtitle,
     this.description,
     this.label,
+    this.labelReadOnly,
+    this.error,
     this.addItemBuilder,
     this.removeItemBuilder,
+    this.copyItemBuilder,
     this.submitButtonBuilder,
     this.addFileButtonBuilder,
     this.formBuilder,
@@ -24,28 +25,48 @@ class JsonFormSchemaUiConfig {
     LabelPosition? labelPosition,
   })  : localizedTexts = localizedTexts ?? const LocalizedTexts(),
         debugMode = debugMode ?? false,
-        labelPosition = labelPosition ?? LabelPosition.input;
+        labelPosition = labelPosition ?? LabelPosition.table;
 
-  final TextStyle? fieldTitle;
-  final TextStyle? error;
+  /// Form title style
   final TextStyle? title;
+
+  /// Form title alignment
   final TextAlign? titleAlign;
+
+  /// Object and array title style.
+  /// The title for each form sections constructed with [formSectionBuilder] will use this style.
   final TextStyle? subtitle;
+
+  /// Description style
   final TextStyle? description;
+
+  /// Field label style
   final TextStyle? label;
+
+  /// Field label style for read-only fields
+  final TextStyle? labelReadOnly;
+
+  /// Validation errors text style
+  final TextStyle? error;
+
+  /// Localized texts
   final LocalizedTexts localizedTexts;
+
+  /// Enable debug mode
   final bool debugMode;
+
+  /// The position of the field labels
   final LabelPosition labelPosition;
 
   final Widget Function(VoidCallback onPressed, String key)? addItemBuilder;
   final Widget Function(VoidCallback onPressed, String key)? removeItemBuilder;
+  final Widget Function(VoidCallback onPressed, String key)? copyItemBuilder;
 
-  /// render a custom submit button
-  /// @param [VoidCallback] submit function
+  /// Render a custom submit button
   final Widget Function(VoidCallback onSubmit)? submitButtonBuilder;
 
-  /// render a custom button
-  /// if it returns null or it is null, it will build default button
+  /// Render a custom add file button.
+  /// If it returns null or it is null, we will build the default button
   final Widget? Function(VoidCallback? onPressed, String key)?
       addFileButtonBuilder;
 
@@ -57,13 +78,11 @@ class JsonFormSchemaUiConfig {
   String labelText(SchemaProperty property) =>
       '${property.titleOrId}${property.requiredNotNull ? "*" : ""}';
 
-  String? fieldLabelText(SchemaProperty property) =>
-      labelPosition == LabelPosition.input ? labelText(property) : null;
-
   InputDecoration inputDecoration(SchemaProperty property) {
     return InputDecoration(
       errorStyle: error,
-      labelText: fieldLabelText(property),
+      labelText:
+          labelPosition == LabelPosition.input ? labelText(property) : null,
       hintText: property.uiSchema.placeholder,
       helperText: property.uiSchema.help ??
           (labelPosition == LabelPosition.table ? null : property.description),
@@ -81,7 +100,7 @@ class JsonFormSchemaUiConfig {
           );
   }
 
-  Widget addItemWidget(void Function() addItem, SchemaArray schemaArray) {
+  Widget addItemWidget(SchemaArray schemaArray, void Function() addItem) {
     String? message;
     final props = schemaArray.arrayProperties;
     if (props.maxItems != null && schemaArray.items.length >= props.maxItems!) {
@@ -101,19 +120,18 @@ class JsonFormSchemaUiConfig {
   }
 
   Widget copyItemWidget(Schema itemSchema, void Function() copyItem) {
-    // TODO: copyItemBuilder
-    return TextButton.icon(
-      key: Key('copyItem_${itemSchema.idKey}'),
-      onPressed: copyItem,
-      icon: const Icon(Icons.copy),
-      label: Text(localizedTexts.copyItem()),
-    );
+    return copyItemBuilder?.call(copyItem, itemSchema.idKey) ??
+        TextButton.icon(
+          key: Key('copyItem_${itemSchema.idKey}'),
+          onPressed: copyItem,
+          icon: const Icon(Icons.copy),
+          label: Text(localizedTexts.copyItem()),
+        );
   }
 
   @override
   bool operator ==(Object other) {
     return other is JsonFormSchemaUiConfig &&
-        other.fieldTitle == fieldTitle &&
         other.error == error &&
         other.title == title &&
         other.titleAlign == titleAlign &&
@@ -125,6 +143,7 @@ class JsonFormSchemaUiConfig {
         other.labelPosition == labelPosition &&
         other.addItemBuilder == addItemBuilder &&
         other.removeItemBuilder == removeItemBuilder &&
+        other.copyItemBuilder == copyItemBuilder &&
         other.submitButtonBuilder == submitButtonBuilder &&
         other.addFileButtonBuilder == addFileButtonBuilder &&
         other.formBuilder == formBuilder &&
@@ -135,7 +154,6 @@ class JsonFormSchemaUiConfig {
 
   @override
   int get hashCode => Object.hash(
-        fieldTitle,
         error,
         title,
         titleAlign,
@@ -147,6 +165,7 @@ class JsonFormSchemaUiConfig {
         labelPosition,
         addItemBuilder,
         removeItemBuilder,
+        copyItemBuilder,
         submitButtonBuilder,
         addFileButtonBuilder,
         formBuilder,

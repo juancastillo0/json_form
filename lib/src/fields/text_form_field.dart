@@ -66,7 +66,7 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
           }
           return null;
         },
-        style: readOnly ? const TextStyle(color: Colors.grey) : uiConfig.label,
+        style: readOnly ? uiConfig.labelReadOnly : uiConfig.label,
         decoration: uiConfig.inputDecoration(property),
       ),
     );

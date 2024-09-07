@@ -25,8 +25,8 @@ class JsonForm extends StatefulWidget {
     required this.onFormDataSaved,
     this.controller,
     this.uiSchema,
-    this.fileHandler,
     this.uiConfig,
+    this.fileHandler,
     this.customPickerHandler,
     this.customValidatorHandler,
   });
@@ -36,8 +36,8 @@ class JsonForm extends StatefulWidget {
 
   final JsonFormController? controller;
   final String? uiSchema;
-  final FileHandler? fileHandler;
   final JsonFormSchemaUiConfig? uiConfig;
+  final FileHandler? fileHandler;
   final CustomPickerHandler? customPickerHandler;
   final CustomValidatorHandler? customValidatorHandler;
 
@@ -46,9 +46,9 @@ class JsonForm extends StatefulWidget {
 }
 
 class _JsonFormState extends State<JsonForm> {
-  Schema get mainSchema => controller.mainSchema!;
   late JsonFormController controller;
-  final _formKey = GlobalKey<FormState>();
+  Schema get mainSchema => controller.mainSchema!;
+  GlobalKey<FormState> get _formKey => controller.formKey!;
 
   _JsonFormState();
 
@@ -61,7 +61,7 @@ class _JsonFormState extends State<JsonForm> {
   void initMainSchema({required bool controllerChanged}) {
     if (controllerChanged) {
       controller = widget.controller ?? JsonFormController(data: {});
-      controller.formKey = _formKey;
+      controller.formKey ??= GlobalKey<FormState>();
       if (controller.mainSchema != null) {
         return;
       }

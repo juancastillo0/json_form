@@ -68,8 +68,7 @@ class _DropDownJFormFieldState
             value: value,
             onChanged: enabled ? _onChanged : null,
             onSaved: widget.onSaved,
-            style:
-                readOnly ? const TextStyle(color: Colors.grey) : uiConfig.label,
+            style: readOnly ? uiConfig.labelReadOnly : uiConfig.label,
             decoration: uiConfig.inputDecoration(widget.property),
           ),
         ),

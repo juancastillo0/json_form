@@ -1,13 +1,24 @@
-<p align="center">
+<h3 align="center">json_form</h3>
 
-  <h3 align="center">json_form</h3>
+A [Flutter](https://flutter.dev/) widget capable of using [JSON Schema](http://json-schema.org/) to declaratively build and customize input forms.
 
-  <p align="center">
-    A simple <a href="https://flutter.dev/">Flutter</a> widget capable of using <a href="http://json-schema.org/">JSON Schema</a> to declaratively build and customize web forms.
-    <br />
-    Inspired by <a href="https://github.com/rjsf-team/react-jsonschema-form">react-jsonschema-form</a>
-    <br />    
-</p>
+Inspired by [react-jsonschema-form](https://github.com/rjsf-team/react-jsonschema-form).
+
+
+## Table of Contents
+
+- [Table of Contents](#table-of-contents)
+- [Installation](#installation)
+- [Examples](#examples)
+- [Usage](#usage)
+  - [Using arrays \& Files](#using-arrays--files)
+  - [Using UI Schema](#using-ui-schema)
+    - [UI Schema Configurations](#ui-schema-configurations)
+  - [UI Config](#ui-config)
+  - [Custom File Handler](#custom-file-handler)
+  - [Using Custom Validator](#using-custom-validator)
+  - [TODO](#todo)
+
 
 ## Installation
 
@@ -15,23 +26,20 @@ Add dependency to pubspec.yaml
 
 ```
 dependencies:
-  ...
   json_form: ^0.0.1+1
 ```
 
-Run in your terminal
-
-```
-flutter packages get
-```
-
 See the [File Picker Installation](https://github.com/miguelpruivo/plugins_flutter_file_picker) for file fields.
+
+
+## Examples
+
+You can interact with multiple form examples in the [deployed web page](https://juancastillo0.github.io/json_form/). The code for the page can be found in the [example folder of this repo](./example/lib/main.dart).
 
 ## Usage
 
 ```dart
 import 'package:json_form/json_form.dart';
-
 
 final jsonSchema = {
   "title": "A registration form",
@@ -59,8 +67,6 @@ final jsonSchema = {
   }
 }
 
-
-
 @override
 Widget build(BuildContext context) {
   return Scaffold(
@@ -73,11 +79,12 @@ Widget build(BuildContext context) {
   );
 }
 ```
+
 <img width="364" alt="image" src="https://user-images.githubusercontent.com/58694638/187986742-3b1aa96c-4a85-42a3-aec0-dac62a8515a4.png">
 
 ### Using arrays & Files
 ```dart
-  final json = '''
+final jsonSchema = '''
 {
   "title": "Example 2",
   "type": "object",
@@ -101,35 +108,92 @@ Widget build(BuildContext context) {
     }
   }
 }
-  ''';
+''';
+```
 
 ### Using UI Schema
-```dart
 
+```dart
 final uiSchema = '''
 {
   "selectYourCola": {
     "ui:widget": "radio"
   }
- }
+}
 ''';
-
 ```
 <img width="348" alt="image" src="https://user-images.githubusercontent.com/58694638/187996261-ab3be73d-35e0-40c5-a0de-47900b64f1be.png">
 
+
+#### UI Schema Configurations
+
+| Configuration   | Type            | Default | Only For | Description                                                         |
+| --------------- | --------------- | ------- | -------- | ------------------------------------------------------------------- |
+| title           | String?         |         |          | The user facing title of the field                                  |
+| description     | String?         |         |          | The user facing description of the field                            |
+| globalOptions   | UiSchemaData?   |         |          | Applies the options to all children                                 |
+| help            | String?         |         |          | Helper text for the user                                            |
+| readOnly        | bool            | false   |          | Can't be updated, but will be sent                                  |
+| disabled        | bool            | false   |          | Can't be updated and will not be sent                               |
+| hidden          | bool            | false   |          | Does not show or sends the value                                    |
+| hideError       | bool            | false   |          |                                                                     |
+| placeholder     | String?         |         | text     | The input's hint text                                               |
+| emptyValue      | String?         |         | text     | Sent when the value is empty                                        |
+| autoFocus       | bool            | false   |          | Focuses the input on rendering                                      |
+| autoComplete    | bool            | false   | text     | Enabled auto complete suggestions                                   |
+| yearsRange      | List\<int\>?    |         | date     |
+| format          | String          | 'YMD'   | date     |                                                                     |
+| hideNowButton   | bool            | false   | date     |                                                                     |
+| hideClearButton | bool            | false   | date     |                                                                     |
+| widget          | String?         |         |          | The kind of input to be used. Options:                              |
+| accept          | String?         |         | file     | The mime types accepted in the file input                           |
+| enumNames       | List\<String\>? |         | enum     | The named or labels shown to the user for each of the enum variants |
+| enumDisabled    | List\<String\>? |         | enum     | List of enum values that are disabled                               |
+| order           | List\<String\>? |         | object   | The order of the properties of an object                            |
+| inline          | bool            | false   | checkbox | Whether the checkboxes are positioned in a horizontal line          |
+| addable         | bool            | true    | array    | Whether the user can add items to an array                          |
+| removable       | bool            | true    | array    | Whether the user can remove items from an array                     |
+| orderable       | bool            | true    | array    | Whether the user can reorder or move the items in an array          |
+| copyable        | bool            | true    | array    | Whether the user can copy or duplicate the items in an array        |
+
+
+### UI Config
+
+| Configuration        | Type                                                         | Default                                         | Description                                                     |
+| -------------------- | ------------------------------------------------------------ | ----------------------------------------------- | --------------------------------------------------------------- |
+| title                | TextStyle?                                                   | titleLarge                                      |                                                                 |
+| titleAlign           | TextAlign?                                                   | center                                          |                                                                 |
+| subtitle             | TextStyle?                                                   | titleMedium (bold)                              |                                                                 |
+| description          | TextStyle?                                                   | bodyMedium                                      |                                                                 |
+| label                | TextStyle?                                                   |                                                 |                                                                 |
+| labelReadOnly        | TextStyle?                                                   | TextStyle(color: Colors.grey)                   |                                                                 |
+| error                | TextStyle?                                                   | bodySmall (colorScheme.error)                   | Text style for validation errors                                |
+| localizedTexts       | LocalizedTexts                                               | [English](./lib/src/utils/localized_texts.dart) |                                                                 |
+| debugMode            | bool                                                         | false                                           |                                                                 |
+| labelPosition        | LabelPosition                                                | table                                           |                                                                 |
+| addItemBuilder       | Widget Function(VoidCallback onPressed, String key)?         |                                                 | Add Item button for arrays                                      |
+| removeItemBuilder    | Widget Function(VoidCallback onPressed, String key)?         |                                                 | Remove Item button for arrays                                   |
+| copyItemBuilder      | Widget Function(VoidCallback onPressed, String key)?         |                                                 | Copy or Duplicate button for arrays                             |
+| submitButtonBuilder  | Widget Function(VoidCallback onSubmit)?                      |                                                 | Submit button                                                   |
+| addFileButtonBuilder | Widget? Function(VoidCallback? onPressed, String key)?       |                                                 |                                                                 |
+| formBuilder          | Form Function(GlobalKey\<FormState\> formKey, Widget child)? | 12 of padding                                   | Builds the Form widget you can use it to wrap the whole form    |
+| formSectionBuilder   | Widget Function(Widget child)?                               |                                                 | Wraps a form section. Objects and arrays generate form sections |
+| fieldWrapperBuilder  | Widget? Function(FieldWrapperParams params)?                 |                                                 | Wraps the input field and returns it with the label             |
+| inputWrapperBuilder  | Widget? Function(FieldWrapperParams params)?                 |                                                 | Wraps the input field and returns it without the label          |
+
+// TODO: nullable return in builders
 
 ### Custom File Handler 
 
 ```dart
 customFileHandler: () => {
   'profile_photo': () async {
-    
     return [
       File(
           'https://cdn.mos.cms.futurecdn.net/LEkEkAKZQjXZkzadbHHsVj-970-80.jpg')
     ];
   },
-  '*': null
+  '*': null,
 }
 ```
 
@@ -151,6 +215,5 @@ customValidatorHandler: () => {
 
 - [ ] Add all examples
 - [ ] OnChanged
-- [ ] References
 - [ ] pub.dev
 

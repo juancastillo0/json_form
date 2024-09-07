@@ -70,7 +70,7 @@ class _NumberJFormFieldState
           if (widget.onChanged != null) widget.onChanged!(v);
         },
         enabled: enabled,
-        style: readOnly ? const TextStyle(color: Colors.grey) : uiConfig.label,
+        style: readOnly ? uiConfig.labelReadOnly : uiConfig.label,
         validator: (String? value) {
           if (property.requiredNotNull &&
               property.uiSchema.emptyValue == null &&

@@ -45,9 +45,7 @@ class _CheckboxJFormFieldState
                   ? null
                   : Text(
                       uiConfig.labelText(widget.property),
-                      style: readOnly
-                          ? const TextStyle(color: Colors.grey)
-                          : WidgetBuilderInherited.of(context).uiConfig.label,
+                      style: readOnly ? uiConfig.labelReadOnly : uiConfig.label,
                     ),
               onChanged: enabled
                   ? (bool? value) {

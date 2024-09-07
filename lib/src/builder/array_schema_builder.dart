@@ -217,10 +217,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
               schemaArray.uiSchema.widget != 'checkboxes')
             Align(
               alignment: Alignment.centerRight,
-              child: uiConfig.addItemWidget(
-                _addItem,
-                schemaArray,
-              ),
+              child: uiConfig.addItemWidget(schemaArray, _addItem),
             ),
         ],
       ),

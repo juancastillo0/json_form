@@ -44,8 +44,9 @@ class WidgetBuilderInherited extends InheritedWidget {
             color: Theme.of(context).colorScheme.error,
             fontSize: textTheme.bodySmall!.fontSize,
           ),
-      fieldTitle: uiConfig?.fieldTitle ?? textTheme.bodyMedium,
       label: uiConfig?.label,
+      labelReadOnly:
+          uiConfig?.labelReadOnly ?? const TextStyle(color: Colors.grey),
       debugMode: uiConfig?.debugMode,
       fieldWrapperBuilder: uiConfig?.fieldWrapperBuilder,
       inputWrapperBuilder: uiConfig?.inputWrapperBuilder,
@@ -53,9 +54,11 @@ class WidgetBuilderInherited extends InheritedWidget {
       formSectionBuilder: uiConfig?.formSectionBuilder,
       localizedTexts: uiConfig?.localizedTexts,
       labelPosition: uiConfig?.labelPosition,
-      //builders
+
+      /// builders
       addItemBuilder: uiConfig?.addItemBuilder,
       removeItemBuilder: uiConfig?.removeItemBuilder,
+      copyItemBuilder: uiConfig?.copyItemBuilder,
       submitButtonBuilder: uiConfig?.submitButtonBuilder,
       addFileButtonBuilder: uiConfig?.addFileButtonBuilder,
     );
@@ -84,13 +87,14 @@ class WidgetBuilderInherited extends InheritedWidget {
 }
 
 class JsonFormController extends ChangeNotifier {
-  Schema? mainSchema;
   final Map<String, Object?> data;
-  late GlobalKey<FormState> formKey;
+  Schema? mainSchema;
+  GlobalKey<FormState>? formKey;
 
   JsonFormController({
     required this.data,
     this.mainSchema,
+    this.formKey,
   });
 
   /// update [data] with key,values from jsonSchema
@@ -167,6 +171,7 @@ class JsonFormController extends ChangeNotifier {
   }
 
   Map<String, Object?>? submit() {
+    final formKey = this.formKey!;
     if (formKey.currentState != null && formKey.currentState!.validate()) {
       formKey.currentState!.save();
 

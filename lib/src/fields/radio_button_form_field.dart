@@ -85,7 +85,7 @@ class _RadioButtonJFormFieldState
                     title: Text(
                       names[i],
                       style: readOnly
-                          ? const TextStyle(color: Colors.grey)
+                          ? uiConfig.labelReadOnly
                           : uiConfig.label,
                     ),
                     groupValue: field.value,

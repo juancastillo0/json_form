@@ -41,7 +41,7 @@ class UiSchemaData {
   /// With "widget=file" or "format=data-url": accept='.pdf'
   String? accept;
 
-  /// displayed as text if is not empty
+  /// Displayed as text if is not empty
   List<String>? enumNames;
   List<String>? enumDisabled;
   List<String>? order;

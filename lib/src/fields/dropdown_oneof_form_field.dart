@@ -132,16 +132,14 @@ class _SelectedFormFieldState
 
   List<DropdownMenuItem<OneOfModel>>? _buildItems() {
     if (listOfModel.isEmpty) return [];
-
+    final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     return listOfModel
         .map(
           (item) => DropdownMenuItem<OneOfModel>(
             value: item,
             child: Text(
               item.title ?? '',
-              style: readOnly
-                  ? const TextStyle(color: Colors.grey)
-                  : WidgetBuilderInherited.of(context).uiConfig.label,
+              style: readOnly ? uiConfig.labelReadOnly : uiConfig.label,
             ),
           ),
         )
