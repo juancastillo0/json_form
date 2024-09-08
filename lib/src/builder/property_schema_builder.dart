@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:cross_file/cross_file.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:json_form/src/builder/logic/object_schema_logic.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
@@ -270,15 +269,14 @@ class PropertySchemaBuilder extends StatelessWidget {
     dynamic value, {
     String? id,
   }) {
-    log('dispatchSelectedForDropDownEventToParent()  $value ID: $id');
+    log('dispatchSelectedForDropDownEventToParent() $value ID: $id');
     ObjectSchemaInherited.of(context).listenChangeProperty(
       (value != null && (value is String ? value.isNotEmpty : true)),
       schemaProperty,
       optionalValue: value,
-      idOptional: id,
-      mainSchema: mainSchema,
+      // TODO: idOptional: id,
+      // mainSchema: mainSchema,
     );
-    // }
   }
 
   /// Cuando se valida si es true o false
