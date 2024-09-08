@@ -96,7 +96,7 @@ class _SelectedFormFieldState
           (item) => DropdownMenuItem<SchemaProperty>(
             value: item,
             child: Text(
-              item.title,
+              item.titleOrId,
               style: readOnly ? uiConfig.labelReadOnly : uiConfig.label,
             ),
           ),

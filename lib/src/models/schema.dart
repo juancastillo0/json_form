@@ -63,11 +63,12 @@ abstract class Schema {
     required List<Object?>? oneOf,
     this.requiredProperty = false,
     String? title,
-    this.description,
+    String? description,
     this.parent,
     List<String>? dependentsAddedBy,
   })  : dependentsAddedBy = dependentsAddedBy ?? [],
-        title = title ?? kNoTitle,
+        _title = title,
+        _description = description,
         oneOf = oneOf is List<Schema> ? oneOf : [] {
     if (oneOf != null && oneOf is! List<Schema>) {
       _setOneOf(oneOf);
@@ -120,8 +121,10 @@ abstract class Schema {
 
   // props
   final String id;
-  String title;
-  String? description;
+  final String? _title;
+  final String? _description;
+  String? get title => uiSchema.title ?? _title;
+  String? get description => uiSchema.description ?? _description;
   final SchemaType type;
   final Map<String, Map<String, Object?>>? defs;
   final List<Schema> oneOf;
@@ -131,8 +134,8 @@ abstract class Schema {
 
   bool get requiredNotNull => requiredProperty && !nullable;
 
-  String get titleOrId => title != kNoTitle
-      ? title
+  String get titleOrId => title != null
+      ? title!
       : parent is SchemaArray && int.tryParse(id) != null
           ? '${(parent as SchemaArray).items.indexOf(this) + 1}.'
           : id;
@@ -169,8 +172,6 @@ abstract class Schema {
     required bool fromOptions,
   }) {
     uiSchema.setUi(data, parent: parent?.uiSchema, fromOptions: fromOptions);
-    title = uiSchema.title ?? title;
-    description = uiSchema.description ?? description;
   }
 
   void _setOneOf(List<dynamic> oneOf) {

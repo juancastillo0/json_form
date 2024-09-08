@@ -6,7 +6,7 @@ class SchemaArray extends Schema {
     required super.defs,
     required super.oneOf,
     required dynamic itemsBaseSchema,
-    String? title,
+    super.title,
     super.description,
     this.arrayProperties = const ArrayProperties(),
     List<Schema>? items,
@@ -15,7 +15,7 @@ class SchemaArray extends Schema {
     super.parent,
     super.dependentsAddedBy,
   })  : items = items ?? [],
-        super(title: title ?? kNoTitle, type: SchemaType.array) {
+        super(type: SchemaType.array) {
     this.itemsBaseSchema = itemsBaseSchema is Schema
         ? itemsBaseSchema.copyWith(id: kNoIdKey, parent: this)
         : Schema.fromJson(itemsBaseSchema, parent: this);

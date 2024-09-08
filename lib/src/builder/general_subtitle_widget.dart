@@ -24,6 +24,8 @@ class GeneralSubtitle extends StatelessWidget {
             field.description != mainSchema?.description
         ? field.description
         : null;
+
+    /// Show the description of array items beside the array's description
     if (f is SchemaArray && f.itemsBaseSchema.description != null) {
       description = description == null
           ? f.itemsBaseSchema.description
@@ -37,8 +39,6 @@ class GeneralSubtitle extends StatelessWidget {
       children: [
         const SizedBox(height: 10),
         if (mainSchema?.titleOrId != field.titleOrId &&
-            // TODO:
-            field.titleOrId != kNoTitle &&
             field.titleOrId.isNotEmpty) ...[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

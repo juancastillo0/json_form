@@ -92,7 +92,7 @@ class SchemaProperty extends Schema {
     required super.id,
     required super.type,
     required super.oneOf,
-    String? title,
+    super.title,
     super.description,
     this.defaultValue,
     this.enumm,
@@ -107,7 +107,6 @@ class SchemaProperty extends Schema {
     super.parent,
     super.dependentsAddedBy,
   }) : super(
-          title: title ?? kNoTitle,
           defs: null,
         );
 

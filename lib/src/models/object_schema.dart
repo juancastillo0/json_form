@@ -8,13 +8,13 @@ class SchemaObject extends Schema {
     this.required = const [],
     required this.dependentRequired,
     required this.dependentSchemas,
-    String? title,
+    super.title,
     super.description,
     required super.nullable,
     super.requiredProperty,
     super.parent,
     super.dependentsAddedBy,
-  }) : super(title: title ?? kNoTitle, type: SchemaType.object);
+  }) : super(type: SchemaType.object);
 
   factory SchemaObject.fromJson(
     String id,
