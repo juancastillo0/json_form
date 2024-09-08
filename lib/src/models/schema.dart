@@ -60,13 +60,19 @@ abstract class Schema {
     required this.type,
     required this.nullable,
     required this.defs,
+    required List<Object?>? oneOf,
     this.requiredProperty = false,
     String? title,
     this.description,
     this.parent,
     List<String>? dependentsAddedBy,
   })  : dependentsAddedBy = dependentsAddedBy ?? [],
-        title = title ?? kNoTitle;
+        title = title ?? kNoTitle,
+        oneOf = oneOf is List<Schema> ? oneOf : [] {
+    if (oneOf != null && oneOf is! List<Schema>) {
+      _setOneOf(oneOf);
+    }
+  }
 
   factory Schema.fromJson(
     Map<String, dynamic> json, {
@@ -84,12 +90,7 @@ abstract class Schema {
       json = result.right!;
     }
 
-// Solucion temporal y personalizada
-    final enumm = json['enum'];
-    if (enumm is List<String> && enumm.length == 1) {
-      return SchemaEnum(enumm: enumm, nullable: false);
-    }
-
+    _tryCastType(json);
     json['type'] ??= 'object';
 
     switch (SchemaType.fromJson(json['type'])) {
@@ -123,6 +124,7 @@ abstract class Schema {
   String? description;
   final SchemaType type;
   final Map<String, Map<String, Object?>>? defs;
+  final List<Schema> oneOf;
 
   bool requiredProperty;
   final bool nullable;
@@ -170,6 +172,32 @@ abstract class Schema {
     title = uiSchema.title ?? title;
     description = uiSchema.description ?? description;
   }
+
+  void _setOneOf(List<dynamic> oneOf) {
+    for (Map<String, dynamic> element in oneOf.cast()) {
+      this.oneOf.add(Schema.fromJson(element, parent: this));
+    }
+  }
+
+  static void _tryCastType(Map<String, Object?> json) {
+    var enumm = json['enum'] as List?;
+    final constValue = json['const'];
+    if (enumm == null && constValue != null) {
+      enumm = [constValue];
+      json['enum'] = enumm;
+    }
+    if (json['type'] == null && enumm != null) {
+      if (enumm.every((e) => e is String)) {
+        json['type'] = SchemaType.string.name;
+      } else if (enumm.every((e) => e is int)) {
+        json['type'] = SchemaType.integer.name;
+      } else if (enumm.every((e) => e is num)) {
+        json['type'] = SchemaType.number.name;
+      } else if (enumm.every((e) => e is bool)) {
+        json['type'] = SchemaType.boolean.name;
+      }
+    }
+  }
 }
 
 Either<Schema, Map<String, Object?>> _resolveRef(String ref, Schema? parent) {
@@ -197,38 +225,4 @@ Either<Schema, Map<String, Object?>> _resolveRef(String ref, Schema? parent) {
     throw ArgumentError('Reference "$ref" not found in definitions');
   }
   return Either.right(j);
-}
-
-// TODO: validate
-// Solucion temporal y personalizada
-class SchemaEnum extends Schema {
-  SchemaEnum({
-    String? id,
-    required this.enumm,
-    required super.nullable,
-    super.parent,
-    super.dependentsAddedBy,
-  }) : super(
-          id: id ?? kNoIdKey,
-          title: kNoTitle,
-          type: SchemaType.enumm,
-          defs: null,
-        );
-
-  final List<String> enumm;
-
-  @override
-  Schema copyWith({
-    required String id,
-    Schema? parent,
-    List<String>? dependentsAddedBy,
-  }) {
-    return SchemaEnum(
-      id: id,
-      enumm: enumm,
-      nullable: nullable,
-      parent: parent ?? this.parent,
-      dependentsAddedBy: dependentsAddedBy ?? this.dependentsAddedBy,
-    );
-  }
 }

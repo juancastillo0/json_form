@@ -1,13 +1,13 @@
-import 'dart:developer';
-
 import '../models/models.dart';
 
 class SchemaObject extends Schema {
   SchemaObject({
     required super.id,
     required super.defs,
+    required super.oneOf,
     this.required = const [],
-    this.dependencies,
+    required this.dependentRequired,
+    required this.dependentSchemas,
     String? title,
     super.description,
     required super.nullable,
@@ -21,6 +21,8 @@ class SchemaObject extends Schema {
     Map<String, dynamic> json, {
     Schema? parent,
   }) {
+    final dependentSchemas = <String, Schema>{};
+    final dependentRequired = <String, List<String>>{};
     final schema = SchemaObject(
       id: id,
       title: json['title'],
@@ -28,17 +30,31 @@ class SchemaObject extends Schema {
       required:
           json["required"] != null ? List<String>.from(json["required"]) : [],
       nullable: SchemaType.isNullable(json['type']),
-      dependencies: json['dependencies'],
+      dependentRequired: dependentRequired,
+      dependentSchemas: dependentSchemas,
+      oneOf: json['oneOf'],
       defs: ((json['\$defs'] ?? json['definitions']) as Map?)?.cast(),
       parent: parent,
     );
-    schema.dependentsAddedBy.addAll(parent?.dependentsAddedBy ?? []);
+    schema.dependentsAddedBy.addAll(parent?.dependentsAddedBy ?? const []);
+
+    (json['dependencies'] as Map<String, dynamic>?)?.forEach((key, value) {
+      if (value is List) {
+        dependentRequired[key] = value.cast();
+      } else {
+        dependentSchemas[key] = Schema.fromJson(value, parent: schema);
+      }
+    });
+    (json['dependentSchemas'] as Map<String, dynamic>?)?.forEach((key, value) {
+      dependentSchemas[key] =
+          Schema.fromJson(value as Map<String, dynamic>, parent: schema);
+    });
+    (json['dependentRequired'] as Map<String, dynamic>?)?.forEach((key, value) {
+      dependentRequired[key] = (value as List).cast();
+    });
 
     if (json['properties'] != null) {
       schema._setProperties(json['properties']);
-    }
-    if (json['oneOf'] != null) {
-      schema._setOneOf(json['oneOf']);
     }
 
     return schema;
@@ -59,8 +75,10 @@ class SchemaObject extends Schema {
       nullable: nullable,
       parent: parent ?? this.parent,
       dependentsAddedBy: dependentsAddedBy ?? this.dependentsAddedBy,
-      dependencies: dependencies,
-    )..oneOf = oneOf;
+      dependentSchemas: dependentSchemas,
+      dependentRequired: dependentRequired,
+      oneOf: oneOf,
+    );
 
     newSchema.properties.addAll(
       properties.map(
@@ -76,11 +94,6 @@ class SchemaObject extends Schema {
     return newSchema;
   }
 
-  // ! Getters
-  bool get isGenesis => id == kGenesisIdKey;
-
-  bool isOneOf = false;
-
   /// array of required keys
   final List<String> required;
   final List<Schema> properties = [];
@@ -88,10 +101,8 @@ class SchemaObject extends Schema {
   /// the dependencies keyword from an earlier draft of JSON Schema
   /// (note that this is not part of the latest JSON Schema spec, though).
   /// Dependencies can be used to create dynamic schemas that change fields based on what data is entered
-  final Map<String, dynamic>? dependencies;
-
-  /// A [Schema] with [oneOf] is valid if exactly one of the subschemas is valid.
-  List<Schema>? oneOf;
+  final Map<String, Schema> dependentSchemas;
+  final Map<String, List<String>> dependentRequired;
 
   @override
   void setUiSchema(
@@ -127,25 +138,13 @@ class SchemaObject extends Schema {
         parent: this,
       );
 
+      property.requiredProperty = isRequired;
       if (property is SchemaProperty) {
-        property.requiredProperty = isRequired;
         // Asignamos las propiedades que dependen de este
         property.setDependents(this);
-      } else {
-        property.requiredProperty = isRequired;
       }
 
       this.properties.add(property);
     });
-  }
-
-  void _setOneOf(List<dynamic> oneOf) {
-    final oneOfs = <Schema>[];
-    for (Map<String, dynamic> element in oneOf.cast()) {
-      log(element.toString());
-      oneOfs.add(Schema.fromJson(element, parent: this));
-    }
-
-    this.oneOf = oneOfs;
   }
 }

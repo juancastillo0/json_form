@@ -38,7 +38,8 @@ class GeneralSubtitle extends StatelessWidget {
         const SizedBox(height: 10),
         if (mainSchema?.titleOrId != field.titleOrId &&
             // TODO:
-            field.titleOrId != kNoTitle) ...[
+            field.titleOrId != kNoTitle &&
+            field.titleOrId.isNotEmpty) ...[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

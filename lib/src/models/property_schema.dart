@@ -1,3 +1,5 @@
+import 'package:json_form/src/utils/either.dart';
+
 import '../models/models.dart';
 
 enum PropertyFormat {
@@ -20,55 +22,55 @@ enum PropertyFormat {
   uriTemplate,
   jsonPointer,
   relativeJsonPointer,
-  regex,
-}
+  regex;
 
-PropertyFormat propertyFormatFromString(String? value) {
-  switch (value) {
-    case 'date':
-      return PropertyFormat.date;
-    case 'date-time':
-      return PropertyFormat.dateTime;
-    case 'email':
-      return PropertyFormat.email;
-    case 'data-url':
-      return PropertyFormat.dataUrl;
-    case 'uri':
-      return PropertyFormat.uri;
-    case 'uri-reference':
-      return PropertyFormat.uriReference;
-    case 'iri':
-      return PropertyFormat.iri;
-    case 'iri-reference':
-      return PropertyFormat.iriReference;
-    case 'time':
-      return PropertyFormat.time;
-    case 'idn-email':
-      return PropertyFormat.idnEmail;
-    case 'hostname':
-      return PropertyFormat.hostname;
-    case 'idn-hostname':
-      return PropertyFormat.idnHostname;
-    case 'uuid':
-      return PropertyFormat.uuid;
-    case 'ipv4':
-      return PropertyFormat.ipv4;
-    case 'ipv6':
-      return PropertyFormat.ipv6;
-    case 'uri-template':
-      return PropertyFormat.uriTemplate;
-    case 'json-pointer':
-      return PropertyFormat.jsonPointer;
-    case 'relative-json-pointer':
-      return PropertyFormat.relativeJsonPointer;
-    case 'regex':
-      return PropertyFormat.regex;
-    default:
-      return PropertyFormat.general;
+  static PropertyFormat fromString(String? value) {
+    switch (value) {
+      case 'date':
+        return PropertyFormat.date;
+      case 'date-time':
+        return PropertyFormat.dateTime;
+      case 'email':
+        return PropertyFormat.email;
+      case 'data-url':
+        return PropertyFormat.dataUrl;
+      case 'uri':
+        return PropertyFormat.uri;
+      case 'uri-reference':
+        return PropertyFormat.uriReference;
+      case 'iri':
+        return PropertyFormat.iri;
+      case 'iri-reference':
+        return PropertyFormat.iriReference;
+      case 'time':
+        return PropertyFormat.time;
+      case 'idn-email':
+        return PropertyFormat.idnEmail;
+      case 'hostname':
+        return PropertyFormat.hostname;
+      case 'idn-hostname':
+        return PropertyFormat.idnHostname;
+      case 'uuid':
+        return PropertyFormat.uuid;
+      case 'ipv4':
+        return PropertyFormat.ipv4;
+      case 'ipv6':
+        return PropertyFormat.ipv6;
+      case 'uri-template':
+        return PropertyFormat.uriTemplate;
+      case 'json-pointer':
+        return PropertyFormat.jsonPointer;
+      case 'relative-json-pointer':
+        return PropertyFormat.relativeJsonPointer;
+      case 'regex':
+        return PropertyFormat.regex;
+      default:
+        return PropertyFormat.general;
+    }
   }
 }
 
-dynamic safeDefaultValue(Map<String, dynamic> json) {
+dynamic _safeDefaultValue(Map<String, dynamic> json) {
   final value = json['default'];
   final type = SchemaType.fromJson(json['type']);
   if (type == SchemaType.boolean) {
@@ -89,10 +91,10 @@ class SchemaProperty extends Schema {
   SchemaProperty({
     required super.id,
     required super.type,
+    required super.oneOf,
     String? title,
     super.description,
     this.defaultValue,
-    this.examples,
     this.enumm,
     super.requiredProperty = false,
     required super.nullable,
@@ -101,7 +103,7 @@ class SchemaProperty extends Schema {
     this.minLength,
     this.maxLength,
     this.pattern,
-    this.oneOf,
+    this.isMultipleFile = false,
     super.parent,
     super.dependentsAddedBy,
   }) : super(
@@ -118,9 +120,8 @@ class SchemaProperty extends Schema {
       id: id,
       title: json['title'],
       type: SchemaType.fromJson(json['type']),
-      format: propertyFormatFromString(json['format']),
-      defaultValue: safeDefaultValue(json),
-      examples: json['examples'],
+      format: PropertyFormat.fromString(json['format']),
+      defaultValue: _safeDefaultValue(json),
       description: json['description'],
       enumm: json['enum'],
       minLength: json['minLength'],
@@ -150,58 +151,47 @@ class SchemaProperty extends Schema {
       format: format,
       defaultValue: defaultValue,
       enumm: enumm,
+      minLength: minLength,
+      maxLength: maxLength,
+      pattern: pattern,
       requiredProperty: requiredProperty,
       nullable: nullable,
       oneOf: oneOf,
       parent: parent ?? this.parent,
       dependentsAddedBy: dependentsAddedBy ?? this.dependentsAddedBy,
-    )
-      ..maxLength = maxLength
-      ..minLength = minLength
-      ..dependents = dependents
-      ..isMultipleFile = isMultipleFile;
+      isMultipleFile: isMultipleFile,
+    )..dependents = dependents;
     newSchema.setUiSchema(uiSchema.toJson(), fromOptions: false);
 
     return newSchema;
   }
 
-  PropertyFormat format;
+  final PropertyFormat format;
 
   /// it means enum
-  List<dynamic>? enumm;
-
-  dynamic defaultValue;
-  List<dynamic>? examples;
+  final List<dynamic>? enumm;
+  dynamic get constValue =>
+      enumm != null && enumm!.length == 1 ? enumm!.first : null;
+  final dynamic defaultValue;
 
   // propiedades que se llenan con el json
-  int? minLength;
-  int? maxLength;
+  final int? minLength;
+  final int? maxLength;
   final NumberProperties numberProperties;
-  String? pattern;
-  dynamic dependents;
-  bool isMultipleFile = false;
+  final String? pattern;
+  final bool isMultipleFile;
+  Either<List<String>, Schema>? dependents;
 
   /// indica si sus dependentes han sido activados por XDependencies
   bool isDependentsActive = false;
 
-  List<dynamic>? oneOf;
-
   void setDependents(SchemaObject schema) {
-    final dependents = schema.dependencies?[id];
-    // Asignamos las propiedades que dependen de este
-    if (schema.dependencies != null && dependents != null) {
-      if (dependents is Map) {
-        schema.isOneOf = dependents.containsKey("oneOf");
-      }
-      if (dependents is List || schema.isOneOf) {
-        this.dependents = dependents;
-      } else {
-        this.dependents = Schema.fromJson(
-          dependents,
-          // id: '',
-          parent: schema,
-        );
-      }
+    if (schema.dependentRequired.containsKey(id)) {
+      // if (dependents is Map) {
+      // TODO:  schema.isOneOf = dependents.containsKey("oneOf");
+      dependents = Either.left(schema.dependentRequired[id]!);
+    } else if (schema.dependentSchemas.containsKey(id)) {
+      dependents = Either.right(schema.dependentSchemas[id]!);
     }
   }
 }
@@ -254,6 +244,8 @@ class NumberProperties {
     return errors;
   }
 
+  /// Returns the list of options that can be selected
+  /// for the [minimum], [maximum] and [multipleOf] properties
   List<num> options() {
     final mi = (minimum != null ? minimum! : exclusiveMinimum! + 1);
     final ma = (maximum != null ? maximum! : exclusiveMaximum! - 1);

@@ -1,10 +1,8 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
-import 'package:json_form/src/models/one_of_model.dart';
+import 'package:json_form/src/models/property_schema.dart';
 import 'package:json_form/src/models/schema.dart';
 
 class DropdownOneOfJFormField extends PropertyFieldWidget<dynamic> {
@@ -25,61 +23,22 @@ class DropdownOneOfJFormField extends PropertyFieldWidget<dynamic> {
 
 class _SelectedFormFieldState
     extends PropertyFieldState<dynamic, DropdownOneOfJFormField> {
-  final listOfModel = <OneOfModel>[];
-  Map<String, dynamic> indexedData = {};
-  OneOfModel? valueSelected;
-  List<DropdownMenuItem<OneOfModel>> w = <DropdownMenuItem<OneOfModel>>[];
+  SchemaProperty? valueSelected;
 
   @override
   void initState() {
-    // fill enum property
-    if (widget.property.enumm == null) {
-      switch (widget.property.type) {
-        case SchemaType.boolean:
-          widget.property.enumm = [true, false];
-          break;
-        default:
-          widget.property.enumm = widget.property.uiSchema.enumNames
-                  ?.map((e) => e.toString())
-                  .toList() ??
-              [];
-      }
-    }
-
-    if (widget.property.oneOf is List) {
-      for (int i = 0; i < (widget.property.oneOf?.length ?? 0); i++) {
-        final oneOfItem = widget.property.oneOf![i] as Map;
-        final customObject = OneOfModel(
-          oneOfModelEnum: oneOfItem['enum'],
-          title: oneOfItem['title'],
-          type: oneOfItem['type'],
-        );
-
-        listOfModel.add(customObject);
-      }
-    }
-
-    // fill selected value
-    try {
-      final defaultValue = widget.property.defaultValue.toLowerCase();
-      final exists = listOfModel.firstWhere(
-        (e) =>
-            e.oneOfModelEnum != null &&
-            e.oneOfModelEnum!.any((i) => i.toLowerCase() == defaultValue),
-      );
-
-      valueSelected = exists;
-    } catch (e) {
-      valueSelected = null;
-    }
-
     super.initState();
+    // fill selected value
+    final defaultValue = super.getDefaultValue();
+    if (defaultValue != null) {
+      valueSelected = property.oneOf.cast<SchemaProperty>().firstWhere(
+            (e) => e.constValue == defaultValue,
+          );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    assert(widget.property.oneOf != null, 'oneOf is required');
-
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     return WrapFieldWithLabel(
       property: widget.property,
@@ -87,7 +46,7 @@ class _SelectedFormFieldState
         onTap: _onTap,
         child: AbsorbPointer(
           absorbing: widget.customPickerHandler != null,
-          child: DropdownButtonFormField<OneOfModel>(
+          child: DropdownButtonFormField<SchemaProperty>(
             key: Key(widget.property.idKey),
             value: valueSelected,
             autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -103,7 +62,7 @@ class _SelectedFormFieldState
             },
             items: _buildItems(),
             onChanged: _onChanged,
-            onSaved: widget.onSaved,
+            onSaved: (v) => widget.onSaved(v?.constValue),
             decoration: uiConfig.inputDecoration(widget.property),
           ),
         ),
@@ -112,33 +71,32 @@ class _SelectedFormFieldState
   }
 
   void _onTap() async {
-    log('ontap');
     if (widget.customPickerHandler == null) return;
     final response = await widget.customPickerHandler!(_getItems());
 
-    if (response != null) _onChanged(response as OneOfModel);
+    if (response != null) _onChanged(response as SchemaProperty);
   }
 
-  void _onChanged(OneOfModel? value) {
+  void _onChanged(SchemaProperty? value) {
     if (readOnly) return;
 
     setState(() {
       valueSelected = value;
     });
     if (widget.onChanged != null) {
-      widget.onChanged!(value?.oneOfModelEnum?.first);
+      widget.onChanged!(value?.constValue);
     }
   }
 
-  List<DropdownMenuItem<OneOfModel>>? _buildItems() {
-    if (listOfModel.isEmpty) return [];
+  List<DropdownMenuItem<SchemaProperty>>? _buildItems() {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
-    return listOfModel
+    return property.oneOf
+        .cast<SchemaProperty>()
         .map(
-          (item) => DropdownMenuItem<OneOfModel>(
+          (item) => DropdownMenuItem<SchemaProperty>(
             value: item,
             child: Text(
-              item.title ?? '',
+              item.title,
               style: readOnly ? uiConfig.labelReadOnly : uiConfig.label,
             ),
           ),
@@ -147,10 +105,8 @@ class _SelectedFormFieldState
   }
 
   Map _getItems() {
-    if (listOfModel.isEmpty) return {};
-
     final Map data = {};
-    for (final element in listOfModel) {
+    for (final element in property.oneOf) {
       data[element] = element.title;
     }
 

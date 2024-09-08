@@ -12,7 +12,6 @@ import 'package:json_form/src/fields/radio_button_form_field.dart';
 import 'package:json_form/src/fields/dropdown_oneof_form_field.dart';
 import 'package:json_form/src/fields/slider_form_field.dart';
 import 'package:json_form/src/models/models.dart';
-import 'package:json_form/src/models/one_of_model.dart';
 import 'package:json_form/src/utils/date_text_input_json_formatter.dart';
 import 'package:intl/intl.dart';
 
@@ -86,7 +85,7 @@ class PropertySchemaBuilder extends StatelessWidget {
         },
         customValidator: customValidator,
       );
-    } else if (schemaProperty.oneOf != null) {
+    } else if (schemaProperty.oneOf.isNotEmpty) {
       _field = DropdownOneOfJFormField(
         property: schemaPropertySorted,
         customPickerHandler: _getCustomPickerHandler(
@@ -94,10 +93,8 @@ class PropertySchemaBuilder extends StatelessWidget {
           schemaProperty.id,
         ),
         onSaved: (val) {
-          if (val is OneOfModel) {
-            log('onSaved: SelectedFormField  ${schemaProperty.idKey}  : ${val.oneOfModelEnum?.first}');
-            updateData(context, val.oneOfModelEnum?.first);
-          }
+          log('onSaved: SelectedFormField  ${schemaProperty.idKey}  : $val');
+          updateData(context, val);
         },
         onChanged: (value) {
           dispatchSelectedForDropDownEventToParent(
@@ -105,10 +102,7 @@ class PropertySchemaBuilder extends StatelessWidget {
             value,
             id: schemaProperty.id,
           );
-
-          if (value is OneOfModel) {
-            updateData(context, value.oneOfModelEnum?.first);
-          }
+          updateData(context, value);
         },
         customValidator: customValidator,
       );

@@ -142,8 +142,18 @@ class JsonFormController extends ChangeNotifier {
         }
         schema = schema.items[_keyNumeric];
       } else {
-        schema =
-            (schema as SchemaObject).properties.firstWhere((p) => p.id == _key);
+        final s = schema as SchemaObject;
+        schema = s.properties.firstWhere(
+          (p) => p.id == _key,
+          orElse: () => s.dependentSchemas.values.firstWhere(
+            (p) => p.id == _key,
+            orElse: () => s.dependentSchemas.values
+                .expand(
+                  (p) => p is SchemaObject ? p.properties : const <Schema>[],
+                )
+                .firstWhere((p) => p.id == _key),
+          ),
+        );
       }
 
       if (i == stack.length - 1) {

@@ -40,21 +40,20 @@ class ObjectSchemaInherited extends InheritedWidget {
     bool active,
     SchemaProperty schemaProperty, {
     dynamic optionalValue,
-    Schema? mainSchema,
-    String? idOptional,
   }) async {
     try {
       // Eliminamos los nuevos inputs agregados
       await _removeCreatedItemsSafeMode(schemaProperty);
       // Obtenemos el index del actual property para añadir a abajo de él
       final indexProperty = schemaObject.properties.indexOf(schemaProperty);
-      final dependents = schemaProperty.dependents;
-      if (dependents is List) {
+      final dependents = schemaProperty.dependents!;
+      if (dependents.isLeft) {
+        final dependentsList = dependents.left!;
         dev.log('case 1');
 
         // Cuando es una Lista de String y todos ellos ahoran serán requeridos
         for (var element in schemaObject.properties) {
-          if (dependents.contains(element.id)) {
+          if (dependentsList.contains(element.id)) {
             if (element is SchemaProperty) {
               dev.log('Este element ${element.id} es ahora $active');
               element.requiredProperty = active;
@@ -63,75 +62,61 @@ class ObjectSchemaInherited extends InheritedWidget {
         }
 
         schemaProperty.isDependentsActive = active;
-        listen(ObjectSchemaDependencyEvent(schemaObject: schemaObject));
-      } else if (dependents is Map && dependents.containsKey("oneOf")) {
+      } else if (dependents.right!.oneOf.isNotEmpty) {
         dev.log('case OneOf');
 
-        final oneOfs = dependents['oneOf'];
+        final oneOfs = dependents.right!.oneOf;
+        for (final oneOf in oneOfs) {
+          final properties =
+              oneOf is SchemaObject ? oneOf.properties : <Schema>[];
+          final propIndex =
+              properties.indexWhere((p) => p.id == schemaProperty.id);
+          if (propIndex == -1) continue;
+          final prop = properties[propIndex];
+          // Verificamos que tenga la estructura enum correcta
+          if (prop is! SchemaProperty || prop.enumm == null) continue;
 
-        if (oneOfs is List) {
-          for (Map<String, dynamic> oneOf in oneOfs.cast()) {
-            final properties = oneOf['properties'] as Map?;
-            // Verificamos si es el que requerimos
-            if (properties == null ||
-                !properties.containsKey(schemaProperty.id)) continue;
+          // Guardamos los valores que se van a condicionar para que salgan los nuevos inputs
+          final valuesForCondition = prop.enumm!;
 
-            final prop = properties[schemaProperty.id];
-            // Verificamos que tenga la estructura enum correcta
-            if (prop is! Map || !prop.containsKey('enum')) continue;
+          // si tiene uno del valor seleccionado en el select, mostramos
+          if (valuesForCondition.contains(optionalValue)) {
+            schemaProperty.isDependentsActive = true;
 
-            // Guardamos los valores que se van a condicionar para que salgan los nuevos inputs
-            final valuesForCondition = prop['enum'] as List;
+            // Add new properties
+            // TODO: final tempSchema = oneOf.copyWith(id: oneOf.id);
 
-            // si tiene uno del valor seleccionado en el select, mostramos
-            if (valuesForCondition.contains(optionalValue)) {
-              schemaProperty.isDependentsActive = true;
+            final newProperties = properties
+                // Quitamos el key del mismo para que no se agregue al arbol de widgets
+                .where((e) => e.id != schemaProperty.id)
+                // Agregamos que fue dependiente de este, para que luego pueda ser eliminado.
+                .map((e) {
+              final newProp = e.copyWith(id: e.id, parent: schemaObject);
+              newProp.dependentsAddedBy.addAll([
+                ...schemaProperty.dependentsAddedBy,
+                schemaProperty.id,
+              ]);
+              if (newProp is SchemaProperty)
+                newProp.setDependents(schemaObject);
+              return newProp;
+            }).toList();
 
-              // Add new properties
-              final tempSchema = SchemaObject.fromJson(
-                kNoIdKey,
-                oneOf,
-                parent: schemaObject,
-              );
-
-              final newProperties = tempSchema.properties
-                  // Quitamos el key del mismo para que no se agregue al arbol de widgets
-                  .where((e) => e.id != schemaProperty.id)
-                  // Agregamos que fue dependiente de este, para que luego pueda ser eliminado.
-                  .map((e) {
-                e.dependentsAddedBy.addAll([
-                  ...schemaProperty.dependentsAddedBy,
-                  schemaProperty.id,
-                ]);
-                if (e is SchemaProperty) e.setDependents(schemaObject);
-
-                return e;
-              }).toList();
-
-              schemaObject.properties
-                  .insertAll(indexProperty + 1, newProperties);
-            }
+            schemaObject.properties.insertAll(indexProperty + 1, newProperties);
           }
         }
-
-        // dispatch Event
-        listen(ObjectSchemaDependencyEvent(schemaObject: schemaObject));
-      } else if (dependents is Schema) {
+      } else {
         // Cuando es un Schema simple
         dev.log('case 3');
-        final _schema = dependents;
-
+        final _schema = dependents.right!;
         if (active) {
-          schemaObject.properties.add(_schema);
+          schemaObject.properties.insert(indexProperty + 1, _schema);
         } else {
           schemaObject.properties
               .removeWhere((element) => element.id == _schema.idKey);
         }
-
         schemaProperty.isDependentsActive = active;
-
-        listen(ObjectSchemaDependencyEvent(schemaObject: schemaObject));
       }
+      listen(ObjectSchemaDependencyEvent(schemaObject: schemaObject));
     } catch (e) {
       dev.log(e.toString());
     }

@@ -455,6 +455,12 @@ class FormExample {
       FormExample('uiSchema', uiSchemaJsonSchema, uiSchemaUiSchema);
   static const oneOfExample = FormExample('oneOf', oneOfJsonSchema, '{}');
   static const defsExample = FormExample('defs', defsJsonSchema, '{}');
+  static const dependenciesExample =
+      FormExample('dependencies', dependenciesJsonSchema, '{}');
+  static const oneOfDependenciesExample =
+      FormExample('oneOfDependencies', oneOfDependenciesJsonSchema, '{}');
+  static const oneOfConstExample =
+      FormExample('oneOfConst', oneOfConstJsonSchema, '{}');
 
   static const allExamples = [
     primitivesExample,
@@ -464,6 +470,9 @@ class FormExample {
     uiSchemaExample,
     oneOfExample,
     defsExample,
+    dependenciesExample,
+    oneOfDependenciesExample,
+    oneOfConstExample,
   ];
 }
 
@@ -529,11 +538,10 @@ const oneOfJsonSchema = '''
         },
         {
           "enum": ["investor"],
-          "type": "string",
           "title": "Inversionista"
         },      
         {
-          "enum": ["manager_officier"],
+          "const": "manager_officier",
           "type": "string",
           "title": "Gerente / Director(a)"
         }
@@ -871,4 +879,133 @@ const defsJsonSchema = '''{
       "type": "string"
     }
   }
+}''';
+
+const dependenciesJsonSchema = '''{
+  "type": "object",
+  "properties": {
+    "user": {
+      "\$ref": "#/\$defs/user"
+    },
+    "parentId": {
+      "type": "string",
+      "title": "Parent ID",
+      "minLength": 5
+    },
+    "address": {
+      "type": "string"
+    }
+  },
+  "\$defs": {
+    "user": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "dependencies": {
+    "parentId": {
+      "type": "object",
+      "properties": {
+        "parentName": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}''';
+
+const oneOfDependenciesJsonSchema = '''{
+  "title": "One Of Dependencies",
+  "description": "Dynamically renders different fields based on the value of an enum. Uses dependencies and one of to configure de variants.",
+  "type": "object",
+  "properties": {
+    "Do you have any pets?": {
+      "type": "string",
+      "enum": ["No", "Yes: One", "Yes: More than one"],
+      "default": "No"
+    }
+  },
+  "required": ["Do you have any pets?"],
+  "dependencies": {
+    "Do you have any pets?": {
+      "oneOf": [
+        {
+          "properties": {
+            "Do you have any pets?": {
+              "enum": ["No"]
+            }
+          }
+        },
+        {
+          "properties": {
+            "Do you have any pets?": {
+              "enum": ["Yes: One"]
+            },
+            "How old is your pet?": {
+              "type": "number"
+            }
+          },
+          "required": ["How old is your pet?"]
+        },
+        {
+          "properties": {
+            "Do you have any pets?": {
+              "const": "Yes: More than one"
+            },
+            "Do you want to get rid of any?": {
+              "type": "boolean"
+            }
+          },
+          "required": ["Do you want to get rid of any?"]
+        }
+      ]
+    }
+  }
+}''';
+
+const oneOfConstJsonSchema = '''{
+  "title": "One Of Const",
+  "description": "variants",
+  "type": "object",
+  "properties": {
+    "Other Property": {
+      "type": "string"
+    }
+  },
+  "required": ["Do you have any pets?"],
+  "oneOf": [
+    {
+      "properties": {
+        "Do you have any pets?": {
+          "const": "No"
+        }
+      }
+    },
+    {
+      "properties": {
+        "Do you have any pets?": {
+          "const": "Yes: One"
+        },
+        "How old is your pet?": {
+          "type": "number"
+        }
+      },
+      "required": ["How old is your pet?"]
+    },
+    {
+      "properties": {
+        "Do you have any pets?": {
+          "const": "Yes: More than one"
+        },
+        "Do you want to get rid of any?": {
+          "type": "boolean"
+        }
+      },
+      "required": ["Do you want to get rid of any?"]
+    }
+  ]
 }''';

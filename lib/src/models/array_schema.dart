@@ -4,6 +4,7 @@ class SchemaArray extends Schema {
   SchemaArray({
     required super.id,
     required super.defs,
+    required super.oneOf,
     required dynamic itemsBaseSchema,
     String? title,
     super.description,
@@ -27,6 +28,7 @@ class SchemaArray extends Schema {
   }) {
     final schemaArray = SchemaArray(
       id: id,
+      oneOf: json['oneOf'],
       defs: ((json['\$defs'] ?? json['definitions']) as Map?)?.cast(),
       title: json['title'],
       description: json['description'],
@@ -57,6 +59,7 @@ class SchemaArray extends Schema {
       nullable: nullable,
       parent: parent ?? this.parent,
       dependentsAddedBy: dependentsAddedBy ?? this.dependentsAddedBy,
+      oneOf: oneOf,
     );
     newSchema.items.addAll(
       items.map(
@@ -96,7 +99,9 @@ class SchemaArray extends Schema {
       description: description,
       parent: parent,
       dependentsAddedBy: dependentsAddedBy,
-    )..isMultipleFile = true;
+      isMultipleFile: true,
+      oneOf: oneOf,
+    );
   }
 
   @override

@@ -30,12 +30,27 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder> {
   }
 
   @override
+  void didUpdateWidget(covariant ObjectSchemaBuilder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.schemaObject != widget.schemaObject) {
+      _schemaObject = widget.schemaObject;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final properties = widget.schemaObject.properties;
+    final properties = _schemaObject.properties;
     final directionality = Directionality.of(context);
     final widgetBuilderInherited = WidgetBuilderInherited.of(context);
     final isTableLabel =
         widgetBuilderInherited.uiConfig.labelPosition == LabelPosition.table;
+
+    final Set<Schema> dependentSchemas = {};
+    for (final property in properties) {
+      if (property is SchemaProperty && property.dependents?.right != null) {
+        dependentSchemas.add(property.dependents!.right!);
+      }
+    }
 
     return ObjectSchemaInherited(
       schemaObject: _schemaObject,
@@ -56,10 +71,17 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder> {
             if (isTableLabel)
               Table(
                 children: [
-                  ...properties
-                      .whereType<SchemaProperty>()
-                      .where((p) => !p.uiSchema.hidden)
-                      .map(
+                  ...properties.whereType<SchemaProperty>().expand(
+                    (e) {
+                      final r = e.dependents?.right;
+                      return r != null && e.isDependentsActive
+                          ? [
+                              e,
+                              if (r is SchemaObject) ...r.properties else r,
+                            ]
+                          : [e];
+                    },
+                  ).map(
                     (e) {
                       final title = Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,7 +115,11 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder> {
                 ],
               ),
             ...properties
-                .where((p) => !isTableLabel || p is! SchemaProperty)
+                .where(
+                  (p) =>
+                      !isTableLabel ||
+                      p is! SchemaProperty && !dependentSchemas.contains(p),
+                )
                 .map(
                   (e) => FormFromSchemaBuilder(
                     schemaObject: widget.schemaObject,
