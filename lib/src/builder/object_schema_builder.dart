@@ -42,8 +42,8 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder> {
     final properties = _schemaObject.properties;
     final directionality = Directionality.of(context);
     final widgetBuilderInherited = WidgetBuilderInherited.of(context);
-    final isTableLabel =
-        widgetBuilderInherited.uiConfig.labelPosition == LabelPosition.table;
+    final uiConfig = widgetBuilderInherited.uiConfig;
+    final isTableLabel = uiConfig.labelPosition == LabelPosition.table;
 
     final Set<Schema> dependentSchemas = {};
     for (final property in properties) {
@@ -83,22 +83,23 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder> {
                     },
                   ).map(
                     (e) {
-                      final title = Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 15),
-                          Text(
-                            e.titleOrId,
-                            style: widgetBuilderInherited.uiConfig.label,
-                          ),
-                          if (e.description != null)
-                            Text(
-                              e.description!,
-                              style:
-                                  widgetBuilderInherited.uiConfig.description,
-                            ),
-                        ],
-                      );
+                      final title =
+                          uiConfig.titleAndDescriptionBuilder?.call(e) ??
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 15),
+                                  Text(
+                                    e.titleOrId,
+                                    style: uiConfig.label,
+                                  ),
+                                  if (e.description != null)
+                                    Text(
+                                      e.description!,
+                                      style: uiConfig.description,
+                                    ),
+                                ],
+                              );
                       return TableRow(
                         children: [
                           if (directionality == TextDirection.ltr) title,

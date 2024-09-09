@@ -118,18 +118,17 @@ class _JsonFormState extends State<JsonForm> {
                 mainSchema: mainSchema,
                 schema: mainSchema,
               ),
-              uiConfig.submitButtonBuilder != null
-                  ? uiConfig.submitButtonBuilder!(onSubmit)
-                  : Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: ElevatedButton(
-                        key: const Key('JsonForm_submitButton'),
-                        onPressed: onSubmit,
-                        child: Text(
-                          uiConfig.localizedTexts.submit(),
-                        ),
+              uiConfig.submitButtonBuilder?.call(onSubmit) ??
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: ElevatedButton(
+                      key: const Key('JsonForm_submitButton'),
+                      onPressed: onSubmit,
+                      child: Text(
+                        uiConfig.localizedTexts.submit(),
                       ),
                     ),
+                  ),
             ],
           );
 
@@ -151,6 +150,9 @@ class _JsonFormState extends State<JsonForm> {
 
   Widget _buildHeaderTitle(BuildContext context) {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
+    final custom = uiConfig.titleAndDescriptionBuilder?.call(mainSchema);
+    if (custom != null) return custom;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[

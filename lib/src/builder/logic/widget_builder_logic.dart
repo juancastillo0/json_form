@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:json_form/src/builder/widget_builder.dart';
+import 'package:json_form/src/helpers/helpers.dart';
 import 'package:json_form/src/models/json_form_schema_style.dart';
 import 'package:json_form/src/models/models.dart';
 
@@ -52,6 +53,7 @@ class WidgetBuilderInherited extends InheritedWidget {
       inputWrapperBuilder: uiConfig?.inputWrapperBuilder,
       formBuilder: uiConfig?.formBuilder,
       formSectionBuilder: uiConfig?.formSectionBuilder,
+      titleAndDescriptionBuilder: uiConfig?.titleAndDescriptionBuilder,
       localizedTexts: uiConfig?.localizedTexts,
       labelPosition: uiConfig?.labelPosition,
 

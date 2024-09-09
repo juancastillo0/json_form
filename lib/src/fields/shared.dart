@@ -38,22 +38,12 @@ class WrapFieldWithLabel extends StatelessWidget {
 
     Widget child = this.child;
     if (uiConfig.inputWrapperBuilder != null) {
-      final wrapped = uiConfig.inputWrapperBuilder!(
-        FieldWrapperParams(
-          property: property,
-          input: child,
-        ),
-      );
+      final wrapped = uiConfig.inputWrapperBuilder!(property, child);
       if (wrapped != null) child = wrapped;
     }
 
     if (uiConfig.fieldWrapperBuilder != null) {
-      final wrapped = uiConfig.fieldWrapperBuilder!(
-        FieldWrapperParams(
-          property: property,
-          input: child,
-        ),
-      );
+      final wrapped = uiConfig.fieldWrapperBuilder!(property, child);
       if (wrapped != null) return wrapped;
     }
     // configured in the field itself
@@ -97,10 +87,9 @@ class FormSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
+    final custom = uiConfig.formSectionBuilder?.call(child);
+    if (custom != null) return custom;
 
-    if (uiConfig.formSectionBuilder != null) {
-      return uiConfig.formSectionBuilder!(child);
-    }
     return Container(
       decoration: BoxDecoration(
         border: Border(

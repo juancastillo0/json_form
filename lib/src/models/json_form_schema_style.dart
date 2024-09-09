@@ -18,6 +18,7 @@ class JsonFormSchemaUiConfig {
     this.addFileButtonBuilder,
     this.formBuilder,
     this.formSectionBuilder,
+    this.titleAndDescriptionBuilder,
     this.fieldWrapperBuilder,
     this.inputWrapperBuilder,
     LocalizedTexts? localizedTexts,
@@ -34,13 +35,14 @@ class JsonFormSchemaUiConfig {
   final TextAlign? titleAlign;
 
   /// Object and array title style.
-  /// The title for each form sections constructed with [formSectionBuilder] will use this style.
+  /// The title for each form section constructed with [formSectionBuilder] will use this style.
   final TextStyle? subtitle;
 
   /// Description style
   final TextStyle? description;
 
   /// Field label style
+  /// TODO: label vs field title
   final TextStyle? label;
 
   /// Field label style for read-only fields
@@ -58,22 +60,25 @@ class JsonFormSchemaUiConfig {
   /// The position of the field labels
   final LabelPosition labelPosition;
 
-  final Widget Function(VoidCallback onPressed, String key)? addItemBuilder;
-  final Widget Function(VoidCallback onPressed, String key)? removeItemBuilder;
-  final Widget Function(VoidCallback onPressed, String key)? copyItemBuilder;
+  final Widget? Function(VoidCallback onPressed, String key)? addItemBuilder;
+  final Widget? Function(VoidCallback onPressed, String key)? removeItemBuilder;
+  final Widget? Function(VoidCallback onPressed, String key)? copyItemBuilder;
 
   /// Render a custom submit button
-  final Widget Function(VoidCallback onSubmit)? submitButtonBuilder;
+  final Widget? Function(VoidCallback onSubmit)? submitButtonBuilder;
 
   /// Render a custom add file button.
   /// If it returns null or it is null, we will build the default button
   final Widget? Function(VoidCallback? onPressed, String key)?
       addFileButtonBuilder;
 
-  final Form Function(GlobalKey<FormState> formKey, Widget child)? formBuilder;
-  final Widget Function(Widget child)? formSectionBuilder;
-  final Widget? Function(FieldWrapperParams params)? fieldWrapperBuilder;
-  final Widget? Function(FieldWrapperParams params)? inputWrapperBuilder;
+  final Form? Function(GlobalKey<FormState> formKey, Widget child)? formBuilder;
+  final Widget? Function(Widget child)? formSectionBuilder;
+  final Widget? Function(SchemaUiInfo info)? titleAndDescriptionBuilder;
+  final Widget? Function(SchemaUiInfo property, Widget input)?
+      fieldWrapperBuilder;
+  final Widget? Function(SchemaUiInfo property, Widget input)?
+      inputWrapperBuilder;
 
   String labelText(SchemaProperty property) =>
       '${property.titleOrId}${property.requiredNotNull ? "*" : ""}';
@@ -90,14 +95,13 @@ class JsonFormSchemaUiConfig {
   }
 
   Widget removeItemWidget(Schema property, void Function() removeItem) {
-    return removeItemBuilder != null
-        ? removeItemBuilder!(removeItem, property.idKey)
-        : TextButton.icon(
-            key: Key('removeItem_${property.idKey}'),
-            onPressed: removeItem,
-            icon: const Icon(Icons.remove),
-            label: Text(localizedTexts.removeItem()),
-          );
+    return removeItemBuilder?.call(removeItem, property.idKey) ??
+        TextButton.icon(
+          key: Key('removeItem_${property.idKey}'),
+          onPressed: removeItem,
+          icon: const Icon(Icons.remove),
+          label: Text(localizedTexts.removeItem()),
+        );
   }
 
   Widget addItemWidget(SchemaArray schemaArray, void Function() addItem) {
@@ -106,17 +110,16 @@ class JsonFormSchemaUiConfig {
     if (props.maxItems != null && schemaArray.items.length >= props.maxItems!) {
       message = localizedTexts.maxItemsTooltip(props.maxItems!);
     }
-    return addItemBuilder != null
-        ? addItemBuilder!(addItem, schemaArray.idKey)
-        : Tooltip(
-            message: message ?? '',
-            child: TextButton.icon(
-              key: Key('addItem_${schemaArray.idKey}'),
-              onPressed: message == null ? addItem : null,
-              icon: const Icon(Icons.add),
-              label: Text(localizedTexts.addItem()),
-            ),
-          );
+    return addItemBuilder?.call(addItem, schemaArray.idKey) ??
+        Tooltip(
+          message: message ?? '',
+          child: TextButton.icon(
+            key: Key('addItem_${schemaArray.idKey}'),
+            onPressed: message == null ? addItem : null,
+            icon: const Icon(Icons.add),
+            label: Text(localizedTexts.addItem()),
+          ),
+        );
   }
 
   Widget copyItemWidget(Schema itemSchema, void Function() copyItem) {
@@ -148,6 +151,7 @@ class JsonFormSchemaUiConfig {
         other.addFileButtonBuilder == addFileButtonBuilder &&
         other.formBuilder == formBuilder &&
         other.formSectionBuilder == formSectionBuilder &&
+        other.titleAndDescriptionBuilder == titleAndDescriptionBuilder &&
         other.fieldWrapperBuilder == fieldWrapperBuilder &&
         other.inputWrapperBuilder == inputWrapperBuilder;
   }
@@ -170,6 +174,7 @@ class JsonFormSchemaUiConfig {
         addFileButtonBuilder,
         formBuilder,
         formSectionBuilder,
+        titleAndDescriptionBuilder,
         fieldWrapperBuilder,
         inputWrapperBuilder,
       );
@@ -188,14 +193,4 @@ enum LabelPosition {
 
   /// Label is in the Field Input Decoration
   input,
-}
-
-class FieldWrapperParams {
-  const FieldWrapperParams({
-    required this.property,
-    required this.input,
-  });
-
-  final SchemaProperty property;
-  final Widget input;
 }

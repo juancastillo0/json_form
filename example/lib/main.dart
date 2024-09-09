@@ -95,9 +95,9 @@ class _MyHomePageState extends State<MyHomePage> {
   JsonFormSchemaUiConfig customUiConfig() {
     return JsonFormSchemaUiConfig(
       labelPosition: labelPosition,
-      inputWrapperBuilder: (params) => Padding(
+      inputWrapperBuilder: (property, input) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 5),
-        child: params.input,
+        child: input,
       ),
       title: const TextStyle(
         color: Colors.black,

@@ -7,18 +7,19 @@ class GeneralSubtitle extends StatelessWidget {
     super.key,
     required this.field,
     this.mainSchema,
-    this.omitDivider = false,
     this.trailing,
   });
 
   final Schema field;
   final Schema? mainSchema;
-  final bool omitDivider;
   final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
+    final custom = uiConfig.titleAndDescriptionBuilder?.call(field);
+    if (custom != null) return custom;
+
     final f = field;
     String? description = field.description != null &&
             field.description != mainSchema?.description
@@ -50,7 +51,7 @@ class GeneralSubtitle extends StatelessWidget {
               if (trailing != null) trailing!,
             ],
           ),
-          if (!omitDivider) const Divider(),
+          const Divider(),
         ],
         if (description != null)
           Padding(

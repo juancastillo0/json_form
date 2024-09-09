@@ -250,8 +250,6 @@ class PropertySchemaBuilder extends StatelessWidget {
     );
   }
 
-  // @temp Functions
-  /// Cuando se valida si es string o no
   void dispatchStringEventToParent(BuildContext context, String value) {
     if (value.isEmpty && schemaProperty.isDependentsActive) {
       ObjectSchemaInherited.of(context)
@@ -279,12 +277,11 @@ class PropertySchemaBuilder extends StatelessWidget {
     );
   }
 
-  /// Cuando se valida si es true o false
-  void dispatchBooleanEventToParent(BuildContext context, bool value) {
-    log('dispatchBooleanEventToParent()  $value');
-    if (value != schemaProperty.isDependentsActive) {
+  void dispatchBooleanEventToParent(BuildContext context, bool isActive) {
+    log('dispatchBooleanEventToParent()  $isActive');
+    if (isActive != schemaProperty.isDependentsActive) {
       ObjectSchemaInherited.of(context)
-          .listenChangeProperty(value, schemaProperty);
+          .listenChangeProperty(isActive, schemaProperty);
     }
   }
 

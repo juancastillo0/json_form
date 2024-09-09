@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:json_form/src/utils/either.dart';
 
 import '../models/models.dart';
-// Esto transforma el JSON a Modelos
 
 enum SchemaType {
   string,
@@ -10,8 +9,7 @@ enum SchemaType {
   boolean,
   integer,
   object,
-  array,
-  enumm;
+  array;
 
   factory SchemaType.fromJson(Object? json_) {
     String json;
@@ -54,7 +52,7 @@ enum SchemaType {
   static bool _notNull(Object? v) => v != 'null' && v != null;
 }
 
-abstract class Schema {
+abstract class Schema implements SchemaUiInfo {
   Schema({
     required this.id,
     required this.type,
@@ -123,8 +121,11 @@ abstract class Schema {
   final String id;
   final String? _title;
   final String? _description;
+  @override
   String? get title => uiSchema.title ?? _title;
+  @override
   String? get description => uiSchema.description ?? _description;
+  @override
   final SchemaType type;
   final Map<String, Map<String, Object?>>? defs;
   final List<Schema> oneOf;
@@ -147,16 +148,15 @@ abstract class Schema {
 
   final UiSchemaData uiSchema = UiSchemaData();
 
-  /// it lets us know the key in the formData Map {key}
+  @override
   String get idKey {
     if (parentIdKey != null && parentIdKey != kGenesisIdKey) {
       return _appendId(parentIdKey!, id);
     }
-
     return id;
   }
 
-  String _appendId(String path, String id) {
+  static String _appendId(String path, String id) {
     return id != kNoIdKey ? (path.isNotEmpty ? '$path.' : '') + id : path;
   }
 
@@ -226,4 +226,18 @@ Either<Schema, Map<String, Object?>> _resolveRef(String ref, Schema? parent) {
     throw ArgumentError('Reference "$ref" not found in definitions');
   }
   return Either.right(j);
+}
+
+abstract class SchemaUiInfo {
+  /// It lets us know the key in the form's data Map
+  String? get idKey;
+
+  /// User facing title
+  String? get title;
+
+  /// User facing description
+  String? get description;
+
+  /// The kind of the JSON Schema
+  SchemaType get type;
 }
