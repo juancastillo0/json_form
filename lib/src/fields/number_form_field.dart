@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
-import 'package:json_form/src/models/property_schema.dart';
 import 'package:json_form/src/models/schema.dart';
 
 class NumberJFormField extends PropertyFieldWidget<num?> {
@@ -27,8 +26,6 @@ class _NumberJFormFieldState
         ? int.tryParse(value)
         : double.tryParse(value);
   }
-
-  SchemaProperty get property => widget.property;
 
   @override
   Widget build(BuildContext context) {

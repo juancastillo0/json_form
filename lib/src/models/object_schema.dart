@@ -53,9 +53,9 @@ class SchemaObject extends Schema {
       dependentRequired[key] = (value as List).cast();
     });
 
-    if (json['properties'] != null) {
-      schema._setProperties(json['properties']);
-    }
+    final properties = json['properties'] as Map<String, dynamic>? ?? {};
+    schema._setConstPropertiesDependencies(properties);
+    schema._setProperties(properties);
 
     return schema;
   }
@@ -126,6 +126,59 @@ class SchemaObject extends Schema {
         return order.indexOf(a.id) - order.indexOf(b.id);
       });
     }
+  }
+
+  void _setConstPropertiesDependencies(Map<String, dynamic> properties) {
+    /// this is from dependentSchemas
+    if (id.isEmpty && parent is SchemaObject) return;
+
+    final constProperties = <String, List<SchemaProperty>>{};
+    for (final o in oneOf) {
+      if (o is SchemaObject) {
+        for (final p in o.properties) {
+          if (!dependentSchemas.containsKey(p.id) &&
+              p is SchemaProperty &&
+              p.constValue != null) {
+            constProperties[p.id] = (constProperties[p.id] ?? [])..add(p);
+          }
+        }
+      }
+    }
+    constProperties.forEach((key, value) {
+      if (value.length != oneOf.length) return;
+      final prop = properties[key];
+      final propEnum = prop is Map ? prop['enum'] : null;
+      final enumm = value.map((v) => v.constValue).toList();
+      if (prop == null) {
+        final enumNames = value
+            .map(
+              (v) => v.uiSchema.enumNames != null &&
+                      v.uiSchema.enumNames!.isNotEmpty
+                  ? v.uiSchema.enumNames!.first
+                  : v.title,
+            )
+            .toList();
+        properties[key] = <String, dynamic>{
+          'enum': enumm,
+          if (enumNames.every((n) => n != null && n.isNotEmpty))
+            'ui:enumNames': enumNames,
+        };
+      } else if (propEnum is! List ||
+          propEnum.length != enumm.length ||
+          !propEnum.every(enumm.contains)) {
+        return;
+      }
+      dependentSchemas[key] = SchemaObject(
+        id: key,
+        defs: {},
+        oneOf: oneOf,
+        required: [],
+        dependentSchemas: {},
+        dependentRequired: {},
+        nullable: false,
+        parent: this,
+      );
+    });
   }
 
   void _setProperties(Map<String, dynamic> properties) {
