@@ -19,6 +19,14 @@ class CheckboxJFormField extends PropertyFieldWidget<bool> {
 
 class _CheckboxJFormFieldState
     extends PropertyFieldState<bool, CheckboxJFormField> {
+  late FormFieldState<bool> field;
+  @override
+  bool get value => field.value!;
+  @override
+  set value(bool newValue) {
+    field.didChange(newValue);
+  }
+
   @override
   Widget build(BuildContext context) {
     final widgetBuilderInherited = WidgetBuilderInherited.of(context);
@@ -31,6 +39,7 @@ class _CheckboxJFormFieldState
       validator: widget.customValidator,
       enabled: enabled,
       builder: (field) {
+        this.field = field;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -38,6 +47,7 @@ class _CheckboxJFormFieldState
               isError: field.hasError,
               value: field.value ?? false,
               enabled: enabled,
+              focusNode: focusNode,
               controlAffinity: uiConfig.labelPosition == LabelPosition.table
                   ? ListTileControlAffinity.leading
                   : ListTileControlAffinity.platform,

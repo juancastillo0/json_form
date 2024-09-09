@@ -21,6 +21,14 @@ class SliderJFormField extends PropertyFieldWidget<num> {
 }
 
 class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
+  late FormFieldState<num> field;
+  @override
+  num get value => field.value!;
+  @override
+  set value(num newValue) {
+    field.didChange(newValue);
+  }
+
   late List<num> values;
 
   @override
@@ -36,7 +44,7 @@ class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
 
     return FormField<num>(
       autovalidateMode: uiConfig.autovalidateMode,
-      initialValue: super.getDefaultValue(),
+      initialValue: super.getDefaultValue() ?? values.first.toDouble(),
       onSaved: (newValue) {
         widget.onSaved(newValue);
       },
@@ -48,7 +56,8 @@ class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
       },
       enabled: enabled,
       builder: (field) {
-        final value = field.value?.toDouble() ?? values.first.toDouble();
+        this.field = field;
+        final value = field.value!.toDouble();
         return WrapFieldWithLabel(
           property: property,
           ignoreFieldLabel: uiConfig.labelPosition != LabelPosition.table,
@@ -66,6 +75,7 @@ class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
                   Expanded(
                     child: Slider(
                       key: Key(property.idKey),
+                      focusNode: focusNode,
                       label: value.toString(),
                       value: value,
                       min: values.first.toDouble(),

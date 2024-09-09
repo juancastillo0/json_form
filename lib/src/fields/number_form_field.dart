@@ -20,6 +20,15 @@ class NumberJFormField extends PropertyFieldWidget<num?> {
 
 class _NumberJFormFieldState
     extends PropertyFieldState<num?, NumberJFormField> {
+  late final textController =
+      TextEditingController(text: super.getDefaultValue()?.toString() ?? '');
+  @override
+  num? get value => parseValue(textController.text);
+  @override
+  set value(num? newValue) {
+    textController.text = newValue?.toString() ?? '';
+  }
+
   num? parseValue(String? value) {
     if (value == null || value.isEmpty) return null;
     return widget.property.type == SchemaType.integer
@@ -39,6 +48,7 @@ class _NumberJFormFieldState
       property: property,
       child: TextFormField(
         key: Key(property.idKey),
+        focusNode: focusNode,
         keyboardType: TextInputType.numberWithOptions(
           decimal: decimal,
           signed: signed,
@@ -48,7 +58,7 @@ class _NumberJFormFieldState
             RegExp('${signed ? '-?' : ''}[0-9${decimal ? '.,' : ''}]*'),
           ),
         ],
-        initialValue: super.getDefaultValue()?.toString() ?? '',
+        controller: textController,
         autofocus: property.uiSchema.autoFocus,
         enableSuggestions: property.uiSchema.autoComplete,
         onSaved: (value) {

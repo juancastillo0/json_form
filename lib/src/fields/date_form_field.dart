@@ -27,6 +27,13 @@ class _DateJFormFieldState
   final txtDateCtrl = MaskedTextController(mask: '0000-00-00');
   DateFormat formatter = DateFormat(dateFormatString);
 
+  @override
+  DateTime get value => parseDate();
+  @override
+  set value(DateTime newValue) {
+    txtDateCtrl.updateText(formatter.format(newValue));
+  }
+
   bool get isDateTime => widget.property.format == PropertyFormat.dateTime;
 
   @override
@@ -60,6 +67,7 @@ class _DateJFormFieldState
       child: TextFormField(
         key: Key(widget.property.idKey),
         controller: txtDateCtrl,
+        focusNode: focusNode,
         keyboardType: TextInputType.phone,
         autofocus: widget.property.uiSchema.autoFocus,
         enableSuggestions: widget.property.uiSchema.autoComplete,

@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:json_form/src/utils/either.dart';
 
 import '../models/models.dart';
@@ -240,4 +240,11 @@ abstract class SchemaUiInfo {
 
   /// The kind of the JSON Schema
   SchemaType get type;
+}
+
+abstract class JsonFormField<T> {
+  SchemaUiInfo get property;
+  T get value;
+  set value(T value);
+  FocusNode get focusNode;
 }

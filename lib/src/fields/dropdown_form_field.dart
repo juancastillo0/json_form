@@ -21,7 +21,15 @@ class DropDownJFormField extends PropertyFieldWidget<dynamic> {
 
 class _DropDownJFormFieldState
     extends PropertyFieldState<dynamic, DropDownJFormField> {
-  dynamic value;
+  Object? _value;
+  @override
+  Object? get value => _value;
+  @override
+  set value(Object? newValue) {
+    setState(() {
+      _value = newValue;
+    });
+  }
 
   late List<dynamic> values;
   late List<String> names;
@@ -35,7 +43,7 @@ class _DropDownJFormFieldState
         : (widget.property.enumm ?? enumNames ?? []);
     names = enumNames ?? values.map((v) => v.toString()).toList();
 
-    value = super.getDefaultValue();
+    _value = super.getDefaultValue();
   }
 
   @override
@@ -53,6 +61,7 @@ class _DropDownJFormFieldState
           absorbing: widget.customPickerHandler != null,
           child: DropdownButtonFormField<dynamic>(
             key: Key(widget.property.idKey),
+            focusNode: focusNode,
             autovalidateMode: uiConfig.autovalidateMode,
             hint: Text(uiConfig.localizedTexts.select()),
             isExpanded: false,

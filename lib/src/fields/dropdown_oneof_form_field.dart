@@ -3,7 +3,6 @@ import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
 import 'package:json_form/src/models/property_schema.dart';
-import 'package:json_form/src/models/schema.dart';
 
 class DropdownOneOfJFormField extends PropertyFieldWidget<dynamic> {
   const DropdownOneOfJFormField({
@@ -24,6 +23,14 @@ class DropdownOneOfJFormField extends PropertyFieldWidget<dynamic> {
 class _SelectedFormFieldState
     extends PropertyFieldState<dynamic, DropdownOneOfJFormField> {
   SchemaProperty? valueSelected;
+  @override
+  Object? get value => valueSelected?.constValue;
+  @override
+  set value(Object? newValue) {
+    setState(() {
+      valueSelected = parseValue(newValue);
+    });
+  }
 
   @override
   void initState() {
@@ -31,10 +38,14 @@ class _SelectedFormFieldState
     // fill selected value
     final defaultValue = super.getDefaultValue();
     if (defaultValue != null) {
-      valueSelected = property.oneOf.cast<SchemaProperty>().firstWhere(
-            (e) => e.constValue == defaultValue,
-          );
+      valueSelected = parseValue(defaultValue);
     }
+  }
+
+  SchemaProperty parseValue(Object? value) {
+    return property.oneOf.cast<SchemaProperty>().firstWhere(
+          (e) => e.constValue == value,
+        );
   }
 
   @override
@@ -48,6 +59,7 @@ class _SelectedFormFieldState
           absorbing: widget.customPickerHandler != null,
           child: DropdownButtonFormField<SchemaProperty>(
             key: Key(widget.property.idKey),
+            focusNode: focusNode,
             value: valueSelected,
             autovalidateMode: uiConfig.autovalidateMode,
             hint: Text(uiConfig.localizedTexts.select()),

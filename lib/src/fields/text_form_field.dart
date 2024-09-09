@@ -21,7 +21,14 @@ class TextJFormField extends PropertyFieldWidget<String> {
 }
 
 class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
-  SchemaProperty get property => widget.property;
+  late final textController =
+      TextEditingController(text: super.getDefaultValue()?.toString() ?? '');
+  @override
+  String get value => textController.text;
+  @override
+  set value(String newValue) {
+    textController.text = newValue;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +38,7 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
       property: property,
       child: TextFormField(
         key: Key(property.idKey),
+        focusNode: focusNode,
         autofocus: uiSchema.autoFocus,
         enableSuggestions: uiSchema.autoComplete,
         keyboardType: getTextInputTypeFromFormat(
@@ -40,7 +48,7 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
         enabled: enabled,
         maxLines: uiSchema.widget == "textarea" ? null : 1,
         obscureText: uiSchema.widget == "password",
-        initialValue: super.getDefaultValue() ?? '',
+        controller: textController,
         onSaved: (v) => widget.onSaved(
           v == null || v.isEmpty ? property.uiSchema.emptyValue : v,
         ),

@@ -3,14 +3,18 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/models/property_schema.dart';
+import 'package:json_form/src/models/schema.dart';
 import 'package:json_form/src/utils/date_text_input_json_formatter.dart';
 import 'package:intl/intl.dart';
 
 export 'checkbox_form_field.dart';
 export 'date_form_field.dart';
 export 'dropdown_form_field.dart';
+export 'dropdown_oneof_form_field.dart';
 export 'file_form_field.dart';
 export 'number_form_field.dart';
+export 'radio_button_form_field.dart';
+export 'slider_form_field.dart';
 export 'text_form_field.dart';
 
 abstract class PropertyFieldWidget<T> extends StatefulWidget {
@@ -32,10 +36,18 @@ abstract class PropertyFieldWidget<T> extends StatefulWidget {
 }
 
 abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
-    extends State<W> {
+    extends State<W> implements JsonFormField<T> {
+  @override
+  final focusNode = FocusNode();
+  @override
   SchemaProperty get property => widget.property;
   bool get readOnly => property.uiSchema.readOnly;
   bool get enabled => !property.uiSchema.disabled && !readOnly;
+
+  @override
+  T get value;
+  @override
+  set value(T newValue);
 
   @override
   void initState() {

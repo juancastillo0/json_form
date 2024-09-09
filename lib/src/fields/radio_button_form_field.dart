@@ -5,7 +5,6 @@ import 'package:json_form/json_form.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
-import '../models/models.dart';
 
 class RadioButtonJFormField extends PropertyFieldWidget<dynamic> {
   const RadioButtonJFormField({
@@ -22,6 +21,14 @@ class RadioButtonJFormField extends PropertyFieldWidget<dynamic> {
 
 class _RadioButtonJFormFieldState
     extends PropertyFieldState<dynamic, RadioButtonJFormField> {
+  late FormFieldState<Object?> field;
+  @override
+  Object? get value => field.value;
+  @override
+  set value(Object? newValue) {
+    field.didChange(newValue);
+  }
+
   late List<dynamic> values;
   late List<String> names;
 
@@ -69,6 +76,7 @@ class _RadioButtonJFormFieldState
       },
       enabled: enabled,
       builder: (field) {
+        this.field = field;
         return WrapFieldWithLabel(
           property: property,
           ignoreFieldLabel: uiConfig.labelPosition != LabelPosition.table,

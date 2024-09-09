@@ -23,6 +23,14 @@ class FileJFormField extends PropertyFieldWidget<dynamic> {
 }
 
 class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
+  late FormFieldState<Object?> field;
+  @override
+  Object? get value => field.value;
+  @override
+  set value(Object? newValue) {
+    field.didChange(newValue);
+  }
+
   @override
   Widget build(BuildContext context) {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
@@ -49,6 +57,7 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
         }
       },
       builder: (field) {
+        this.field = field;
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
