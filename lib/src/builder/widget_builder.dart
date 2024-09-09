@@ -137,6 +137,7 @@ class _JsonFormState extends State<JsonForm> {
             child: uiConfig.formBuilder?.call(_formKey, formChild) ??
                 Form(
                   key: _formKey,
+                  autovalidateMode: uiConfig.autovalidateMode,
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: formChild,

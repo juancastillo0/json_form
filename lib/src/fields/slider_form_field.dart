@@ -35,7 +35,7 @@ class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
     inspect(property);
 
     return FormField<num>(
-      autovalidateMode: AutovalidateMode.onUserInteraction,
+      autovalidateMode: uiConfig.autovalidateMode,
       initialValue: super.getDefaultValue(),
       onSaved: (newValue) {
         widget.onSaved(newValue);
@@ -57,7 +57,12 @@ class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
             children: [
               Row(
                 children: [
-                  Text(value.toString()),
+                  Text(
+                    value.toString(),
+                    style: readOnly
+                        ? uiConfig.fieldInputReadOnly
+                        : uiConfig.fieldInput,
+                  ),
                   Expanded(
                     child: Slider(
                       key: Key(property.idKey),
@@ -66,13 +71,16 @@ class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
                       min: values.first.toDouble(),
                       max: values.last.toDouble(),
                       divisions: values.length - 1,
-                      onChanged: (double value) {
-                        final v = property.type == SchemaType.integer
-                            ? value.round()
-                            : value;
-                        field.didChange(v);
-                        widget.onChanged!(v);
-                      },
+                      autofocus: property.uiSchema.autoFocus,
+                      onChanged: enabled
+                          ? (double value) {
+                              final v = property.type == SchemaType.integer
+                                  ? value.round()
+                                  : value;
+                              field.didChange(v);
+                              widget.onChanged!(v);
+                            }
+                          : null,
                     ),
                   ),
                 ],

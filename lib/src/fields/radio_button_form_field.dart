@@ -56,7 +56,7 @@ class _RadioButtonJFormFieldState
 
     return FormField<dynamic>(
       key: Key(property.idKey),
-      autovalidateMode: AutovalidateMode.onUserInteraction,
+      autovalidateMode: uiConfig.autovalidateMode,
       initialValue: super.getDefaultValue(),
       onSaved: (newValue) {
         widget.onSaved(newValue);
@@ -85,8 +85,8 @@ class _RadioButtonJFormFieldState
                     title: Text(
                       names[i],
                       style: readOnly
-                          ? uiConfig.labelReadOnly
-                          : uiConfig.label,
+                          ? uiConfig.fieldInputReadOnly
+                          : uiConfig.fieldInput,
                     ),
                     groupValue: field.value,
                     onChanged: enabled

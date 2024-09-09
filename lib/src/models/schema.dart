@@ -230,7 +230,7 @@ Either<Schema, Map<String, Object?>> _resolveRef(String ref, Schema? parent) {
 
 abstract class SchemaUiInfo {
   /// It lets us know the key in the form's data Map
-  String? get idKey;
+  String get idKey;
 
   /// User facing title
   String? get title;

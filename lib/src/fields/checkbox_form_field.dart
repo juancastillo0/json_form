@@ -26,7 +26,7 @@ class _CheckboxJFormFieldState
     return FormField<bool>(
       key: Key(widget.property.idKey),
       initialValue: super.getDefaultValue() ?? false,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
+      autovalidateMode: uiConfig.autovalidateMode,
       onSaved: widget.onSaved,
       validator: widget.customValidator,
       enabled: enabled,
@@ -45,7 +45,9 @@ class _CheckboxJFormFieldState
                   ? null
                   : Text(
                       uiConfig.labelText(widget.property),
-                      style: readOnly ? uiConfig.labelReadOnly : uiConfig.label,
+                      style: readOnly
+                          ? uiConfig.fieldInputReadOnly
+                          : uiConfig.fieldInput,
                     ),
               onChanged: enabled
                   ? (bool? value) {

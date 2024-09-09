@@ -39,7 +39,8 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder> {
 
   @override
   Widget build(BuildContext context) {
-    final properties = _schemaObject.properties;
+    final properties =
+        _schemaObject.properties.where((p) => !p.uiSchema.hidden);
     final directionality = Directionality.of(context);
     final widgetBuilderInherited = WidgetBuilderInherited.of(context);
     final uiConfig = widgetBuilderInherited.uiConfig;
@@ -91,7 +92,7 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder> {
                                   const SizedBox(height: 15),
                                   Text(
                                     e.titleOrId,
-                                    style: uiConfig.label,
+                                    style: uiConfig.fieldLabel,
                                   ),
                                   if (e.description != null)
                                     Text(

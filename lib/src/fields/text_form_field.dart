@@ -46,7 +46,7 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
         ),
         maxLength: property.maxLength,
         inputFormatters: [textInputCustomFormatter(property.format)],
-        autovalidateMode: AutovalidateMode.onUserInteraction,
+        autovalidateMode: uiConfig.autovalidateMode,
         readOnly: readOnly,
         onChanged: widget.onChanged,
         validator: (String? value) {
@@ -66,7 +66,7 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
           }
           return null;
         },
-        style: readOnly ? uiConfig.labelReadOnly : uiConfig.label,
+        style: readOnly ? uiConfig.fieldInputReadOnly : uiConfig.fieldInput,
         decoration: uiConfig.inputDecoration(property),
       ),
     );

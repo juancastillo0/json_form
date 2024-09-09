@@ -59,7 +59,7 @@ class _NumberJFormFieldState
           if (v == null) return;
           widget.onSaved(v);
         },
-        autovalidateMode: AutovalidateMode.onUserInteraction,
+        autovalidateMode: uiConfig.autovalidateMode,
         readOnly: readOnly,
         onChanged: (value) {
           final v = parseValue(value);
@@ -67,7 +67,7 @@ class _NumberJFormFieldState
           if (widget.onChanged != null) widget.onChanged!(v);
         },
         enabled: enabled,
-        style: readOnly ? uiConfig.labelReadOnly : uiConfig.label,
+        style: readOnly ? uiConfig.fieldInputReadOnly : uiConfig.fieldInput,
         validator: (String? value) {
           if (property.requiredNotNull &&
               property.uiSchema.emptyValue == null &&

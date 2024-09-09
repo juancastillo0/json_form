@@ -8,9 +8,11 @@ class JsonFormSchemaUiConfig {
     this.titleAlign,
     this.subtitle,
     this.description,
-    this.label,
-    this.labelReadOnly,
+    this.fieldLabel,
+    this.fieldInput,
+    this.fieldInputReadOnly,
     this.error,
+    AutovalidateMode? autovalidateMode,
     this.addItemBuilder,
     this.removeItemBuilder,
     this.copyItemBuilder,
@@ -26,7 +28,8 @@ class JsonFormSchemaUiConfig {
     LabelPosition? labelPosition,
   })  : localizedTexts = localizedTexts ?? const LocalizedTexts(),
         debugMode = debugMode ?? false,
-        labelPosition = labelPosition ?? LabelPosition.table;
+        labelPosition = labelPosition ?? LabelPosition.table,
+        autovalidateMode = autovalidateMode ?? AutovalidateMode.onUnfocus;
 
   /// Form title style
   final TextStyle? title;
@@ -42,11 +45,13 @@ class JsonFormSchemaUiConfig {
   final TextStyle? description;
 
   /// Field label style
-  /// TODO: label vs field title
-  final TextStyle? label;
+  final TextStyle? fieldLabel;
 
-  /// Field label style for read-only fields
-  final TextStyle? labelReadOnly;
+  /// Field input value style
+  final TextStyle? fieldInput;
+
+  /// Field input value style for read-only fields
+  final TextStyle? fieldInputReadOnly;
 
   /// Validation errors text style
   final TextStyle? error;
@@ -59,6 +64,8 @@ class JsonFormSchemaUiConfig {
 
   /// The position of the field labels
   final LabelPosition labelPosition;
+
+  final AutovalidateMode autovalidateMode;
 
   final Widget? Function(VoidCallback onPressed, String key)? addItemBuilder;
   final Widget? Function(VoidCallback onPressed, String key)? removeItemBuilder;
@@ -86,6 +93,7 @@ class JsonFormSchemaUiConfig {
   InputDecoration inputDecoration(SchemaProperty property) {
     return InputDecoration(
       errorStyle: error,
+      labelStyle: fieldLabel,
       labelText:
           labelPosition == LabelPosition.input ? labelText(property) : null,
       hintText: property.uiSchema.placeholder,
@@ -132,6 +140,46 @@ class JsonFormSchemaUiConfig {
         );
   }
 
+  factory JsonFormSchemaUiConfig.fromContext(
+    BuildContext context, {
+    JsonFormSchemaUiConfig? baseConfig,
+  }) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return JsonFormSchemaUiConfig(
+      title: baseConfig?.title ?? textTheme.titleLarge,
+      titleAlign: baseConfig?.titleAlign ?? TextAlign.center,
+      subtitle: baseConfig?.subtitle ??
+          textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold),
+      description: baseConfig?.description ?? textTheme.bodyMedium,
+      error: baseConfig?.error ??
+          TextStyle(
+            color: Theme.of(context).colorScheme.error,
+            fontSize: textTheme.bodySmall!.fontSize,
+          ),
+      fieldLabel: baseConfig?.fieldLabel,
+      fieldInput: baseConfig?.fieldInput,
+      fieldInputReadOnly:
+          baseConfig?.fieldInputReadOnly ?? const TextStyle(color: Colors.grey),
+      debugMode: baseConfig?.debugMode,
+      localizedTexts: baseConfig?.localizedTexts,
+      labelPosition: baseConfig?.labelPosition,
+      autovalidateMode: baseConfig?.autovalidateMode,
+
+      /// builders
+      addItemBuilder: baseConfig?.addItemBuilder,
+      removeItemBuilder: baseConfig?.removeItemBuilder,
+      copyItemBuilder: baseConfig?.copyItemBuilder,
+      submitButtonBuilder: baseConfig?.submitButtonBuilder,
+      addFileButtonBuilder: baseConfig?.addFileButtonBuilder,
+      fieldWrapperBuilder: baseConfig?.fieldWrapperBuilder,
+      inputWrapperBuilder: baseConfig?.inputWrapperBuilder,
+      formBuilder: baseConfig?.formBuilder,
+      formSectionBuilder: baseConfig?.formSectionBuilder,
+      titleAndDescriptionBuilder: baseConfig?.titleAndDescriptionBuilder,
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     return other is JsonFormSchemaUiConfig &&
@@ -140,10 +188,13 @@ class JsonFormSchemaUiConfig {
         other.titleAlign == titleAlign &&
         other.subtitle == subtitle &&
         other.description == description &&
-        other.label == label &&
+        other.fieldLabel == fieldLabel &&
+        other.fieldInput == fieldInput &&
+        other.fieldInputReadOnly == fieldInputReadOnly &&
         other.localizedTexts == localizedTexts &&
         other.debugMode == debugMode &&
         other.labelPosition == labelPosition &&
+        other.autovalidateMode == autovalidateMode &&
         other.addItemBuilder == addItemBuilder &&
         other.removeItemBuilder == removeItemBuilder &&
         other.copyItemBuilder == copyItemBuilder &&
@@ -157,16 +208,19 @@ class JsonFormSchemaUiConfig {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
         error,
         title,
         titleAlign,
         subtitle,
         description,
-        label,
+        fieldLabel,
+        fieldInput,
+        fieldInputReadOnly,
         localizedTexts,
         debugMode,
         labelPosition,
+        autovalidateMode,
         addItemBuilder,
         removeItemBuilder,
         copyItemBuilder,
@@ -177,7 +231,7 @@ class JsonFormSchemaUiConfig {
         titleAndDescriptionBuilder,
         fieldWrapperBuilder,
         inputWrapperBuilder,
-      );
+      ]);
 }
 
 enum LabelPosition {

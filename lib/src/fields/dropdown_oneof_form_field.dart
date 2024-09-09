@@ -49,7 +49,7 @@ class _SelectedFormFieldState
           child: DropdownButtonFormField<SchemaProperty>(
             key: Key(widget.property.idKey),
             value: valueSelected,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
+            autovalidateMode: uiConfig.autovalidateMode,
             hint: Text(uiConfig.localizedTexts.select()),
             isExpanded: false,
             validator: (value) {
@@ -97,7 +97,8 @@ class _SelectedFormFieldState
             value: item,
             child: Text(
               item.titleOrId,
-              style: readOnly ? uiConfig.labelReadOnly : uiConfig.label,
+              style:
+                  readOnly ? uiConfig.fieldInputReadOnly : uiConfig.fieldInput,
             ),
           ),
         )

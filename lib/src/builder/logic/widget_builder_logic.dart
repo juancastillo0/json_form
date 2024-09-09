@@ -30,39 +30,11 @@ class WidgetBuilderInherited extends InheritedWidget {
 
   void setJsonFormSchemaStyle(
     BuildContext context,
-    JsonFormSchemaUiConfig? uiConfig,
+    JsonFormSchemaUiConfig? baseConfig,
   ) {
-    final textTheme = Theme.of(context).textTheme;
-
-    this.uiConfig = JsonFormSchemaUiConfig(
-      title: uiConfig?.title ?? textTheme.titleLarge,
-      titleAlign: uiConfig?.titleAlign ?? TextAlign.center,
-      subtitle: uiConfig?.subtitle ??
-          textTheme.titleMedium!.copyWith(fontWeight: FontWeight.bold),
-      description: uiConfig?.description ?? textTheme.bodyMedium,
-      error: uiConfig?.error ??
-          TextStyle(
-            color: Theme.of(context).colorScheme.error,
-            fontSize: textTheme.bodySmall!.fontSize,
-          ),
-      label: uiConfig?.label,
-      labelReadOnly:
-          uiConfig?.labelReadOnly ?? const TextStyle(color: Colors.grey),
-      debugMode: uiConfig?.debugMode,
-      fieldWrapperBuilder: uiConfig?.fieldWrapperBuilder,
-      inputWrapperBuilder: uiConfig?.inputWrapperBuilder,
-      formBuilder: uiConfig?.formBuilder,
-      formSectionBuilder: uiConfig?.formSectionBuilder,
-      titleAndDescriptionBuilder: uiConfig?.titleAndDescriptionBuilder,
-      localizedTexts: uiConfig?.localizedTexts,
-      labelPosition: uiConfig?.labelPosition,
-
-      /// builders
-      addItemBuilder: uiConfig?.addItemBuilder,
-      removeItemBuilder: uiConfig?.removeItemBuilder,
-      copyItemBuilder: uiConfig?.copyItemBuilder,
-      submitButtonBuilder: uiConfig?.submitButtonBuilder,
-      addFileButtonBuilder: uiConfig?.addFileButtonBuilder,
+    uiConfig = JsonFormSchemaUiConfig.fromContext(
+      context,
+      baseConfig: baseConfig,
     );
   }
 

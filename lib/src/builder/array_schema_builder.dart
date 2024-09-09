@@ -69,7 +69,10 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
                       : option.toString();
                   return CheckboxListTile(
                     key: Key('JsonForm_item_${schemaArray.idKey}_$index'),
-                    title: Text(title),
+                    title: Text(
+                      title,
+                      style: uiConfig.fieldInput,
+                    ),
                     value: field.value != null &&
                         (field.value as List).contains(option),
                     onChanged: (_) {
@@ -97,7 +100,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder> {
                   if (uiConfig.labelPosition == LabelPosition.table)
                     Text(
                       schemaLoop.titleOrId,
-                      style: uiConfig.label,
+                      style: uiConfig.fieldLabel,
                     ),
                   const Spacer(),
                   const SizedBox(height: 5),

@@ -70,7 +70,9 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
                         .string,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: readOnly ? uiConfig.labelReadOnly : uiConfig.label,
+                    style: readOnly
+                        ? uiConfig.fieldInputReadOnly
+                        : uiConfig.fieldInput,
                   ),
                   trailing: IconButton(
                     icon: const Icon(Icons.close, size: 14),

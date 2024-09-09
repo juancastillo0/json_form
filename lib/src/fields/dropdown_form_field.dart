@@ -53,7 +53,7 @@ class _DropDownJFormFieldState
           absorbing: widget.customPickerHandler != null,
           child: DropdownButtonFormField<dynamic>(
             key: Key(widget.property.idKey),
-            autovalidateMode: AutovalidateMode.onUserInteraction,
+            autovalidateMode: uiConfig.autovalidateMode,
             hint: Text(uiConfig.localizedTexts.select()),
             isExpanded: false,
             validator: (value) {
@@ -68,7 +68,7 @@ class _DropDownJFormFieldState
             value: value,
             onChanged: enabled ? _onChanged : null,
             onSaved: widget.onSaved,
-            style: readOnly ? uiConfig.labelReadOnly : uiConfig.label,
+            style: readOnly ? uiConfig.fieldInputReadOnly : uiConfig.fieldInput,
             decoration: uiConfig.inputDecoration(widget.property),
           ),
         ),

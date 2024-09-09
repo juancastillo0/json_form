@@ -55,7 +55,7 @@ class WrapFieldWithLabel extends StatelessWidget {
     final labelText = uiConfig.labelText(property);
     final label = Text(
       labelText,
-      style: uiConfig.label,
+      style: uiConfig.fieldLabel,
     );
     final mappedChild = uiConfig.labelPosition == LabelPosition.top
         ? child
