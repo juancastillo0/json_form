@@ -53,6 +53,15 @@ abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
   void initState() {
     super.initState();
     triggerDefaultValue();
+    property.formField = this;
+  }
+
+  @override
+  void dispose() {
+    if (property.formField == this) {
+      property.formField = null;
+    }
+    super.dispose();
   }
 
   /// It calls onChanged

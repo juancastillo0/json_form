@@ -130,6 +130,7 @@ abstract class Schema implements SchemaUiInfo {
   final Map<String, Map<String, Object?>>? defs;
   final List<Schema> oneOf;
 
+  JsonFormField? formField;
   bool requiredProperty;
   final bool nullable;
 
