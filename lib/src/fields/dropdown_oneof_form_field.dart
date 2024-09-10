@@ -52,20 +52,20 @@ class _SelectedFormFieldState
   Widget build(BuildContext context) {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     return WrapFieldWithLabel(
-      property: widget.property,
+      property: property,
       child: GestureDetector(
         onTap: _onTap,
         child: AbsorbPointer(
           absorbing: widget.customPickerHandler != null,
           child: DropdownButtonFormField<SchemaProperty>(
-            key: Key(widget.property.idKey),
+            key: Key(property.idKey),
             focusNode: focusNode,
             value: valueSelected,
             autovalidateMode: uiConfig.autovalidateMode,
             hint: Text(uiConfig.localizedTexts.select()),
             isExpanded: false,
             validator: (value) {
-              if (widget.property.requiredNotNull && value == null) {
+              if (property.requiredNotNull && value == null) {
                 return uiConfig.localizedTexts.required();
               }
               if (widget.customValidator != null)
@@ -75,7 +75,7 @@ class _SelectedFormFieldState
             items: _buildItems(),
             onChanged: _onChanged,
             onSaved: (v) => widget.onSaved(v?.constValue),
-            decoration: uiConfig.inputDecoration(widget.property),
+            decoration: uiConfig.inputDecoration(property),
           ),
         ),
       ),

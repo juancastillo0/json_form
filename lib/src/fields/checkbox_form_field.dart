@@ -32,7 +32,7 @@ class _CheckboxJFormFieldState
     final widgetBuilderInherited = WidgetBuilderInherited.of(context);
     final uiConfig = widgetBuilderInherited.uiConfig;
     return FormField<bool>(
-      key: Key(widget.property.idKey),
+      key: Key(property.idKey),
       initialValue: super.getDefaultValue() ?? false,
       autovalidateMode: uiConfig.autovalidateMode,
       onSaved: widget.onSaved,
@@ -54,7 +54,7 @@ class _CheckboxJFormFieldState
               title: uiConfig.labelPosition == LabelPosition.table
                   ? null
                   : Text(
-                      uiConfig.labelText(widget.property),
+                      uiConfig.labelText(property),
                       style: readOnly
                           ? uiConfig.fieldInputReadOnly
                           : uiConfig.fieldInput,

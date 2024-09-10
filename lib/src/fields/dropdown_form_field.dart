@@ -37,10 +37,10 @@ class _DropDownJFormFieldState
   @override
   void initState() {
     super.initState();
-    final enumNames = widget.property.uiSchema.enumNames;
-    values = widget.property.type == SchemaType.boolean
+    final enumNames = property.uiSchema.enumNames;
+    values = property.type == SchemaType.boolean
         ? [true, false]
-        : (widget.property.enumm ?? enumNames ?? []);
+        : (property.enumm ?? enumNames ?? []);
     names = enumNames ?? values.map((v) => v.toString()).toList();
 
     _value = super.getDefaultValue();
@@ -54,19 +54,19 @@ class _DropDownJFormFieldState
     );
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     return WrapFieldWithLabel(
-      property: widget.property,
+      property: property,
       child: GestureDetector(
         onTap: enabled ? _onTap : null,
         child: AbsorbPointer(
           absorbing: widget.customPickerHandler != null,
           child: DropdownButtonFormField<dynamic>(
-            key: Key(widget.property.idKey),
+            key: Key(property.idKey),
             focusNode: focusNode,
             autovalidateMode: uiConfig.autovalidateMode,
             hint: Text(uiConfig.localizedTexts.select()),
             isExpanded: false,
             validator: (value) {
-              if (widget.property.requiredNotNull && value == null) {
+              if (property.requiredNotNull && value == null) {
                 return uiConfig.localizedTexts.required();
               }
               if (widget.customValidator != null)
@@ -78,7 +78,7 @@ class _DropDownJFormFieldState
             onChanged: enabled ? _onChanged : null,
             onSaved: widget.onSaved,
             style: readOnly ? uiConfig.fieldInputReadOnly : uiConfig.fieldInput,
-            decoration: uiConfig.inputDecoration(widget.property),
+            decoration: uiConfig.inputDecoration(property),
           ),
         ),
       ),
@@ -101,10 +101,10 @@ class _DropDownJFormFieldState
   List<DropdownMenuItem> _buildItems() {
     return List.generate(values.length, (i) {
       return DropdownMenuItem(
-        key: Key('${widget.property.idKey}_$i'),
+        key: Key('${property.idKey}_$i'),
         value: values[i],
-        enabled: !(widget.property.uiSchema.enumDisabled?.contains(values[i]) ??
-            false),
+        enabled:
+            !(property.uiSchema.enumDisabled?.contains(values[i]) ?? false),
         child: Text(names[i]),
       );
     });

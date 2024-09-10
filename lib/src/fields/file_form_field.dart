@@ -36,11 +36,10 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
 
     return FormField<List<XFile>>(
-      key: Key(widget.property.idKey),
+      key: Key(property.idKey),
       enabled: enabled,
       validator: (value) {
-        if ((value == null || value.isEmpty) &&
-            widget.property.requiredNotNull) {
+        if ((value == null || value.isEmpty) && property.requiredNotNull) {
           return uiConfig.localizedTexts.required();
         }
 
@@ -51,7 +50,7 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
       onSaved: (newValue) {
         if (newValue != null) {
           final response =
-              widget.property.isMultipleFile ? newValue : (newValue.first);
+              property.isMultipleFile ? newValue : (newValue.first);
 
           widget.onSaved(response);
         }
@@ -115,7 +114,7 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
     field.didChange(values);
 
     if (widget.onChanged != null) {
-      final response = widget.property.isMultipleFile
+      final response = property.isMultipleFile
           ? values
           : (values != null && values.isNotEmpty ? values.first : null);
       widget.onChanged!(response);
@@ -141,8 +140,8 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
     final addFileButtonBuilder = uiConfig.addFileButtonBuilder;
 
     if (addFileButtonBuilder != null &&
-        addFileButtonBuilder(_onTap(field), widget.property.idKey) != null) {
-      return addFileButtonBuilder(_onTap(field), widget.property.idKey)!;
+        addFileButtonBuilder(_onTap(field), property.idKey) != null) {
+      return addFileButtonBuilder(_onTap(field), property.idKey)!;
     }
 
     return ElevatedButton(

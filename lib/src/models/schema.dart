@@ -243,9 +243,19 @@ abstract class SchemaUiInfo {
   SchemaType get type;
 }
 
+/// A field that can be used to retrieve and update a
+/// JSON Schema property in a form
 abstract class JsonFormField<T> {
+  /// Basic schema information of the field
   SchemaUiInfo get property;
+
+  /// The current value of the field input
   T get value;
+
+  /// Updates the value of the field input
   set value(T value);
+
+  /// The focus node of the input.
+  /// You may use this to retrieve and change the focus status.
   FocusNode get focusNode;
 }
