@@ -34,7 +34,7 @@ class _DateJFormFieldState
     txtDateCtrl.updateText(formatter.format(newValue));
   }
 
-  bool get isDateTime => widget.property.format == PropertyFormat.dateTime;
+  bool get isDateTime => property.format == PropertyFormat.dateTime;
 
   @override
   void initState() {
@@ -63,17 +63,16 @@ class _DateJFormFieldState
     );
 
     return WrapFieldWithLabel(
-      property: widget.property,
+      property: property,
       child: TextFormField(
-        key: Key(widget.property.idKey),
+        key: Key(property.idKey),
         controller: txtDateCtrl,
         focusNode: focusNode,
         keyboardType: TextInputType.phone,
-        autofocus: widget.property.uiSchema.autofocus,
-        enableSuggestions: widget.property.uiSchema.autocomplete,
+        autofocus: property.uiSchema.autofocus,
+        enableSuggestions: property.uiSchema.autocomplete,
         validator: (value) {
-          if (widget.property.requiredNotNull &&
-              (value == null || value.isEmpty)) {
+          if (property.requiredNotNull && (value == null || value.isEmpty)) {
             return uiConfig.localizedTexts.required();
           }
           if (widget.customValidator != null)
@@ -104,7 +103,7 @@ class _DateJFormFieldState
                 }
               }
             : null,
-        decoration: uiConfig.inputDecoration(widget.property).copyWith(
+        decoration: uiConfig.inputDecoration(property).copyWith(
               hintText: formatter.pattern!.toUpperCase(),
               suffixIcon: isDateTime
                   ? Row(
@@ -126,8 +125,7 @@ class _DateJFormFieldState
   void _openCalendar() async {
     DateTime tempDate = parseDate();
     final defaultYearsRange = [1900, 2099];
-    List<int> yearsRange =
-        widget.property.uiSchema.yearsRange ?? defaultYearsRange;
+    List<int> yearsRange = property.uiSchema.yearsRange ?? defaultYearsRange;
     if (yearsRange.isEmpty) yearsRange = defaultYearsRange;
     yearsRange.sort();
     final firstDate = DateTime(yearsRange.first);
@@ -145,7 +143,7 @@ class _DateJFormFieldState
       initialDate: tempDate,
       firstDate: firstDate,
       lastDate: lastDate,
-      helpText: widget.property.uiSchema.help,
+      helpText: property.uiSchema.help,
     );
     if (date == null) return;
     date = date.copyWith(
@@ -162,7 +160,7 @@ class _DateJFormFieldState
     final time = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.fromDateTime(date),
-      helpText: widget.property.uiSchema.help,
+      helpText: property.uiSchema.help,
     );
     if (time == null) return;
     // TODO: seconds

@@ -31,7 +31,7 @@ class _NumberJFormFieldState
 
   num? parseValue(String? value) {
     if (value == null || value.isEmpty) return null;
-    return widget.property.type == SchemaType.integer
+    return property.type == SchemaType.integer
         ? int.tryParse(value)
         : double.tryParse(value);
   }

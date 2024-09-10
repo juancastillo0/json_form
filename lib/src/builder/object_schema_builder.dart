@@ -102,6 +102,7 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder> {
                                 ],
                               );
                       return TableRow(
+                        key: ValueKey('JsonForm_objectProperty_${e.idKey}'),
                         children: [
                           if (directionality == TextDirection.ltr) title,
                           FormFromSchemaBuilder(
@@ -124,6 +125,7 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder> {
                 )
                 .map(
                   (e) => FormFromSchemaBuilder(
+                    key: ValueKey('JsonForm_objectProperty_${e.idKey}'),
                     schemaObject: widget.schemaObject,
                     mainSchema: widget.mainSchema,
                     schema: e,

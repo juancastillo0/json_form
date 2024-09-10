@@ -75,6 +75,7 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
                   final file = field.value![index];
 
                   return ListTile(
+                    key: Key('${property.idKey}_$index'),
                     title: Text(
                       file.path.characters
                           .takeLastWhile((p0) => p0 != '/')
@@ -137,15 +138,12 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
     JsonFormSchemaUiConfig uiConfig,
     FormFieldState<List<XFile>> field,
   ) {
-    final addFileButtonBuilder = uiConfig.addFileButtonBuilder;
-
-    if (addFileButtonBuilder != null &&
-        addFileButtonBuilder(_onTap(field), property.idKey) != null) {
-      return addFileButtonBuilder(_onTap(field), property.idKey)!;
-    }
+    final onTap = _onTap(field);
+    final custom = uiConfig.addFileButtonBuilder?.call(onTap, property.idKey);
+    if (custom != null) return custom;
 
     return ElevatedButton(
-      onPressed: _onTap(field),
+      onPressed: onTap,
       style: ButtonStyle(
         minimumSize: WidgetStateProperty.all(const Size(double.infinity, 40)),
       ),

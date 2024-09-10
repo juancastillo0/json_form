@@ -102,10 +102,12 @@ class _SelectedFormFieldState
 
   List<DropdownMenuItem<SchemaProperty>>? _buildItems() {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
+    int i = 0;
     return property.oneOf
         .cast<SchemaProperty>()
         .map(
           (item) => DropdownMenuItem<SchemaProperty>(
+            key: Key('${property.idKey}_${i++}'),
             value: item,
             child: Text(
               item.titleOrId,
@@ -114,7 +116,7 @@ class _SelectedFormFieldState
             ),
           ),
         )
-        .toList();
+        .toList(growable: false);
   }
 
   Map _getItems() {

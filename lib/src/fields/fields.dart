@@ -64,7 +64,6 @@ abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
     super.dispose();
   }
 
-  /// It calls onChanged
   Future<dynamic> triggerDefaultValue() async {
     final completer = Completer<void>();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -79,7 +78,6 @@ abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
   }
 
   dynamic getDefaultValue({bool parse = true}) {
-    final property = widget.property;
     final widgetBuilderInherited = WidgetBuilderInherited.get(context);
     var data =
         widgetBuilderInherited.controller.retrieveObjectData(property.idKey) ??

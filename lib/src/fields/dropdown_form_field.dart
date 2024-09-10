@@ -99,15 +99,19 @@ class _DropDownJFormFieldState
   }
 
   List<DropdownMenuItem> _buildItems() {
-    return List.generate(values.length, (i) {
-      return DropdownMenuItem(
-        key: Key('${property.idKey}_$i'),
-        value: values[i],
-        enabled:
-            !(property.uiSchema.enumDisabled?.contains(values[i]) ?? false),
-        child: Text(names[i]),
-      );
-    });
+    return List.generate(
+      values.length,
+      (i) {
+        return DropdownMenuItem(
+          key: Key('${property.idKey}_$i'),
+          value: values[i],
+          enabled:
+              !(property.uiSchema.enumDisabled?.contains(values[i]) ?? false),
+          child: Text(names[i]),
+        );
+      },
+      growable: false,
+    );
   }
 
   Map _getItems() {
