@@ -81,7 +81,7 @@ class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
                       min: values.first.toDouble(),
                       max: values.last.toDouble(),
                       divisions: values.length - 1,
-                      autofocus: property.uiSchema.autoFocus,
+                      autofocus: property.uiSchema.autofocus,
                       onChanged: enabled
                           ? (double value) {
                               final v = property.type == SchemaType.integer

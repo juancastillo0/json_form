@@ -59,8 +59,8 @@ class _NumberJFormFieldState
           ),
         ],
         controller: textController,
-        autofocus: property.uiSchema.autoFocus,
-        enableSuggestions: property.uiSchema.autoComplete,
+        autofocus: property.uiSchema.autofocus,
+        enableSuggestions: property.uiSchema.autocomplete,
         onSaved: (value) {
           value = value == null || value.isEmpty
               ? property.uiSchema.emptyValue

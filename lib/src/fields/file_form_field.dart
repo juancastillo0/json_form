@@ -58,50 +58,54 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
       },
       builder: (field) {
         this.field = field;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(uiConfig.labelText(property), style: uiConfig.subtitle),
-            const SizedBox(height: 10),
-            _buildButton(uiConfig, field),
-            const SizedBox(height: 10),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: field.value?.length ?? 0,
-              itemBuilder: (context, index) {
-                final file = field.value![index];
+        return Focus(
+          focusNode: focusNode,
+          autofocus: property.uiSchema.autofocus,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(uiConfig.labelText(property), style: uiConfig.subtitle),
+              const SizedBox(height: 10),
+              _buildButton(uiConfig, field),
+              const SizedBox(height: 10),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: field.value?.length ?? 0,
+                itemBuilder: (context, index) {
+                  final file = field.value![index];
 
-                return ListTile(
-                  title: Text(
-                    file.path.characters
-                        .takeLastWhile((p0) => p0 != '/')
-                        .string,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: readOnly
-                        ? uiConfig.fieldInputReadOnly
-                        : uiConfig.fieldInput,
-                  ),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.close, size: 14),
-                    onPressed: enabled
-                        ? () {
-                            change(
-                              field,
-                              field.value!
-                                ..removeWhere(
-                                  (element) => element.path == file.path,
-                                ),
-                            );
-                          }
-                        : null,
-                  ),
-                );
-              },
-            ),
-            if (field.hasError) CustomErrorText(text: field.errorText!),
-          ],
+                  return ListTile(
+                    title: Text(
+                      file.path.characters
+                          .takeLastWhile((p0) => p0 != '/')
+                          .string,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: readOnly
+                          ? uiConfig.fieldInputReadOnly
+                          : uiConfig.fieldInput,
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.close, size: 14),
+                      onPressed: enabled
+                          ? () {
+                              change(
+                                field,
+                                field.value!
+                                  ..removeWhere(
+                                    (element) => element.path == file.path,
+                                  ),
+                              );
+                            }
+                          : null,
+                    ),
+                  );
+                },
+              ),
+              if (field.hasError) CustomErrorText(text: field.errorText!),
+            ],
+          ),
         );
       },
     );

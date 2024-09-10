@@ -39,8 +39,8 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
       child: TextFormField(
         key: Key(property.idKey),
         focusNode: focusNode,
-        autofocus: uiSchema.autoFocus,
-        enableSuggestions: uiSchema.autoComplete,
+        autofocus: uiSchema.autofocus,
+        enableSuggestions: uiSchema.autocomplete,
         keyboardType: getTextInputTypeFromFormat(
           property.format,
           uiSchema.widget,

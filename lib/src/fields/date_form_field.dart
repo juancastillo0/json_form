@@ -69,8 +69,8 @@ class _DateJFormFieldState
         controller: txtDateCtrl,
         focusNode: focusNode,
         keyboardType: TextInputType.phone,
-        autofocus: widget.property.uiSchema.autoFocus,
-        enableSuggestions: widget.property.uiSchema.autoComplete,
+        autofocus: widget.property.uiSchema.autofocus,
+        enableSuggestions: widget.property.uiSchema.autocomplete,
         validator: (value) {
           if (widget.property.requiredNotNull &&
               (value == null || value.isEmpty)) {

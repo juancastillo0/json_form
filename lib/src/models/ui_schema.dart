@@ -20,8 +20,8 @@ class UiSchemaData {
   ///
   String? placeholder;
   String? emptyValue;
-  bool autoFocus = false;
-  bool autoComplete = false;
+  bool autofocus = false;
+  bool autocomplete = false;
 
   ///
   /// Date Options
@@ -36,6 +36,7 @@ class UiSchemaData {
   /// boolean: radio, select, checkbox (default)
   /// string: textarea, password, color, file
   /// number: updown, range, radio
+  /// array: checkboxes
   String? widget;
 
   /// With "widget=file" or "format=data-url": accept='.pdf'
@@ -108,10 +109,10 @@ class UiSchemaData {
         // TODO: filePreview, label=false, type:password
         // rows/width
         case "autofocus":
-          autoFocus = data as bool;
+          autofocus = data as bool;
           break;
         case "autocomplete":
-          autoComplete = data as bool;
+          autocomplete = data as bool;
           break;
         case "hideError":
           hideError = data as bool;

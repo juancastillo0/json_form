@@ -77,42 +77,46 @@ class _RadioButtonJFormFieldState
       enabled: enabled,
       builder: (field) {
         this.field = field;
-        return WrapFieldWithLabel(
-          property: property,
-          ignoreFieldLabel: uiConfig.labelPosition != LabelPosition.table,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: List<Widget>.generate(
-                  names.length,
-                  (int i) => RadioListTile(
-                    key: Key('${property.idKey}_$i'),
-                    value: values[i],
-                    title: Text(
-                      names[i],
-                      style: readOnly
-                          ? uiConfig.fieldInputReadOnly
-                          : uiConfig.fieldInput,
-                    ),
-                    groupValue: field.value,
-                    onChanged: enabled
-                        ? (dynamic value) {
-                            log(value.toString());
-                            if (value != null) {
-                              field.didChange(value);
-                              if (widget.onChanged != null) {
-                                widget.onChanged!(value!);
+        return Focus(
+          focusNode: focusNode,
+          child: WrapFieldWithLabel(
+            property: property,
+            ignoreFieldLabel: uiConfig.labelPosition != LabelPosition.table,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: List<Widget>.generate(
+                    names.length,
+                    (int i) => RadioListTile(
+                      key: Key('${property.idKey}_$i'),
+                      value: values[i],
+                      title: Text(
+                        names[i],
+                        style: readOnly
+                            ? uiConfig.fieldInputReadOnly
+                            : uiConfig.fieldInput,
+                      ),
+                      groupValue: field.value,
+                      autofocus: i == 0 ? property.uiSchema.autofocus : false,
+                      onChanged: enabled
+                          ? (dynamic value) {
+                              log(value.toString());
+                              if (value != null) {
+                                field.didChange(value);
+                                if (widget.onChanged != null) {
+                                  widget.onChanged!(value!);
+                                }
                               }
                             }
-                          }
-                        : null,
+                          : null,
+                    ),
                   ),
                 ),
-              ),
-              if (field.hasError) CustomErrorText(text: field.errorText!),
-            ],
+                if (field.hasError) CustomErrorText(text: field.errorText!),
+              ],
+            ),
           ),
         );
       },

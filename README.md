@@ -127,34 +127,34 @@ final uiSchema = '''
 
 #### UI Schema Configurations
 
-| Configuration   | Type            | Default | Only For | Description                                                         |
-| --------------- | --------------- | ------- | -------- | ------------------------------------------------------------------- |
-| title           | String?         |         |          | The user facing title of the field                                  |
-| description     | String?         |         |          | The user facing description of the field                            |
-| globalOptions   | UiSchemaData?   |         |          | Applies the options to all children                                 |
-| help            | String?         |         |          | Helper text for the user                                            |
-| readOnly        | bool            | false   |          | Can't be updated, but will be sent                                  |
-| disabled        | bool            | false   |          | Can't be updated and will not be sent                               |
-| hidden          | bool            | false   |          | Does not show or sends the value                                    |
-| hideError       | bool            | false   |          |                                                                     |
-| placeholder     | String?         |         | text     | The input's hint text                                               |
-| emptyValue      | String?         |         | text     | Sent when the value is empty                                        |
-| autoFocus       | bool            | false   |          | Focuses the input on rendering                                      |
-| autoComplete    | bool            | false   | text     | Enabled auto complete suggestions                                   |
-| yearsRange      | List\<int\>?    |         | date     |
-| format          | String          | 'YMD'   | date     |                                                                     |
-| hideNowButton   | bool            | false   | date     |                                                                     |
-| hideClearButton | bool            | false   | date     |                                                                     |
-| widget          | String?         |         |          | The kind of input to be used. Options:                              |
-| accept          | String?         |         | file     | The mime types accepted in the file input                           |
-| enumNames       | List\<String\>? |         | enum     | The named or labels shown to the user for each of the enum variants |
-| enumDisabled    | List\<String\>? |         | enum     | List of enum values that are disabled                               |
-| order           | List\<String\>? |         | object   | The order of the properties of an object                            |
-| inline          | bool            | false   | checkbox | Whether the checkboxes are positioned in a horizontal line          |
-| addable         | bool            | true    | array    | Whether the user can add items to an array                          |
-| removable       | bool            | true    | array    | Whether the user can remove items from an array                     |
-| orderable       | bool            | true    | array    | Whether the user can reorder or move the items in an array          |
-| copyable        | bool            | true    | array    | Whether the user can copy or duplicate the items in an array        |
+| Configuration   | Type            | Default | Only For   | Description                                                                                                                                                         |
+| --------------- | --------------- | ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| title           | String?         |         |            | The user facing title of the field                                                                                                                                  |
+| description     | String?         |         |            | The user facing description of the field                                                                                                                            |
+| globalOptions   | UiSchemaData?   |         |            | Applies the options to all children                                                                                                                                 |
+| help            | String?         |         |            | Helper text for the user                                                                                                                                            |
+| readOnly        | bool            | false   |            | Can't be updated, but will be sent                                                                                                                                  |
+| disabled        | bool            | false   |            | Can't be updated and will not be sent                                                                                                                               |
+| hidden          | bool            | false   |            | Does not show or sends the value                                                                                                                                    |
+| hideError       | bool            | false   |            |                                                                                                                                                                     |
+| placeholder     | String?         |         | text       | The input's hint text                                                                                                                                               |
+| emptyValue      | String?         |         | text       | Sent when the value is empty                                                                                                                                        |
+| autoFocus       | bool            | false   |            | Focuses the input on rendering                                                                                                                                      |
+| autoComplete    | bool            | false   | text       | Enabled auto complete suggestions                                                                                                                                   |
+| yearsRange      | List\<int\>?    |         | date       |
+| format          | String          | 'YMD'   | date       |                                                                                                                                                                     |
+| hideNowButton   | bool            | false   | date       |                                                                                                                                                                     |
+| hideClearButton | bool            | false   | date       |                                                                                                                                                                     |
+| widget          | String?         |         |            | The kind of input to be used. boolean: radio, select, checkbox (default). string: textarea, password, color, file. number: updown, range, radio. array: checkboxes. |
+| accept          | String?         |         | file       | The mime types accepted in the file input                                                                                                                           |
+| enumNames       | List\<String\>? |         | enum       | The named or labels shown to the user for each of the enum variants                                                                                                 |
+| enumDisabled    | List\<String\>? |         | enum       | List of enum values that are disabled                                                                                                                               |
+| order           | List\<String\>? |         | object     | The order of the properties of an object                                                                                                                            |
+| inline          | bool            | false   | checkboxes | Whether the checkboxes are positioned in a horizontal line                                                                                                          |
+| addable         | bool            | true    | array      | Whether the user can add items to an array                                                                                                                          |
+| removable       | bool            | true    | array      | Whether the user can remove items from an array                                                                                                                     |
+| orderable       | bool            | true    | array      | Whether the user can reorder or move the items in an array                                                                                                          |
+| copyable        | bool            | true    | array      | Whether the user can copy or duplicate the items in an array                                                                                                        |
 
 
 ### UI Config
