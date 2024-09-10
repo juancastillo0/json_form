@@ -43,8 +43,9 @@ class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
     inspect(property);
 
     return FormField<num>(
+      key: Key(property.idKey),
       autovalidateMode: uiConfig.autovalidateMode,
-      initialValue: super.getDefaultValue() ?? values.first.toDouble(),
+      initialValue: super.getDefaultValue() ?? values.first,
       onSaved: (newValue) {
         widget.onSaved(newValue);
       },
@@ -74,7 +75,6 @@ class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
                   ),
                   Expanded(
                     child: Slider(
-                      key: Key(property.idKey),
                       focusNode: focusNode,
                       label: value.toString(),
                       value: value,

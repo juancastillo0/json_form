@@ -46,6 +46,33 @@ class TestUtils {
     await tester.pump();
     return button;
   }
+
+  List<Object?> getUiArrayCheckbox(String key, List options) {
+    int i = 0;
+    return options.where((_) {
+      final checkbox = tester.firstWidget<CheckboxListTile>(
+        find.byKey(Key('JsonForm_item_${key}_${i++}')),
+      );
+      return checkbox.value == true;
+    }).toList();
+  }
+
+  Future<void> updateUiArrayCheckbox(
+    String key,
+    List options,
+    List newValues,
+  ) async {
+    int i = 0;
+    for (final value in options) {
+      final f = find.byKey(Key('JsonForm_item_${key}_${i++}'));
+      final checkbox = tester.firstWidget<CheckboxListTile>(f);
+      if (newValues.contains(value) && checkbox.value != true ||
+          !newValues.contains(value) && checkbox.value == true) {
+        await tester.tap(f);
+        await tester.pump();
+      }
+    }
+  }
 }
 
 void main() {
@@ -53,7 +80,8 @@ void main() {
     final utils = TestUtils(tester);
     late void Function(void Function()) setState;
     LabelPosition labelPosition = LabelPosition.top;
-    Object? data = {};
+    Map<String, Object?> data = {};
+    final controller = JsonFormController(data: data);
     // TODO: file, color
     await tester.pumpWidget(
       MaterialApp(
@@ -101,16 +129,28 @@ void main() {
               "type": "string",
               "format": "date-time",
               "title": "dateTimeTitle"
+            },
+            "arrayCheckbox": {
+              "type": "array",
+              "title": "arrayCheckboxTitle",
+              "items": {
+                "type": "string",
+                "enum": ["e", "f"]
+              }
             }
           }
         }''',
-                onFormDataSaved: (p) => data = p,
+                onFormDataSaved: (p) => data = p as Map<String, Object?>,
+                controller: controller,
                 uiConfig: JsonFormSchemaUiConfig(
                   labelPosition: labelPosition,
                 ),
                 uiSchema: '''{
                   "enumRadio": {
                     "ui:widget": "radio"
+                  },
+                  "arrayCheckbox": {
+                    "ui:widget": "checkboxes"
                   }
                 }''',
               );
@@ -119,12 +159,19 @@ void main() {
         ),
       ),
     );
-    expect(data, {});
+    expect(data, {'arrayCheckbox': []});
 
     // TODO: use JsonFormInput_string as Key?
     await utils.findAndEnterText('string', 'hello');
     final numberInput = await utils.findAndEnterText('number', '2');
-    expect(data, {});
+    expect(
+      data,
+      {
+        'arrayCheckbox': [],
+        'string': 'hello',
+        'number': 2.0,
+      },
+    );
 
     final submitButton = await utils.tapSubmitButton();
     expect(
@@ -135,6 +182,7 @@ void main() {
         'boolean': false,
         'enum': null,
         'enumRadio': null,
+        'arrayCheckbox': [],
       },
     );
 
@@ -156,6 +204,7 @@ void main() {
         'boolean': true,
         'enum': null,
         'enumRadio': null,
+        'arrayCheckbox': [],
       },
     );
 
@@ -176,6 +225,7 @@ void main() {
         'boolean': true,
         'enum': 'b',
         'enumRadio': null,
+        'arrayCheckbox': [],
       },
     );
 
@@ -193,6 +243,7 @@ void main() {
         'boolean': true,
         'enum': 'b',
         'enumRadio': 2,
+        'arrayCheckbox': [],
       },
     );
 
@@ -211,6 +262,7 @@ void main() {
         'enumRadio': 2,
         'date': '2023-04-02',
         'dateTime': '2021-12-27 13:01:49',
+        'arrayCheckbox': [],
       },
     );
 
@@ -233,6 +285,8 @@ void main() {
       await utils.findAndEnterText('number', '$i');
       await utils.findAndEnterText('integer', '$i');
       await utils.tapButton('boolean');
+      // Cancel controller update
+      if (i != 0) await utils.tapButton('boolean');
 
       await utils.tapButton('enum');
       await tester.tap(find.byKey(Key('enum_${i % 4}')), warnIfMissed: false);
@@ -241,21 +295,84 @@ void main() {
       await utils.findAndEnterText('date', '2023-04-0${i + 1}');
       await utils.findAndEnterText('dateTime', '2021-12-2${i + 1} 13:01:49');
 
-      await utils.tapSubmitButton();
-      expect(
-        data,
-        {
-          'string': 'hello$i',
-          'number': i.toDouble(),
-          'integer': i,
-          // table label position changes key state
-          'boolean': i.isOdd, // i >=2  ? i.isEven :
-          'enum': const ['a', 'b', 'c', 'd'][i % 4],
-          'enumRadio': ((i % 3) + 1) * 2,
-          'date': '2023-04-0${i + 1}',
-          'dateTime': '2021-12-2${i + 1} 13:01:49',
-        },
+      final newArrayCheckbox = const [
+        ['e'],
+        ['f'],
+        [],
+        ['e', 'f'],
+      ][i % 4];
+      await utils.updateUiArrayCheckbox(
+        'arrayCheckbox',
+        ['e', 'f'],
+        newArrayCheckbox,
       );
+
+      await utils.tapSubmitButton();
+      final previousValues = {
+        'string': 'hello$i',
+        'number': i.toDouble(),
+        'integer': i,
+        // table label position changes key state
+        'boolean': i.isOdd, // i >=2  ? i.isEven :
+        'enum': const ['a', 'b', 'c', 'd'][i % 4],
+        'enumRadio': ((i % 3) + 1) * 2,
+        'date': '2023-04-0${i + 1}',
+        'dateTime': '2021-12-2${i + 1} 13:01:49',
+        'arrayCheckbox': newArrayCheckbox,
+      };
+      expect(data, previousValues);
+
+      final nextValues = {
+        'string': 'hi$i',
+        'number': (i + 10).toDouble(),
+        'integer': i + 20,
+        // table label position changes key state
+        'boolean': i.isEven, // i >=2  ? i.isEven :
+        'enum': const ['a', 'b', 'c', 'd'][i % 4],
+        'enumRadio': ((i % 3) + 1) * 2,
+        'date': '2023-05-0${i + 1}',
+        'dateTime': '2021-11-2${i + 1} 12:01:48',
+        'arrayCheckbox': [
+          ['e'],
+          ['f'],
+          [],
+          ['e', 'f'],
+        ][(i + 2) % 4],
+      };
+      for (final key in nextValues.keys) {
+        final field = controller.retrieveField(key)!;
+        expect(field.property.idKey, key);
+        expect(field.property.title, '${key}Title');
+
+        final isDate = key.startsWith('date');
+        // Check current value
+        expect(
+          field.value,
+          isDate
+              ? DateTime.parse(previousValues[key] as String)
+              : previousValues[key],
+        );
+        final value = nextValues[key];
+        // Update value
+        field.value = isDate ? DateTime.parse(value as String) : value;
+        await tester.pump();
+        // Validate updated value in the UI
+        if (value is List) {
+          expect(
+            utils.getUiArrayCheckbox('arrayCheckbox', ['e', 'f']),
+            value,
+          );
+        } else if (value is bool) {
+          final checkbox =
+              tester.firstState<FormFieldState<bool>>(find.byKey(Key(key)));
+          expect(checkbox.value, value);
+        } else {
+          expect(find.text(value.toString()), findsOne);
+        }
+      }
+      await utils.tapSubmitButton();
+      expect(data, nextValues);
+
       i++;
     }
   });

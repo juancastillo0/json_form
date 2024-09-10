@@ -840,6 +840,14 @@ const primitivesJsonSchema = '''{
       "type": "string",
       "format": "date-time",
       "title": "dateTimeTitle"
+    },
+    "arrayCheckbox": {
+      "type": "array",
+      "title": "arrayCheckboxTitle",
+      "items": {
+        "type": "string",
+        "enum": ["a", "b"]
+      }
     }
   }
 }''';
@@ -847,6 +855,9 @@ const primitivesJsonSchema = '''{
 const primitivesUiSchema = '''{
   "enumRadio": {
     "ui:widget": "radio"
+  },
+  "arrayCheckbox": {
+    "ui:widget": "checkboxes"
   }
 }''';
 

@@ -35,7 +35,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
     super.initState();
     schemaArray.formField = this;
 
-    WidgetBuilderInherited.of(context).controller.updateDataInPlace(
+    WidgetBuilderInherited.get(context).controller.updateDataInPlace(
           schemaArray.idKey,
           (prev) => _initialValue = (prev as List?) ?? [],
         );
@@ -297,10 +297,8 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
           final i = valueList.indexOf(option);
           if (i != -1) {
             valueList.removeAt(i);
-            _removeItem(i);
           } else {
             valueList.add(option);
-            _addItem();
           }
           field.didChange(valueList);
           return valueList;
