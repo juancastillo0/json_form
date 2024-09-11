@@ -774,7 +774,7 @@ void main() {
         'nameEnabled': null,
       },
       'integerRadio': null,
-      'integerRange': null,
+      'integerRange': -2,
       'arrayString': [],
       'arrayCheckbox': [],
       'stringTop': null,
@@ -828,9 +828,7 @@ void main() {
     expect(data, currentData);
     // TODO: test reorder/draggable
 
-    final enumDropDown = find.byKey(const Key('enumValues'));
-    expect(enumDropDown, findsOneWidget);
-    await tester.tap(enumDropDown);
+    await utils.tapButton('enumValues');
     await tester.pump();
     await tester.tap(
       find.byKey(const Key('enumValues_1')),

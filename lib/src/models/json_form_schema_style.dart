@@ -29,7 +29,7 @@ class JsonFormSchemaUiConfig {
   })  : localizedTexts = localizedTexts ?? const LocalizedTexts(),
         debugMode = debugMode ?? false,
         labelPosition = labelPosition ?? LabelPosition.table,
-        autovalidateMode = autovalidateMode ?? AutovalidateMode.onUnfocus;
+        autovalidateMode = autovalidateMode ?? AutovalidateMode.onUserInteraction;
 
   /// Form title style
   final TextStyle? title;

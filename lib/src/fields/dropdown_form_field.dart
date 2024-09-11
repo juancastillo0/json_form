@@ -99,15 +99,22 @@ class _DropDownJFormFieldState
   }
 
   List<DropdownMenuItem> _buildItems() {
+    final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     return List.generate(
       values.length,
       (i) {
+        final readOnlyValue = readOnly ||
+            (property.uiSchema.enumDisabled?.contains(values[i]) ?? false);
         return DropdownMenuItem(
           key: Key('${property.idKey}_$i'),
           value: values[i],
-          enabled:
-              !(property.uiSchema.enumDisabled?.contains(values[i]) ?? false),
-          child: Text(names[i]),
+          enabled: !readOnlyValue,
+          child: Text(
+            names[i],
+            style: readOnlyValue
+                ? uiConfig.fieldInputReadOnly
+                : uiConfig.fieldInput,
+          ),
         );
       },
       growable: false,
