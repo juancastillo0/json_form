@@ -55,14 +55,18 @@ class _JsonFormState extends State<JsonForm> {
   @override
   void initState() {
     super.initState();
-    initMainSchema(controllerChanged: true);
+    initMainSchema(controllerChanged: true, schemaChanged: true);
   }
 
-  void initMainSchema({required bool controllerChanged}) {
+  void initMainSchema({
+    required bool controllerChanged,
+    required bool schemaChanged,
+  }) {
     if (controllerChanged) {
       controller = widget.controller ?? JsonFormController(data: {});
       controller.formKey ??= GlobalKey<FormState>();
-      if (controller.mainSchema != null) {
+      if (controller.mainSchema != null &&
+          (!schemaChanged || widget.jsonSchema.isEmpty)) {
         return;
       }
     }
@@ -83,11 +87,12 @@ class _JsonFormState extends State<JsonForm> {
   void didUpdateWidget(covariant JsonForm oldWidget) {
     super.didUpdateWidget(oldWidget);
     final controllerChanged = oldWidget.controller != widget.controller;
-    if (oldWidget.jsonSchema != widget.jsonSchema ||
-        oldWidget.uiSchema != widget.uiSchema ||
-        controllerChanged) {
+    final schemaChanged = oldWidget.jsonSchema != widget.jsonSchema ||
+        oldWidget.uiSchema != widget.uiSchema;
+    if (schemaChanged || controllerChanged) {
       initMainSchema(
         controllerChanged: controllerChanged,
+        schemaChanged: schemaChanged,
       );
     }
   }
