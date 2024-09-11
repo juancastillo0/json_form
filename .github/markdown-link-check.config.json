@@ -1,5 +1,7 @@
 {
   "ignorePatterns": [
+    { "pattern": "^https://pub.dartlang.org" },
+    { "pattern": "^https://pub.dev" },
     { "pattern": "^http://localhost:" }
   ]
 }
