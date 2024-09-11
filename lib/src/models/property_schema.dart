@@ -179,18 +179,20 @@ class SchemaProperty extends Schema {
   final NumberProperties numberProperties;
   final String? pattern;
   final bool isMultipleFile;
-  Either<List<String>, Schema>? dependents;
+  PropertyDependents? dependents;
 
-  /// indica si sus dependentes han sido activados por XDependencies
+  /// Whether the dependents have been activated
   bool isDependentsActive = false;
 
   void setDependents(SchemaObject schema) {
-    if (schema.dependentRequired.containsKey(id)) {
+    if (schema.dependentRequired.containsKey(id) ||
+        schema.dependentSchemas.containsKey(id)) {
       // if (dependents is Map) {
       // TODO:  schema.isOneOf = dependents.containsKey("oneOf");
-      dependents = Either.left(schema.dependentRequired[id]!);
-    } else if (schema.dependentSchemas.containsKey(id)) {
-      dependents = Either.right(schema.dependentSchemas[id]!);
+      dependents = PropertyDependents(
+        requiredProps: schema.dependentRequired[id],
+        schema: schema.dependentSchemas[id],
+      );
     }
   }
 }
@@ -257,4 +259,14 @@ class NumberProperties {
     final range = (ma2 - mi2) ~/ mof;
     return List.generate(range + 1, (i) => mi2 + i * mof);
   }
+}
+
+class PropertyDependents {
+  final List<String>? requiredProps;
+  final Schema? schema;
+
+  const PropertyDependents({
+    required this.requiredProps,
+    required this.schema,
+  });
 }

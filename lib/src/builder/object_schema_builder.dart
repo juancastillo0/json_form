@@ -48,8 +48,8 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder> {
 
     final Set<Schema> dependentSchemas = {};
     for (final property in properties) {
-      if (property is SchemaProperty && property.dependents?.right != null) {
-        dependentSchemas.add(property.dependents!.right!);
+      if (property is SchemaProperty && property.dependents?.schema != null) {
+        dependentSchemas.add(property.dependents!.schema!);
       }
     }
 
@@ -74,7 +74,7 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder> {
                 children: [
                   ...properties.whereType<SchemaProperty>().expand(
                     (e) {
-                      final r = e.dependents?.right;
+                      final r = e.dependents?.schema;
                       return r != null && e.isDependentsActive
                           ? [
                               e,

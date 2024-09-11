@@ -43,12 +43,12 @@ class ObjectSchemaInherited extends InheritedWidget {
   }) async {
     try {
       // Eliminamos los nuevos inputs agregados
-      await _removeCreatedItemsSafeMode(schemaProperty);
+      _removeCreatedItemsSafeMode(schemaProperty);
       // Obtenemos el index del actual property para añadir a abajo de él
       final indexProperty = schemaObject.properties.indexOf(schemaProperty);
       final dependents = schemaProperty.dependents!;
-      if (dependents.isLeft) {
-        final dependentsList = dependents.left!;
+      if (dependents.requiredProps != null) {
+        final dependentsList = dependents.requiredProps!;
         dev.log('case 1');
 
         // Cuando es una Lista de String y todos ellos ahoran serán requeridos
@@ -62,10 +62,12 @@ class ObjectSchemaInherited extends InheritedWidget {
         }
 
         schemaProperty.isDependentsActive = active;
-      } else if (dependents.right!.oneOf.isNotEmpty) {
+      }
+
+      if (dependents.schema?.oneOf.isNotEmpty ?? false) {
         dev.log('case OneOf');
 
-        final oneOfs = dependents.right!.oneOf;
+        final oneOfs = dependents.schema!.oneOf;
         for (final oneOf in oneOfs) {
           final properties =
               oneOf is SchemaObject ? oneOf.properties : <Schema>[];
@@ -104,10 +106,10 @@ class ObjectSchemaInherited extends InheritedWidget {
             schemaObject.properties.insertAll(indexProperty + 1, newProperties);
           }
         }
-      } else {
+      } else if (dependents.schema != null) {
         // Cuando es un Schema simple
         dev.log('case 3');
-        final _schema = dependents.right!;
+        final _schema = dependents.schema!;
         if (active) {
           schemaObject.properties.insert(indexProperty + 1, _schema);
         } else {
@@ -122,7 +124,7 @@ class ObjectSchemaInherited extends InheritedWidget {
     }
   }
 
-  Future<void> _removeCreatedItemsSafeMode(
+  void _removeCreatedItemsSafeMode(
     SchemaProperty schemaProperty,
   ) async {
     bool filter(Schema element) =>
@@ -132,7 +134,6 @@ class ObjectSchemaInherited extends InheritedWidget {
       schemaObject.properties.removeWhere(filter);
 
       listen(ObjectSchemaDependencyEvent(schemaObject: schemaObject));
-      await Future<void>.delayed(Duration.zero);
     }
   }
 }

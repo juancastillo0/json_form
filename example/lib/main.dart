@@ -901,7 +901,7 @@ const dependenciesJsonSchema = '''{
     "parentId": {
       "type": "string",
       "title": "Parent ID",
-      "minLength": 5
+      "maxLength": 5
     },
     "address": {
       "type": "string"
@@ -917,7 +917,10 @@ const dependenciesJsonSchema = '''{
       }
     }
   },
-  "dependencies": {
+  "dependentRequired": {
+    "parentId": ["address"]
+  },
+  "dependentSchemas": {
     "parentId": {
       "type": "object",
       "properties": {
