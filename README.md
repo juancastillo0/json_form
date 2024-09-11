@@ -1,3 +1,10 @@
+
+[![Code coverage Coveralls](https://coveralls.io/repos/github/juancastillo0/json_form/badge.svg?branch=main)](https://coveralls.io/github/juancastillo0/json_form?branch=main)
+[![Code coverage Codecov](https://codecov.io/gh/juancastillo0/json_form/branch/main/graph/badge.svg?token=QJLQSCIJ42)](https://codecov.io/gh/juancastillo0/json_form)
+[![Build & Test](https://github.com/juancastillo0/json_form/actions/workflows/melos-ci.yaml/badge.svg)](https://github.com/juancastillo0/json_form/actions/workflows/melos-ci.yaml)
+[![json_form is released under the MIT license.](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/juancastillo0/json_form/blob/main/LICENSE)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#contributing)
+
 <h3 align="center">json_form</h3>
 
 A [Flutter](https://flutter.dev/) widget capable of using [JSON Schema](http://json-schema.org/) to declaratively build and customize input forms.
