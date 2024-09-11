@@ -37,12 +37,12 @@ jobs:
         if: always() && steps.install.outcome == 'success'
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         if: always() && steps.coverage.outcome == 'success'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
-          files: "*/coverage/lcov.info"
+          files: "./coverage/lcov.info"
 
       - name: Upload leto coverage to Coveralls
         uses: coverallsapp/github-action@v2
