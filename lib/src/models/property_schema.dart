@@ -1,5 +1,3 @@
-import 'package:json_form/src/utils/either.dart';
-
 import '../models/models.dart';
 
 enum PropertyFormat {
