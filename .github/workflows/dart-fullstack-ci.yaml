@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  analyze:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04]
+        sdk: [stable, beta]
+    steps:
+      - uses: actions/checkout@v3
+      # - uses: dart-lang/setup-dart@v1
+      #   with:
+      #     sdk: ${{ matrix.sdk }}
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ matrix.sdk }}
+
+      # DEPENDENCIES
+
+      - run: dart pub global activate webdev
+
+      - id: install_client
+        run: dart pub get --directory=dart_client
+
+      - id: install_web_client
+        run: dart pub get --directory=web_client
+
+      - id: install_flutter_client
+        run: dart pub get --directory=flutter_client
+
+      - id: install
+        run: dart pub get --directory=leto_server
+
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+        if: always()
+
+      # CODE GENERATION
+
+      - name: Run code generation client
+        run: cd dart_client && dart pub run build_runner build --delete-conflicting-outputs
+        if: always() && steps.install_client.outcome == 'success'
+
+      - name: Run code generation web client
+        run: cd web_client && dart pub run build_runner build --delete-conflicting-outputs
+        if: always() && steps.install_web_client.outcome == 'success'
+
+      - name: Run code generation flutter client
+        run: cd flutter_client && dart pub run build_runner build --delete-conflicting-outputs
+        if: always() && steps.install_flutter_client.outcome == 'success'
+
+      - name: Run code generation
+        run: cd leto_server && dart pub run build_runner build --delete-conflicting-outputs
+        if: always() && steps.install.outcome == 'success'
+
+      # ANALYZE and TEST
+
+      - name: Analyze project source
+        run: dart analyze
+        if: always() && steps.install.outcome == 'success'
+
+      - run: cd leto_server && dart run bin/server.dart --verify-client
+        if: always() && steps.install.outcome == 'success'
+
+      - id: coverage
+        name: Run server tests with coverage
+        if: always() && steps.install.outcome == 'success'
+        run: |
+          cd leto_server
+          dart pub global activate coverage
+          dart pub global run coverage:test_with_coverage
+
+      # BUILD AND COMPILE
+
+      - id: build_web
+        name: Build web client
+        # run: cd web_client && dart run jaspr build --input web/main.dart
+        run: cd web_client && webdev build --release # --output web:build -- '--define=build_web_compilers:entrypoint=dart2js_args=["-DENDPOINT_BASE=https://juancastillo.xyz"]'
+        if: always() && steps.install_web_client.outcome == 'success'
+
+      - id: compile
+        name: Compile binary
+        run: dart compile exe leto_server/bin/server.dart --output web_client/build/server
+        if: always() && steps.install.outcome == 'success'
+
+
+      - name: Upload web build and server binary
+        uses: peaceiris/actions-gh-pages@v3
+        if: matrix.os == 'ubuntu-22.04' && matrix.sdk == 'stable' && github.ref_name == 'main' && github.event_name == 'push' && steps.compile.outcome == 'success' && steps.coverage.outcome == 'success' && steps.build_web.outcome == 'success'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./web_client/build
+
+      # UPLOAD COVERAGE
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        if: always() && steps.coverage.outcome == 'success'
+        with:
+          fail_ci_if_error: true
+          files: "*/coverage/lcov.info"
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@v2
+        if: always() && steps.coverage.outcome == 'success'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # base-path: leto_server
+          # flag-name: leto_server
+          path-to-lcov: "./leto_server/coverage/lcov.info"
+          parallel: false # parallel-finished: true
