@@ -55,7 +55,6 @@ class UiSchemaData {
   bool removable = true;
   bool orderable = true;
   bool copyable = true;
-  UiSchemaData? get items => children['items'];
 
   Map<String, Object?> toJson() => {
         'ui:options': _asJson,
