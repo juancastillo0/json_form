@@ -322,7 +322,7 @@ aAd(a){var s,r,q=a.graphemeLayoutBounds,p=B.b.jA(q,t.i)
 q=p.a
 s=J.b8(q)
 r=p.$ti.y[1]
-return new A.oK(new A.t(r.a(s.h(q,0)),r.a(s.h(q,1)),r.a(s.h(q,2)),r.a(s.h(q,3))),new A.bG(B.c.aF(a.graphemeClusterTextRange.start),B.c.aF(a.graphemeClusterTextRange.end)),B.jU[B.c.aF(a.dir.value)])},
+return new A.oK(new A.t(r.a(s.h(q,0)),r.a(s.h(q,1)),r.a(s.h(q,2)),r.a(s.h(q,3))),new A.bG(B.c.aF(a.graphemeClusterTextRange.start),B.c.aF(a.graphemeClusterTextRange.end)),B.jV[B.c.aF(a.dir.value)])},
 aQi(a){var s,r="chromium/canvaskit.js"
 switch(a.a){case 0:s=A.b([],t.s)
 if(A.aCP())s.push(r)
@@ -16414,7 +16414,7 @@ _.fr=null},
 El:function El(){},
 T7:function T7(){},
 azO(a,b){var s,r,q,p,o,n,m,l,k,j,i,h,g,f
-if(a==null)a=B.jW
+if(a==null)a=B.jX
 s=J.b8(a)
 r=s.gE(a)-1
 q=A.be(0,null,!1,t.LQ)
@@ -16570,7 +16570,7 @@ q.gAp()
 p.sAp(q.gAp())
 q.gAo()
 p.sAo(q.gAo())
-r.lN(B.jW,p)
+r.lN(B.jX,p)
 r.sbf(b.gbf())
 r.scb(b.gcb())
 r.dy=b.gatR()
@@ -28598,7 +28598,7 @@ Ki(a){var s,r,q,p,o,n,m,l=A.b([],t.Lx)
 for(s=a.a,r=J.b8(s),q=a.$ti.y[1],p=0;p<r.gE(s);++p){o=q.a(r.h(s,p))
 n=o.rect
 m=B.c.aF(o.dir.value)
-l.push(new A.eF(n[0],n[1],n[2],n[3],B.jU[m]))}return l},
+l.push(new A.eF(n[0],n[1],n[2],n[3],B.jV[m]))}return l},
 dF(a){var s,r=this.a
 r===$&&A.a()
 r=r.a.getGlyphPositionAtCoordinate(a.a,a.b)
@@ -32964,7 +32964,7 @@ m=A.hl(s.h(0,"fontWeightIndex"))
 l=m!=null?A.aQg(m):"normal"
 r=A.aC9(s.h(0,"fontSize"))
 if(r==null)r=null
-p=new A.aeg(new A.a0x(r,l,A.cF(s.h(0,"fontFamily")),B.HF[o],B.jU[n]))
+p=new A.aeg(new A.a0x(r,l,A.cF(s.h(0,"fontFamily")),B.HF[o],B.jV[n]))
 break
 case"TextInput.clearClient":p=B.D4
 break
@@ -38636,7 +38636,7 @@ F(a){var s=null
 return new A.yS(B.Lv,"Json Form",A.u2(B.Ba,s,B.Dv,A.au9(s,!1,B.AC,s,s,s,s,s,s,s,s,A.X(B.c.aq(25.5),B.hN.gk()>>>16&255,B.hN.gk()>>>8&255,B.hN.gk()&255),!0,B.fF,B.hp,s,s,s,s,s,s,s,s,s,s,!1,!1,s,s,s,s,s,s,s,s),!0),!1,s)}}
 A.z7.prototype={
 a5(){var s=t.z
-return new A.DW(B.bN,A.v(s,s),B.b.ga3(B.jZ).b,B.b.ga3(B.jZ).c,new A.K7(A.v(t.N,t.X),$.a5()))}}
+return new A.DW(B.bN,A.v(s,s),B.b.ga3(B.jU).b,B.b.ga3(B.jU).c,new A.K7(A.v(t.N,t.X),$.a5()))}}
 A.DW.prototype={
 gXN(){var s,r,q=this.y
 if(q===$){s=this.Q
@@ -38755,7 +38755,7 @@ if(s){s=q.a
 r=s.f
 m.push(A.aAN(B.Je,B.BC,A.b([!r,r],t.HZ),new A.alO(s)))}s=A.b([B.Qd,A.b_("Examples: ",p,p,p,A.F(a).p2.w,p,p,p)],n)
 r=q.a
-B.b.T(s,new A.ab(B.jZ,new A.alP(r),t.Gy))
+B.b.T(s,new A.ab(B.jU,new A.alP(r),t.Gy))
 m.push(A.cK(A.MQ(A.d5(s,B.M,B.x,B.A,p),p,p,B.S),1))
 m=A.d5(m,B.M,B.x,B.A,p)
 s=A.b([],n)
@@ -44655,7 +44655,7 @@ p=q.ax
 if(p!=null)p.aa()
 q.du()}this.av()},
 a5R(a,b){var s,r=null,q=A.b([],t.p)
-for(s=0;q.length<7;s=(s+1)%7)q.push(new A.eS(!0,new A.lW(B.a4,r,r,A.b_(B.jY[s],r,r,r,a,r,r,r),r),r))
+for(s=0;q.length<7;s=(s+1)%7)q.push(new A.eS(!0,new A.lW(B.a4,r,r,A.b_(B.jZ[s],r,r,r,a,r,r,r),r),r))
 return q},
 F(a2){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a=this,a0=null,a1=A.bv(a2,B.K,t.y)
 a1.toString
@@ -45739,7 +45739,7 @@ else{k=a.gmh()
 g=k.y
 k=g==null?A.i(k).i("R.T").a(g):g
 k.toString
-k=B.J9[A.tg(k)-1]+", "+B.jV[A.aX(k)-1]+" "+A.c7(k)}g=A.bs(a3,B.a8)
+k=B.J9[A.tg(k)-1]+", "+B.jW[A.aX(k)-1]+" "+A.c7(k)}g=A.bs(a3,B.a8)
 g=g==null?a0:g.gbE()
 g=(g==null?B.G:g).jB(0,3)
 f=a.a5K(a3).ad(0,14*g.a/14)
@@ -66592,7 +66592,7 @@ q.y1=b.p4
 q.z=b.b
 q.y2=b.be
 q.L=b.aV
-q.afT(a==null?B.jW:a)
+q.afT(a==null?B.jX:a)
 if(s!==r)q.S8()},
 Jh(a){return this.lN(null,a)},
 YI(){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d,c,b,a,a0,a1,a2,a3,a4,a5,a6,a7=this,a8={}
@@ -82027,7 +82027,7 @@ gtZ(){return A.aR0()},
 abb(){if(this.x)return
 this.yt()},
 YH(){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e,d=this,c=null,b=d.c
-if(b===-1||d.d===-1||d.b.length===0)return new A.mX(c,c,B.cB,B.jX,d.b.length!==0)
+if(b===-1||d.d===-1||d.b.length===0)return new A.mX(c,c,B.cB,B.jY,d.b.length!==0)
 if(!d.as){b=d.Lz(d.d,b)
 d.d=b
 d.c=d.Lz(d.c,b)}s=d.b[d.d].gk()
@@ -92943,6 +92943,17 @@ B.dt=new A.jK(0,"hour")
 B.fv=new A.jK(1,"minute")
 B.oe=A.b(s([B.dt,B.fv]),A.al("A<jK>"))
 B.Ic=A.b(s(["BC","AD"]),t.s)
+B.G8=new A.ex("primitives",'{\n  "type": "object",\n  "title": "My Form",\n  "description": "Form description",\n  "properties": {\n    "string": {\n      "type": "string",\n      "title": "stringTitle"\n    },\n    "number": {\n      "type": "number",\n      "title": "numberTitle"\n    },\n    "integer": {\n      "type": "integer",\n      "title": "integerTitle"\n    },\n    "boolean": {\n      "type": "boolean",\n      "title": "booleanTitle"\n    },\n    "enum": {\n      "type": "string",\n      "title": "enumTitle",\n      "enum": ["a", "b", "c", "d"]\n    },\n    "enumRadio": {\n      "type": "integer",\n      "title": "enumRadioTitle",\n      "enum": [2, 4, 6]\n    },\n    "date": {\n      "type": "string",\n      "format": "date",\n      "title": "dateTitle"\n    },\n    "dateTime": {\n      "type": "string",\n      "format": "date-time",\n      "title": "dateTimeTitle"\n    },\n    "arrayCheckbox": {\n      "type": "array",\n      "title": "arrayCheckboxTitle",\n      "items": {\n        "type": "string",\n        "enum": ["a", "b"]\n      }\n    }\n  }\n}','{\n  "enumRadio": {\n    "ui:widget": "radio"\n  },\n  "arrayCheckbox": {\n    "ui:widget": "checkboxes"\n  }\n}')
+B.Gb=new A.ex("array",'{\n  "type": "object",\n  "properties": {\n    "array": {\n      "type": "array",\n      "items": {\n        "type": "string"\n      },\n      "uniqueItems": true,\n      "minItems": 2,\n      "maxItems": 3\n    },\n    "arrayWithObjects": {\n      "type": "array",\n      "items": {\n        "type": "object",\n        "properties": {\n          "value": {\n            "type": "boolean"\n          },\n          "value2": {\n            "type": "boolean",\n            "default": true\n          }\n        }\n      }\n    },\n    "integer": {\n      "type": "integer"\n    }\n  }\n}',"{}")
+B.Ge=new A.ex("arrayItems",'{\n  "type": "object",\n  "properties": {\n    "arrayString": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "ui:options": {\n          "help": "helper text"\n        }\n      }\n    },\n    "arrayNumber": {\n      "type": "array",\n      "items": {\n        "type": "number"\n      }\n    },\n    "arrayInteger": {\n      "type": "array",\n      "items": {\n        "type": "integer"\n      }\n    },\n    "arrayBoolean": {\n      "type": "array",\n      "items": {\n        "type": "boolean"\n      }\n    },\n    "arrayEnum": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": ["a", "b", "c", "d"]\n      }\n    },\n    "arrayEnumRadio": {\n      "type": "array",\n      "items": {\n        "type": "integer",\n        "enum": [2, 4, 6]\n      }\n    },\n    "arrayDate": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "format": "date"\n      }\n    },\n    "arrayDateTime": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "format": "date-time"\n      }\n    }\n  }\n}','{\n  "arrayEnumRadio": {\n    "items": {\n      "ui:widget": "radio"\n    }\n  }\n}')
+B.Gg=new A.ex("nestedObject",'{\n  "type": "object",\n  "properties": {\n    "object1": {\n      "type": "object",\n      "properties": {\n        "objectNested": {\n          "type": "object",\n          "required": ["value"],\n          "properties": {\n            "valueNested": {\n              "type": "boolean"\n            },\n            "value": {\n              "type": "string",\n              "minLength": 1,\n              "maxLength": 2,\n              "pattern": "^[a-b]+$"\n            }\n          }\n        }\n      }\n    },\n    "object2": {\n      "type": "object",\n      "properties": {\n        "value": {\n          "type": "string",\n          "default": "default",\n          "minLength": 2\n        }\n      }\n    }\n  }\n}',"{}")
+B.Ga=new A.ex("uiSchema",'{\n  "type": "object",\n  "properties": {\n    "stringTop": {\n      "type": "string"\n    },\n    "integerRange": {\n      "type": "integer",\n      "minimum": -3,\n      "maximum": 5,\n      "multipleOf": 2\n    },\n    "integerRadio": {\n      "type": "integer",\n      "minimum": -1,\n      "maximum": 3\n    },\n    "enumValues": {\n      "type": "string",\n      "enum": ["n1", "n2", "n3"]\n    },\n    "arrayCheckbox": {\n      "type": "array",\n      "uniqueItems": true,\n      "items": {\n        "type": "string",\n        "enum": ["n1", "n2", "n3"]\n      }\n    },\n    "arrayString": {\n      "type": "array",\n      "items": {\n        "type": "string"\n      }\n    },\n    "object": {\n      "type": "object",\n      "properties": {\n        "nameEnabled": {\n          "type": "string"\n        },\n        "nameDisabled": {\n          "type": "string",\n          "default": "disabled default"\n        },\n        "boolReadOnly": {\n          "type": "boolean",\n          "default": true\n        },\n        "nameHidden": {\n          "type": "string"\n        }\n      }\n    }\n  }\n}','{\n  "ui:order": [\n    "integerRadio",\n    "stringTop",\n    "integerRange",\n    "arrayString",\n    "enumValues",\n    "arrayCheckbox",\n    "object"\n  ],\n  "stringTop": {\n    "ui:autoFocus": true,\n    "ui:autoComplete": true,\n    "ui:placeholder": "My Object Placeholder"\n  },\n  "integerRange": {\n    "ui:widget": "range"\n  },\n  "integerRadio": {\n    "ui:widget": "radio"\n  },\n  "object": {\n    "ui:options": {\n      "description": "My Description",\n      "order": ["nameDisabled", "nameEnabled", "boolReadOnly"]\n    },\n    "ui:title": "My Object UI",\n    "ui:help": "My Object Help",\n    "nameDisabled": {\n      "ui:disabled": true\n    },\n    "boolReadOnly": {\n      "ui:readonly": true\n    },\n    "nameHidden": {\n      "ui:emptyValue": "empty",\n      "ui:hidden": true\n    }\n  },\n  "arrayCheckbox": {\n    "ui:widget": "checkboxes",\n    "ui:inline": true\n  },\n  "arrayString": {\n    "ui:orderable": true,\n    "ui:copyable": true\n  },\n  "enumValues": {\n    "ui:options": {\n      "enumNames": ["n1", "n2", "n3"],\n      "enumDisabled": ["n2"]\n    }\n  }\n}')
+B.G9=new A.ex("oneOf",' {\n  "title": "Form Title",\n  "type": "object",\n  "required": ["select"],\n  "properties": {\n    "files": {\n      "title": "Multiple files",\n      "type": "array",\n      "items": {\n        "type": "string",\n        "format": "data-url"\n      }\n    },\n    "select": {\n      "title" : "Select your Cola",\n      "type": "string",\n      "description": "This is the select-description",\n      "enum": [0,1,2,3,4],\n      "enumNames": ["Vale 0","Vale 1","Vale 2","Vale 3","Vale 4"],\n      "default": 3\n    },\n    "num": {\n      "title": "Number Title",\n      "type": "number",\n      "default": 1\n    },\n    "bool": {\n      "type": "boolean",\n      "description": "This is a description for the boolean",\n      "default": true\n    },\n    "nestedObjects": {\n      "type": "array",\n      "items": {\n        "title" : "NestedObject",\n        "type": "object",\n        "required": ["arrayOfString"],\n        "properties": {\n          "arrayOfString": {\n            "title" : "ArrayOfString",\n            "type": "array",\n            "items": { "type": "string" }\n          },\n          "nullableInteger": {\n            "type": ["integer", "null"]\n          }\n        }\n      }\n    },\n    "profession" :  {\n      "title": "Ocupaci\xf3n o profesi\xf3n",\n      "type": "string",\n      "default": "investor",\n      "oneOf": [\n        {\n          "enum": ["trader"],\n          "type": "string",\n          "title": "Trader"\n        },\n        {\n          "enum": ["investor"],\n          "title": "Inversionista"\n        },      \n        {\n          "const": "manager_officier",\n          "type": "string",\n          "title": "Gerente / Director(a)"\n        }\n      ]\n    }\n  }\n}\n',"{}")
+B.G7=new A.ex("defs",'{\n  "type": "object",\n  "properties": {\n    "user": {\n      "$ref": "#/$defs/user"\n    },\n    "parent": {\n      "$ref": "#/$defs/user"\n    },\n    "address": {\n      "$ref": "#/$defs/address"\n    }\n  },\n  "$defs": {\n    "user": {\n      "type": "object",\n      "properties": {\n        "name": {\n          "type": "string"\n        },\n        "location": {\n          "$ref": "#/$defs/address"\n        }\n      }\n    },\n    "address": {\n      "type": "string"\n    }\n  }\n}',"{}")
+B.Gf=new A.ex("dependencies",'{\n  "type": "object",\n  "properties": {\n    "user": {\n      "$ref": "#/$defs/user"\n    },\n    "parentId": {\n      "type": "string",\n      "title": "Parent ID",\n      "maxLength": 5\n    },\n    "address": {\n      "type": "string"\n    }\n  },\n  "$defs": {\n    "user": {\n      "type": "object",\n      "properties": {\n        "name": {\n          "type": "string"\n        }\n      }\n    }\n  },\n  "dependentRequired": {\n    "parentId": ["address"]\n  },\n  "dependentSchemas": {\n    "parentId": {\n      "type": "object",\n      "properties": {\n        "parentName": {\n          "type": "string"\n        }\n      }\n    }\n  }\n}',"{}")
+B.Gd=new A.ex("oneOfDependencies",'{\n  "title": "One Of Dependencies",\n  "description": "Dynamically renders different fields based on the value of an enum. Uses dependencies and one of to configure de variants.",\n  "type": "object",\n  "properties": {\n    "Do you have any pets?": {\n      "type": "string",\n      "enum": ["No", "Yes: One", "Yes: More than one"],\n      "default": "No"\n    }\n  },\n  "required": ["Do you have any pets?"],\n  "dependencies": {\n    "Do you have any pets?": {\n      "oneOf": [\n        {\n          "properties": {\n            "Do you have any pets?": {\n              "enum": ["No"]\n            }\n          }\n        },\n        {\n          "properties": {\n            "Do you have any pets?": {\n              "enum": ["Yes: One"]\n            },\n            "How old is your pet?": {\n              "type": "number"\n            }\n          },\n          "required": ["How old is your pet?"]\n        },\n        {\n          "properties": {\n            "Do you have any pets?": {\n              "const": "Yes: More than one"\n            },\n            "Do you want to get rid of any?": {\n              "type": "boolean"\n            }\n          },\n          "required": ["Do you want to get rid of any?"]\n        }\n      ]\n    }\n  }\n}',"{}")
+B.Gc=new A.ex("oneOfConst",'{\n  "title": "One Of Const",\n  "description": "variants",\n  "type": "object",\n  "properties": {\n    "Other Property": {\n      "type": "string"\n    },\n    "example": {\n      "$ref": "#/$defs/oneOfExample"\n    }\n  },\n  "$defs": {\n    "oneOfExample": {\n      "type": "object",\n      "ui:options": {\n        "title": "Pets oneOf example"\n      },\n      "required": ["Do you have any pets?"],\n      "oneOf": [\n        {\n          "properties": {\n            "Do you have any pets?": {\n              "const": "No"\n            }\n          }\n        },\n        {\n          "properties": {\n            "Do you have any pets?": {\n              "const": "Yes: One"\n            },\n            "How old is your pet?": {\n              "type": "number"\n            }\n          },\n          "required": ["How old is your pet?"]\n        },\n        {\n          "properties": {\n            "Do you have any pets?": {\n              "const": "Yes: More than one"\n            },\n            "Do you want to get rid of any?": {\n              "type": "boolean"\n            }\n          },\n          "required": ["Do you want to get rid of any?"]\n        }\n      ]\n    }\n  }\n}',"{}")
+B.jU=A.b(s([B.G8,B.Gb,B.Ge,B.Gg,B.Ga,B.G9,B.G7,B.Gf,B.Gd,B.Gc]),A.al("A<ex>"))
 B.of=A.b(s(["J","F","M","A","M","J","J","A","S","O","N","D"]),t.s)
 B.og=A.b(s([0,0,26624,1023,65534,2047,65534,2047]),t.t)
 B.eP=A.b(s([B.cJ,B.cl,B.fB,B.fC,B.iX]),t.QP)
@@ -92994,8 +93005,8 @@ B.at=new A.Br(0,"upstream")
 B.Iu=A.b(s([B.at,B.j]),A.al("A<Br>"))
 B.aB=new A.Bw(0,"rtl")
 B.Y=new A.Bw(1,"ltr")
-B.jU=A.b(s([B.aB,B.Y]),A.al("A<Bw>"))
-B.jV=A.b(s(["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]),t.s)
+B.jV=A.b(s([B.aB,B.Y]),A.al("A<Bw>"))
+B.jW=A.b(s(["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]),t.s)
 B.hy=A.b(s(["January","February","March","April","May","June","July","August","September","October","November","December"]),t.s)
 B.ol=A.b(s([0,0,32776,33792,1,10240,0,0]),t.t)
 B.VU=new A.b7(0,5)
@@ -93032,11 +93043,11 @@ B.IP=A.b(s([]),t.tc)
 B.hz=A.b(s([]),t.jl)
 B.IR=A.b(s([]),t.wi)
 B.IQ=A.b(s([]),A.al("A<azr<@>>"))
-B.jX=A.b(s([]),t.AO)
+B.jY=A.b(s([]),t.AO)
 B.IS=A.b(s([]),t.fx)
 B.IL=A.b(s([]),t.Xa)
 B.IO=A.b(s([]),t.D1)
-B.jW=A.b(s([]),t.QF)
+B.jX=A.b(s([]),t.QF)
 B.Zb=A.b(s([]),A.al("A<hd>"))
 B.IW=A.b(s([]),t.Lx)
 B.IN=A.b(s([]),t.fm)
@@ -93095,18 +93106,7 @@ B.bE=new A.eg(8,"helperError")
 B.bV=new A.eg(9,"counter")
 B.ce=new A.eg(10,"container")
 B.Jf=A.b(s([B.aH,B.aU,B.ae,B.aZ,B.b_,B.b0,B.ab,B.aO,B.bE,B.bV,B.ce]),A.al("A<eg>"))
-B.jY=A.b(s(["S","M","T","W","T","F","S"]),t.s)
-B.G9=new A.ex("primitives",'{\n  "type": "object",\n  "title": "My Form",\n  "properties": {\n    "string": {\n      "type": "string",\n      "title": "stringTitle"\n    },\n    "number": {\n      "type": "number",\n      "title": "numberTitle"\n    },\n    "integer": {\n      "type": "integer",\n      "title": "integerTitle"\n    },\n    "boolean": {\n      "type": "boolean",\n      "title": "booleanTitle"\n    },\n    "enum": {\n      "type": "string",\n      "title": "enumTitle",\n      "enum": ["a", "b", "c", "d"]\n    },\n    "enumRadio": {\n      "type": "integer",\n      "title": "enumRadioTitle",\n      "enum": [2, 4, 6]\n    },\n    "date": {\n      "type": "string",\n      "format": "date",\n      "title": "dateTitle"\n    },\n    "dateTime": {\n      "type": "string",\n      "format": "date-time",\n      "title": "dateTimeTitle"\n    },\n    "arrayCheckbox": {\n      "type": "array",\n      "title": "arrayCheckboxTitle",\n      "items": {\n        "type": "string",\n        "enum": ["a", "b"]\n      }\n    }\n  }\n}','{\n  "enumRadio": {\n    "ui:widget": "radio"\n  },\n  "arrayCheckbox": {\n    "ui:widget": "checkboxes"\n  }\n}')
-B.Gb=new A.ex("array",'{\n  "type": "object",\n  "properties": {\n    "array": {\n      "type": "array",\n      "items": {\n        "type": "string"\n      },\n      "uniqueItems": true,\n      "minItems": 2,\n      "maxItems": 3\n    },\n    "arrayWithObjects": {\n      "type": "array",\n      "items": {\n        "type": "object",\n        "properties": {\n          "value": {\n            "type": "boolean"\n          },\n          "value2": {\n            "type": "boolean",\n            "default": true\n          }\n        }\n      }\n    },\n    "integer": {\n      "type": "integer"\n    }\n  }\n}',"{}")
-B.Gd=new A.ex("arrayItems",'{\n  "type": "object",\n  "properties": {\n    "arrayString": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "ui:options": {\n          "help": "helper text"\n        }\n      }\n    },\n    "arrayNumber": {\n      "type": "array",\n      "items": {\n        "type": "number"\n      }\n    },\n    "arrayInteger": {\n      "type": "array",\n      "items": {\n        "type": "integer"\n      }\n    },\n    "arrayBoolean": {\n      "type": "array",\n      "items": {\n        "type": "boolean"\n      }\n    },\n    "arrayEnum": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "enum": ["a", "b", "c", "d"]\n      }\n    },\n    "arrayEnumRadio": {\n      "type": "array",\n      "items": {\n        "type": "integer",\n        "enum": [2, 4, 6]\n      }\n    },\n    "arrayDate": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "format": "date"\n      }\n    },\n    "arrayDateTime": {\n      "type": "array",\n      "items": {\n        "type": "string",\n        "format": "date-time"\n      }\n    }\n  }\n}','{\n  "arrayEnumRadio": {\n    "items": {\n      "ui:widget": "radio"\n    }\n  }\n}')
-B.Gg=new A.ex("nestedObject",'{\n  "type": "object",\n  "properties": {\n    "object1": {\n      "type": "object",\n      "properties": {\n        "objectNested": {\n          "type": "object",\n          "required": ["value"],\n          "properties": {\n            "valueNested": {\n              "type": "boolean"\n            },\n            "value": {\n              "type": "string",\n              "minLength": 1,\n              "maxLength": 2,\n              "pattern": "^[a-b]+$"\n            }\n          }\n        }\n      }\n    },\n    "object2": {\n      "type": "object",\n      "properties": {\n        "value": {\n          "type": "string",\n          "default": "default",\n          "minLength": 2\n        }\n      }\n    }\n  }\n}',"{}")
-B.Ga=new A.ex("uiSchema",'{\n  "type": "object",\n  "properties": {\n    "stringTop": {\n      "type": "string"\n    },\n    "integerRange": {\n      "type": "integer",\n      "minimum": -3,\n      "maximum": 5,\n      "multipleOf": 2\n    },\n    "integerRadio": {\n      "type": "integer",\n      "minimum": -1,\n      "maximum": 3\n    },\n    "enumValues": {\n      "type": "string",\n      "enum": ["n1", "n2", "n3"]\n    },\n    "arrayCheckbox": {\n      "type": "array",\n      "uniqueItems": true,\n      "items": {\n        "type": "string",\n        "enum": ["n1", "n2", "n3"]\n      }\n    },\n    "arrayString": {\n      "type": "array",\n      "items": {\n        "type": "string"\n      }\n    },\n    "object": {\n      "type": "object",\n      "properties": {\n        "nameEnabled": {\n          "type": "string"\n        },\n        "nameDisabled": {\n          "type": "string",\n          "default": "disabled default"\n        },\n        "boolReadOnly": {\n          "type": "boolean",\n          "default": true\n        },\n        "nameHidden": {\n          "type": "string"\n        }\n      }\n    }\n  }\n}','{\n  "ui:order": [\n    "integerRadio",\n    "stringTop",\n    "integerRange",\n    "arrayString",\n    "enumValues",\n    "arrayCheckbox",\n    "object"\n  ],\n  "stringTop": {\n    "ui:autoFocus": true,\n    "ui:autoComplete": true,\n    "ui:placeholder": "My Object Placeholder"\n  },\n  "integerRange": {\n    "ui:widget": "range"\n  },\n  "integerRadio": {\n    "ui:widget": "radio"\n  },\n  "object": {\n    "ui:options": {\n      "description": "My Description",\n      "order": ["nameDisabled", "nameEnabled", "boolReadOnly"]\n    },\n    "ui:title": "My Object UI",\n    "ui:help": "My Object Help",\n    "nameDisabled": {\n      "ui:disabled": true\n    },\n    "boolReadOnly": {\n      "ui:readonly": true\n    },\n    "nameHidden": {\n      "ui:emptyValue": "empty",\n      "ui:hidden": true\n    }\n  },\n  "arrayCheckbox": {\n    "ui:widget": "checkboxes",\n    "ui:inline": true\n  },\n  "arrayString": {\n    "ui:orderable": true,\n    "ui:copyable": true\n  },\n  "enumValues": {\n    "ui:options": {\n      "enumNames": ["n1", "n2", "n3"],\n      "enumDisabled": ["n2"]\n    }\n  }\n}')
-B.G8=new A.ex("oneOf",' {\n  "title": "Form Title",\n  "type": "object",\n  "required": ["select"],\n  "properties": {\n    "files": {\n      "title": "Multiple files",\n      "type": "array",\n      "items": {\n        "type": "string",\n        "format": "data-url"\n      }\n    },\n    "select": {\n      "title" : "Select your Cola",\n      "type": "string",\n      "description": "This is the select-description",\n      "enum": [0,1,2,3,4],\n      "enumNames": ["Vale 0","Vale 1","Vale 2","Vale 3","Vale 4"],\n      "default": 3\n    },\n    "num": {\n      "title": "Number Title",\n      "type": "number",\n      "default": 1\n    },\n    "bool": {\n      "type": "boolean",\n      "description": "This is a description for the boolean",\n      "default": true\n    },\n    "nestedObjects": {\n      "type": "array",\n      "items": {\n        "title" : "NestedObject",\n        "type": "object",\n        "required": ["arrayOfString"],\n        "properties": {\n          "arrayOfString": {\n            "title" : "ArrayOfString",\n            "type": "array",\n            "items": { "type": "string" }\n          },\n          "nullableInteger": {\n            "type": ["integer", "null"]\n          }\n        }\n      }\n    },\n    "profession" :  {\n      "title": "Ocupaci\xf3n o profesi\xf3n",\n      "type": "string",\n      "default": "investor",\n      "oneOf": [\n        {\n          "enum": ["trader"],\n          "type": "string",\n          "title": "Trader"\n        },\n        {\n          "enum": ["investor"],\n          "title": "Inversionista"\n        },      \n        {\n          "const": "manager_officier",\n          "type": "string",\n          "title": "Gerente / Director(a)"\n        }\n      ]\n    }\n  }\n}\n',"{}")
-B.G7=new A.ex("defs",'{\n  "type": "object",\n  "properties": {\n    "user": {\n      "$ref": "#/$defs/user"\n    },\n    "parent": {\n      "$ref": "#/$defs/user"\n    },\n    "address": {\n      "$ref": "#/$defs/address"\n    }\n  },\n  "$defs": {\n    "user": {\n      "type": "object",\n      "properties": {\n        "name": {\n          "type": "string"\n        },\n        "location": {\n          "$ref": "#/$defs/address"\n        }\n      }\n    },\n    "address": {\n      "type": "string"\n    }\n  }\n}',"{}")
-B.Ge=new A.ex("dependencies",'{\n  "type": "object",\n  "properties": {\n    "user": {\n      "$ref": "#/$defs/user"\n    },\n    "parentId": {\n      "type": "string",\n      "title": "Parent ID",\n      "maxLength": 5\n    },\n    "address": {\n      "type": "string"\n    }\n  },\n  "$defs": {\n    "user": {\n      "type": "object",\n      "properties": {\n        "name": {\n          "type": "string"\n        }\n      }\n    }\n  },\n  "dependentRequired": {\n    "parentId": ["address"]\n  },\n  "dependentSchemas": {\n    "parentId": {\n      "type": "object",\n      "properties": {\n        "parentName": {\n          "type": "string"\n        }\n      }\n    }\n  }\n}',"{}")
-B.Gc=new A.ex("oneOfDependencies",'{\n  "title": "One Of Dependencies",\n  "description": "Dynamically renders different fields based on the value of an enum. Uses dependencies and one of to configure de variants.",\n  "type": "object",\n  "properties": {\n    "Do you have any pets?": {\n      "type": "string",\n      "enum": ["No", "Yes: One", "Yes: More than one"],\n      "default": "No"\n    }\n  },\n  "required": ["Do you have any pets?"],\n  "dependencies": {\n    "Do you have any pets?": {\n      "oneOf": [\n        {\n          "properties": {\n            "Do you have any pets?": {\n              "enum": ["No"]\n            }\n          }\n        },\n        {\n          "properties": {\n            "Do you have any pets?": {\n              "enum": ["Yes: One"]\n            },\n            "How old is your pet?": {\n              "type": "number"\n            }\n          },\n          "required": ["How old is your pet?"]\n        },\n        {\n          "properties": {\n            "Do you have any pets?": {\n              "const": "Yes: More than one"\n            },\n            "Do you want to get rid of any?": {\n              "type": "boolean"\n            }\n          },\n          "required": ["Do you want to get rid of any?"]\n        }\n      ]\n    }\n  }\n}',"{}")
-B.Gf=new A.ex("oneOfConst",'{\n  "title": "One Of Const",\n  "description": "variants",\n  "type": "object",\n  "properties": {\n    "Other Property": {\n      "type": "string"\n    }\n  },\n  "required": ["Do you have any pets?"],\n  "oneOf": [\n    {\n      "properties": {\n        "Do you have any pets?": {\n          "const": "No"\n        }\n      }\n    },\n    {\n      "properties": {\n        "Do you have any pets?": {\n          "const": "Yes: One"\n        },\n        "How old is your pet?": {\n          "type": "number"\n        }\n      },\n      "required": ["How old is your pet?"]\n    },\n    {\n      "properties": {\n        "Do you have any pets?": {\n          "const": "Yes: More than one"\n        },\n        "Do you want to get rid of any?": {\n          "type": "boolean"\n        }\n      },\n      "required": ["Do you want to get rid of any?"]\n    }\n  ]\n}',"{}")
-B.jZ=A.b(s([B.G9,B.Gb,B.Gd,B.Gg,B.Ga,B.G8,B.G7,B.Ge,B.Gc,B.Gf]),A.al("A<ex>"))
+B.jZ=A.b(s(["S","M","T","W","T","F","S"]),t.s)
 B.yM=new A.kX(0,"string")
 B.kA=new A.kX(1,"number")
 B.kB=new A.kX(2,"boolean")
@@ -94331,8 +94331,8 @@ B.kI=new A.tG(1,"nextLine")
 B.i8=new A.tG(2,"forward")
 B.i9=new A.tG(3,"backward")
 B.cB=new A.AJ(2,"none")
-B.yW=new A.mX(null,null,B.cB,B.jX,!1)
-B.yV=new A.mX(null,null,B.cB,B.jX,!0)
+B.yW=new A.mX(null,null,B.cB,B.jY,!1)
+B.yV=new A.mX(null,null,B.cB,B.jY,!0)
 B.L=new A.mY(0,"next")
 B.N=new A.mY(1,"previous")
 B.P=new A.mY(2,"end")
@@ -95746,7 +95746,7 @@ s($,"aVa","aFK",()=>A.a49(A.c6([B.k7],t.R)))
 s($,"aUh","aFc",()=>A.a49(A.c6([B.k8],t.R)))
 s($,"aV4","aFH",()=>A.a49(A.c6([B.k9],t.R)))
 s($,"aW0","aGa",()=>new A.a8p(A.v(t.N,A.al("av<cT?>?(cT?)"))))
-s($,"aVJ","aG4",()=>new A.ZK("en_US",B.Ic,B.Im,B.of,B.of,B.hy,B.hy,B.jV,B.jV,B.or,B.or,B.oj,B.oj,B.jY,B.jY,B.Is,B.Il,B.I8))
+s($,"aVJ","aG4",()=>new A.ZK("en_US",B.Ic,B.Im,B.of,B.of,B.hy,B.hy,B.jW,B.jW,B.or,B.or,B.oj,B.oj,B.jZ,B.jZ,B.Is,B.Il,B.I8))
 r($,"aUt","asV",()=>A.aAX("initializeDateFormatting(<locale>)",$.aG4()))
 r($,"aVG","awG",()=>A.aAX("initializeDateFormatting(<locale>)",B.La))
 s($,"aVz","at_",()=>48)
