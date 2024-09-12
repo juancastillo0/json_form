@@ -804,6 +804,7 @@ const arrayJsonSchema = '''{
 const primitivesJsonSchema = '''{
   "type": "object",
   "title": "My Form",
+  "description": "Form description",
   "properties": {
     "string": {
       "type": "string",

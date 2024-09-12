@@ -43,6 +43,8 @@ See the [File Picker Installation](https://github.com/miguelpruivo/plugins_flutt
 
 You can interact with multiple form examples in the [deployed web page](https://juancastillo0.github.io/json_form/). The code for the page can be found in the [example folder of this repo](./example/lib/main.dart).
 
+![Primitives Example in Github Page](images/json_form_primitives_examples_page.png)
+
 ## Usage
 
 ```dart

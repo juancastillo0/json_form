@@ -1,7 +1,20 @@
 name: json_form
 description: A Flutter widget capable of using JSON Schemas to build and customize forms.
 version: 0.0.1+1
-homepage: https://github.com/juancastillo0/json_form
+repository: https://github.com/juancastillo0/json_form
+homepage: https://juancastillo0.github.io/json_form/
+issue_tracker: https://github.com/juancastillo0/json_form/issues
+screenshots:
+  - description: >
+      An example of a form built using JSON Schema with multiple primitive types. 
+      You can interact with it in the deploy Github Page.
+    path: images/json_form_primitives_examples_page.png
+topics:
+  - json-schema
+  - forms
+  - validators
+  - inputs
+  - json
 
 environment:
   sdk: ">=2.19.0 <4.0.0"
