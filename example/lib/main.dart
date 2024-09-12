@@ -988,38 +988,49 @@ const oneOfConstJsonSchema = '''{
   "properties": {
     "Other Property": {
       "type": "string"
+    },
+    "example": {
+      "\$ref": "#/\$defs/oneOfExample"
     }
   },
-  "required": ["Do you have any pets?"],
-  "oneOf": [
-    {
-      "properties": {
-        "Do you have any pets?": {
-          "const": "No"
-        }
-      }
-    },
-    {
-      "properties": {
-        "Do you have any pets?": {
-          "const": "Yes: One"
-        },
-        "How old is your pet?": {
-          "type": "number"
-        }
+  "\$defs": {
+    "oneOfExample": {
+      "type": "object",
+      "ui:options": {
+        "title": "Pets oneOf example"
       },
-      "required": ["How old is your pet?"]
-    },
-    {
-      "properties": {
-        "Do you have any pets?": {
-          "const": "Yes: More than one"
+      "required": ["Do you have any pets?"],
+      "oneOf": [
+        {
+          "properties": {
+            "Do you have any pets?": {
+              "const": "No"
+            }
+          }
         },
-        "Do you want to get rid of any?": {
-          "type": "boolean"
+        {
+          "properties": {
+            "Do you have any pets?": {
+              "const": "Yes: One"
+            },
+            "How old is your pet?": {
+              "type": "number"
+            }
+          },
+          "required": ["How old is your pet?"]
+        },
+        {
+          "properties": {
+            "Do you have any pets?": {
+              "const": "Yes: More than one"
+            },
+            "Do you want to get rid of any?": {
+              "type": "boolean"
+            }
+          },
+          "required": ["Do you want to get rid of any?"]
         }
-      },
-      "required": ["Do you want to get rid of any?"]
+      ]
     }
-  ]
+  }
 }''';

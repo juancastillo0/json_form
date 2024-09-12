@@ -73,6 +73,63 @@ class TestUtils {
       }
     }
   }
+
+  Future<void> petsDependencies(
+    Map<String, Object?> currentData,
+    String? prop,
+    Object? Function() data,
+  ) async {
+    final toUpdate =
+        prop == null ? currentData : currentData[prop] as Map<String, Object?>;
+    final propKey = prop == null ? '' : '$prop.';
+
+    await tapSubmitButton();
+    expect(data(), currentData);
+    expect(find.text('How old is your pet?'), findsNothing);
+
+    /// Tap "Yes: One"
+    const haveAny = 'Do you have any pets?';
+    await tapButton('$propKey$haveAny');
+    await tester.tap(
+      find.byKey(Key('$propKey${haveAny}_1')),
+      warnIfMissed: false,
+    );
+    await tester.pump();
+    toUpdate[haveAny] = "Yes: One";
+    expect(find.text('How old is your pet?'), findsOneWidget);
+
+    await tapSubmitButton();
+    expect(find.text('Required'), findsOneWidget);
+
+    await findAndEnterText('${propKey}How old is your pet?', '2');
+    toUpdate['How old is your pet?'] = 2;
+    await tapSubmitButton();
+    expect(find.text('Required'), findsNothing);
+    expect(data(), currentData);
+
+    /// Tap "Yes: More than one"
+    const getRid = 'Do you want to get rid of any?';
+    expect(find.text(getRid), findsNothing);
+
+    await tapButton('$propKey$haveAny');
+    await tester.tap(
+      find.byKey(Key('$propKey${haveAny}_2')),
+      warnIfMissed: false,
+    );
+    // await tester.pump(const Duration(seconds: 3));
+    await tester.pump();
+    toUpdate[haveAny] = 'Yes: More than one';
+    expect(find.text(getRid), findsOneWidget);
+    toUpdate[getRid] = false;
+
+    await tapSubmitButton();
+    expect(data(), currentData);
+
+    await tapButton('$propKey$getRid');
+    toUpdate[getRid] = true;
+    await tapSubmitButton();
+    expect(data(), currentData);
+  }
 }
 
 void main() {
@@ -1113,55 +1170,94 @@ void main() {
       ),
     );
 
-    const haveAny = 'Do you have any pets?';
     final Map<String, Object?> currentData = {
-      haveAny: "No",
+      'Do you have any pets?': "No",
     };
+    await utils.petsDependencies(currentData, null, () => data);
+  });
+
+  testWidgets('one of const', (tester) async {
+    final utils = TestUtils(tester);
+    Object? data = {};
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: JsonForm(
+            jsonSchema: '''{
+  "title": "One Of Const",
+  "description": "variants",
+  "type": "object",
+  "properties": {
+    "Other Property": {
+      "type": ["string", null]
+    },
+    "example": {
+      "\$ref": "#/\$defs/oneOfExample"
+    }
+  },
+  "\$defs": {
+    "oneOfExample": {
+      "type": "object",
+      "ui:options": {
+        "title": "Pets oneOf example"
+      },
+      "required": ["Do you have any pets?"],
+      "oneOf": [
+        {
+          "properties": {
+            "Do you have any pets?": {
+              "const": "No"
+            }
+          }
+        },
+        {
+          "properties": {
+            "Do you have any pets?": {
+              "const": "Yes: One"
+            },
+            "How old is your pet?": {
+              "type": "number"
+            }
+          },
+          "required": ["How old is your pet?"]
+        },
+        {
+          "properties": {
+            "Do you have any pets?": {
+              "const": "Yes: More than one"
+            },
+            "Do you want to get rid of any?": {
+              "type": "boolean"
+            }
+          },
+          "required": ["Do you want to get rid of any?"]
+        }
+      ]
+    }
+  }
+}''',
+            onFormDataSaved: (p) => data = p,
+          ),
+        ),
+      ),
+    );
 
     await utils.tapSubmitButton();
+    final Map<String, Object?> currentData = {};
     expect(data, currentData);
-    expect(find.text('How old is your pet?'), findsNothing);
 
-    /// Tap "Yes: One"
-    await utils.tapButton(haveAny);
+    const haveAny = 'Do you have any pets?';
+    await utils.tapButton('example.$haveAny');
     await tester.tap(
-      find.byKey(const Key('${haveAny}_1')),
+      find.byKey(const Key('example.${haveAny}_0')),
       warnIfMissed: false,
     );
     await tester.pump();
-    currentData[haveAny] = "Yes: One";
-    expect(find.text('How old is your pet?'), findsOneWidget);
+    currentData['example'] = <String, Object?>{
+      'Do you have any pets?': 'No',
+    };
+    currentData['Other Property'] = null;
 
-    await utils.tapSubmitButton();
-    expect(find.text('Required'), findsOneWidget);
-
-    await utils.findAndEnterText('How old is your pet?', '2');
-    currentData['How old is your pet?'] = 2;
-    await utils.tapSubmitButton();
-    expect(find.text('Required'), findsNothing);
-    expect(data, currentData);
-
-    /// Tap "Yes: More than one"
-    const getRid = 'Do you want to get rid of any?';
-    expect(find.text(getRid), findsNothing);
-
-    await utils.tapButton(haveAny);
-    await tester.tap(
-      find.byKey(const Key('${haveAny}_2')),
-      warnIfMissed: false,
-    );
-    // await tester.pump(const Duration(seconds: 3));
-    await tester.pump();
-    currentData[haveAny] = 'Yes: More than one';
-    expect(find.text(getRid), findsOneWidget);
-    currentData[getRid] = false;
-
-    await utils.tapSubmitButton();
-    expect(data, currentData);
-
-    await utils.tapButton(getRid);
-    currentData[getRid] = true;
-    await utils.tapSubmitButton();
-    expect(data, currentData);
+    await utils.petsDependencies(currentData, 'example', () => data);
   });
 }
