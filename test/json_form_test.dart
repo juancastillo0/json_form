@@ -399,7 +399,7 @@ void main() {
       };
       for (final key in nextValues.keys) {
         final field = controller.retrieveField(key)!;
-        expect(field.property.idKey, key);
+        expect(field.idKey, key);
         expect(field.property.title, '${key}Title');
 
         final isDate = key.startsWith('date');
