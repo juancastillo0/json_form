@@ -1,6 +1,7 @@
 import 'dart:developer' as dev;
 
 import 'package:flutter/material.dart';
+import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/models/models.dart';
 
 class ObjectSchemaEvent {
@@ -38,25 +39,27 @@ class ObjectSchemaInherited extends InheritedWidget {
 
   void listenChangeProperty(
     bool active,
-    SchemaProperty schemaProperty, {
+    JsonFormValue schemaProperty, {
     dynamic optionalValue,
   }) async {
     try {
       // Eliminamos los nuevos inputs agregados
       _removeCreatedItemsSafeMode(schemaProperty);
+      final objProps = schemaProperty.parent!.children;
       // Obtenemos el index del actual property para añadir a abajo de él
-      final indexProperty = schemaObject.properties.indexOf(schemaProperty);
-      final dependents = schemaProperty.dependents!;
+      final indexProperty = objProps.indexOf(schemaProperty);
+      final dependents = (schemaProperty.schema as SchemaProperty).dependents!;
       if (dependents.requiredProps != null) {
         final dependentsList = dependents.requiredProps!;
         dev.log('case 1');
 
         // Cuando es una Lista de String y todos ellos ahoran serán requeridos
-        for (var element in schemaObject.properties) {
+        for (var element in objProps) {
           if (dependentsList.contains(element.id)) {
-            if (element is SchemaProperty) {
+            if (element.schema is SchemaProperty) {
               dev.log('Este element ${element.id} es ahora $active');
-              element.requiredProperty = active;
+              // TODO: use FormValue
+              element.schema.requiredProperty = active;
             }
           }
         }
@@ -94,16 +97,21 @@ class ObjectSchemaInherited extends InheritedWidget {
                 // Agregamos que fue dependiente de este, para que luego pueda ser eliminado.
                 .map((e) {
               final newProp = e.copyWith(id: e.id, parent: schemaObject);
+              // TODO: move dependentsAddedBy to JsonFormValue
               newProp.dependentsAddedBy.addAll([
-                ...schemaProperty.dependentsAddedBy,
+                ...schemaProperty.schema.dependentsAddedBy,
                 schemaProperty.id,
               ]);
               if (newProp is SchemaProperty)
                 newProp.setDependents(schemaObject);
-              return newProp;
+              return JsonFormValue(
+                id: e.id,
+                parent: schemaProperty.parent,
+                schema: newProp,
+              );
             }).toList();
 
-            schemaObject.properties.insertAll(indexProperty + 1, newProperties);
+            objProps.insertAll(indexProperty + 1, newProperties);
           }
         }
       } else if (dependents.schema != null) {
@@ -111,10 +119,16 @@ class ObjectSchemaInherited extends InheritedWidget {
         dev.log('case 3');
         final _schema = dependents.schema!;
         if (active) {
-          schemaObject.properties.insert(indexProperty + 1, _schema);
+          objProps.insert(
+            indexProperty + 1,
+            JsonFormValue(
+              id: _schema.id,
+              parent: schemaProperty.parent,
+              schema: _schema,
+            ),
+          );
         } else {
-          schemaObject.properties
-              .removeWhere((element) => element.id == _schema.idKey);
+          objProps.removeWhere((element) => element.id == _schema.id);
         }
         schemaProperty.isDependentsActive = active;
       }
@@ -124,9 +138,7 @@ class ObjectSchemaInherited extends InheritedWidget {
     }
   }
 
-  void _removeCreatedItemsSafeMode(
-    SchemaProperty schemaProperty,
-  ) async {
+  void _removeCreatedItemsSafeMode(JsonFormValue schemaProperty) async {
     bool filter(Schema element) =>
         element.dependentsAddedBy.contains(schemaProperty.id);
 

@@ -62,7 +62,7 @@ class _RadioButtonJFormFieldState
     inspect(property);
 
     return FormField<dynamic>(
-      key: Key(property.idKey),
+      key: Key(idKey),
       autovalidateMode: uiConfig.autovalidateMode,
       initialValue: super.getDefaultValue(),
       onSaved: (newValue) {
@@ -90,7 +90,7 @@ class _RadioButtonJFormFieldState
                   children: List<Widget>.generate(
                     names.length,
                     (int i) => RadioListTile(
-                      key: Key('${property.idKey}_$i'),
+                      key: Key('${idKey}_$i'),
                       value: values[i],
                       title: Text(
                         names[i],

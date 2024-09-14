@@ -121,7 +121,7 @@ class _JsonFormState extends State<JsonForm> {
               _buildHeaderTitle(context),
               FormFromSchemaBuilder(
                 mainSchema: mainSchema,
-                schema: mainSchema,
+                formValue: null,
               ),
               uiConfig.submitButtonBuilder?.call(onSubmit) ??
                   Padding(
@@ -198,38 +198,102 @@ class FormFromSchemaBuilder extends StatelessWidget {
   const FormFromSchemaBuilder({
     super.key,
     required this.mainSchema,
-    required this.schema,
+    required this.formValue,
     this.schemaObject,
   });
   final Schema mainSchema;
-  final Schema schema;
+  final JsonFormValue? formValue;
   final SchemaObject? schemaObject;
 
   @override
   Widget build(BuildContext context) {
-    if (schema.uiSchema.hidden) {
-      return const SizedBox.shrink();
-    }
-    if (schema is SchemaProperty) {
-      return PropertySchemaBuilder(
-        mainSchema: mainSchema,
-        schemaProperty: schema as SchemaProperty,
-      );
-    }
-    if (schema is SchemaArray) {
-      return ArraySchemaBuilder(
-        mainSchema: mainSchema,
-        schemaArray: schema as SchemaArray,
-      );
-    }
+    final schema = formValue?.schema ?? mainSchema;
+    return JsonFormKeyPath(
+      context: context,
+      id: formValue?.id ?? schema.id,
+      child: Builder(
+        builder: (context) {
+          if (schema.uiSchema.hidden) {
+            return const SizedBox.shrink();
+          }
+          if (schema is SchemaProperty) {
+            return PropertySchemaBuilder(
+              mainSchema: mainSchema,
+              formValue: formValue!,
+            );
+          }
+          if (schema is SchemaArray) {
+            return ArraySchemaBuilder(
+              mainSchema: mainSchema,
+              schemaArray: schema,
+            );
+          }
 
-    if (schema is SchemaObject) {
-      return ObjectSchemaBuilder(
-        mainSchema: mainSchema,
-        schemaObject: schema as SchemaObject,
-      );
-    }
+          if (schema is SchemaObject) {
+            return ObjectSchemaBuilder(
+              mainSchema: mainSchema,
+              schemaObject: schema,
+            );
+          }
 
-    return const SizedBox.shrink();
+          return const SizedBox.shrink();
+        },
+      ),
+    );
+  }
+}
+
+class JsonFormKeyPath extends InheritedWidget {
+  JsonFormKeyPath({
+    super.key,
+    required BuildContext context,
+    required this.id,
+    required super.child,
+  }) : parent = maybeGet(context);
+
+  final String id;
+  final JsonFormKeyPath? parent;
+
+  String get path => appendId(parent?.path, id);
+
+  static String ofPath(BuildContext context, {String id = ''}) {
+    return JsonFormKeyPath(
+      id: id,
+      context: context,
+      child: const SizedBox(),
+    ).path;
+  }
+
+  static String appendId(String? path, String id) {
+    return path == null || path.isEmpty || path == kGenesisIdKey
+        ? id
+        : id.isEmpty
+            ? path
+            : '$path.$id';
+  }
+
+  @override
+  bool updateShouldNotify(JsonFormKeyPath oldWidget) {
+    return id != oldWidget.id;
+  }
+
+  static JsonFormKeyPath? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<JsonFormKeyPath>();
+
+  static JsonFormKeyPath of(BuildContext context) {
+    final result = maybeOf(context);
+    assert(result != null, 'No JsonFormKeyPath found in context');
+    return result!;
+  }
+
+  static JsonFormKeyPath? maybeGet(BuildContext context) =>
+      context.getElementForInheritedWidgetOfExactType<JsonFormKeyPath>()?.widget
+          as JsonFormKeyPath?;
+
+  static JsonFormKeyPath get(BuildContext context) {
+    final result =
+        context.getElementForInheritedWidgetOfExactType<JsonFormKeyPath>();
+    assert(result != null, 'No JsonFormKeyPath found in context');
+    return result!.widget as JsonFormKeyPath;
   }
 }

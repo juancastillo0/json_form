@@ -60,7 +60,7 @@ class _DropDownJFormFieldState
         child: AbsorbPointer(
           absorbing: widget.customPickerHandler != null,
           child: DropdownButtonFormField<dynamic>(
-            key: Key(property.idKey),
+            key: Key(idKey),
             focusNode: focusNode,
             autovalidateMode: uiConfig.autovalidateMode,
             hint: Text(uiConfig.localizedTexts.select()),
@@ -106,7 +106,7 @@ class _DropDownJFormFieldState
         final readOnlyValue = readOnly ||
             (property.uiSchema.enumDisabled?.contains(values[i]) ?? false);
         return DropdownMenuItem(
-          key: Key('${property.idKey}_$i'),
+          key: Key('${idKey}_$i'),
           value: values[i],
           enabled: !readOnlyValue,
           child: Text(

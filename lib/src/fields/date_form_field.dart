@@ -65,7 +65,7 @@ class _DateJFormFieldState
     return WrapFieldWithLabel(
       property: property,
       child: TextFormField(
-        key: Key(property.idKey),
+        key: Key(idKey),
         controller: txtDateCtrl,
         focusNode: focusNode,
         keyboardType: TextInputType.phone,

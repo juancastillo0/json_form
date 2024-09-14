@@ -36,7 +36,7 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
 
     return FormField<List<XFile>>(
-      key: Key(property.idKey),
+      key: Key(idKey),
       enabled: enabled,
       validator: (value) {
         if ((value == null || value.isEmpty) && property.requiredNotNull) {
@@ -75,7 +75,7 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
                   final file = field.value![index];
 
                   return ListTile(
-                    key: Key('${property.idKey}_$index'),
+                    key: Key('${idKey}_$index'),
                     title: Text(
                       file.path.characters
                           .takeLastWhile((p0) => p0 != '/')
@@ -139,7 +139,7 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
     FormFieldState<List<XFile>> field,
   ) {
     final onTap = _onTap(field);
-    final custom = uiConfig.addFileButtonBuilder?.call(onTap, property.idKey);
+    final custom = uiConfig.addFileButtonBuilder?.call(onTap, idKey);
     if (custom != null) return custom;
 
     return ElevatedButton(

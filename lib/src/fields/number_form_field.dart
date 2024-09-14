@@ -47,7 +47,7 @@ class _NumberJFormFieldState
     return WrapFieldWithLabel(
       property: property,
       child: TextFormField(
-        key: Key(property.idKey),
+        key: Key(idKey),
         focusNode: focusNode,
         keyboardType: TextInputType.numberWithOptions(
           decimal: decimal,

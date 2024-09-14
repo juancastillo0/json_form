@@ -37,7 +37,7 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
     return WrapFieldWithLabel(
       property: property,
       child: TextFormField(
-        key: Key(property.idKey),
+        key: Key(idKey),
         focusNode: focusNode,
         autofocus: uiSchema.autofocus,
         enableSuggestions: uiSchema.autocomplete,

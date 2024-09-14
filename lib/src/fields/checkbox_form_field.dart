@@ -32,7 +32,7 @@ class _CheckboxJFormFieldState
     final widgetBuilderInherited = WidgetBuilderInherited.of(context);
     final uiConfig = widgetBuilderInherited.uiConfig;
     return FormField<bool>(
-      key: Key(property.idKey),
+      key: Key(idKey),
       initialValue: super.getDefaultValue() ?? false,
       autovalidateMode: uiConfig.autovalidateMode,
       onSaved: widget.onSaved,

@@ -43,7 +43,7 @@ class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
     inspect(property);
 
     return FormField<num>(
-      key: Key(property.idKey),
+      key: Key(idKey),
       autovalidateMode: uiConfig.autovalidateMode,
       initialValue: super.getDefaultValue() ?? values.first,
       onSaved: (newValue) {

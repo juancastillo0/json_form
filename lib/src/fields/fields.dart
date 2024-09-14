@@ -37,6 +37,7 @@ abstract class PropertyFieldWidget<T> extends StatefulWidget {
 
 abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
     extends State<W> implements JsonFormField<T> {
+  late JsonFormValue fromValue;
   @override
   final focusNode = FocusNode();
   @override
@@ -50,17 +51,22 @@ abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
   set value(T newValue);
 
   @override
+  String get idKey => fromValue.idKey;
+
+  @override
   void initState() {
     super.initState();
     triggerDefaultValue();
-    property.formField = this;
+    fromValue =
+        JsonFormController.setField(context, property, this, property.id);
   }
 
   @override
   void dispose() {
-    if (property.formField == this) {
-      property.formField = null;
-    }
+    // TODO: remove field
+    // if (property.formField == this) {
+    //   property.formField = null;
+    // }
     super.dispose();
   }
 
@@ -79,9 +85,8 @@ abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
 
   dynamic getDefaultValue({bool parse = true}) {
     final widgetBuilderInherited = WidgetBuilderInherited.get(context);
-    var data =
-        widgetBuilderInherited.controller.retrieveObjectData(property.idKey) ??
-            property.defaultValue;
+    var data = widgetBuilderInherited.controller.retrieveObjectData(idKey) ??
+        property.defaultValue;
     if (data != null && parse) {
       if (property.format == PropertyFormat.date ||
           property.format == PropertyFormat.dateTime) {

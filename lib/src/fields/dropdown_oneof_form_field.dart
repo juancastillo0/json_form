@@ -58,7 +58,7 @@ class _SelectedFormFieldState
         child: AbsorbPointer(
           absorbing: widget.customPickerHandler != null,
           child: DropdownButtonFormField<SchemaProperty>(
-            key: Key(property.idKey),
+            key: Key(idKey),
             focusNode: focusNode,
             value: valueSelected,
             autovalidateMode: uiConfig.autovalidateMode,
@@ -107,7 +107,7 @@ class _SelectedFormFieldState
         .cast<SchemaProperty>()
         .map(
           (item) => DropdownMenuItem<SchemaProperty>(
-            key: Key('${property.idKey}_${i++}'),
+            key: Key('${idKey}_${i++}'),
             value: item,
             child: Text(
               item.titleOrId,

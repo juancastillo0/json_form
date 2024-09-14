@@ -179,9 +179,6 @@ class SchemaProperty extends Schema {
   final bool isMultipleFile;
   PropertyDependents? dependents;
 
-  /// Whether the dependents have been activated
-  bool isDependentsActive = false;
-
   void setDependents(SchemaObject schema) {
     if (schema.dependentRequired.containsKey(id) ||
         schema.dependentSchemas.containsKey(id)) {

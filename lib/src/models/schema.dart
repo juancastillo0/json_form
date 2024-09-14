@@ -130,32 +130,18 @@ abstract class Schema implements SchemaUiInfo {
   final Map<String, Map<String, Object?>>? defs;
   final List<Schema> oneOf;
 
-  JsonFormField? formField;
   bool requiredProperty;
   final bool nullable;
 
   bool get requiredNotNull => requiredProperty && !nullable;
 
-  String get titleOrId => title != null
-      ? title!
-      : parent is SchemaArray && int.tryParse(id) != null
-          ? '${(parent as SchemaArray).items.indexOf(this) + 1}.'
-          : id;
+  String get titleOrId => title != null ? title! : id;
 
   // util props
   final Schema? parent;
-  String? get parentIdKey => parent?.idKey;
   final List<String> dependentsAddedBy;
 
   final UiSchemaData uiSchema = UiSchemaData();
-
-  @override
-  String get idKey {
-    if (parentIdKey != null && parentIdKey != kGenesisIdKey) {
-      return _appendId(parentIdKey!, id);
-    }
-    return id;
-  }
 
   static String _appendId(String path, String id) {
     return id != kNoIdKey ? (path.isNotEmpty ? '$path.' : '') + id : path;
@@ -230,9 +216,6 @@ Either<Schema, Map<String, Object?>> _resolveRef(String ref, Schema? parent) {
 }
 
 abstract class SchemaUiInfo {
-  /// It lets us know the key in the form's data Map
-  String get idKey;
-
   /// User facing title
   String? get title;
 
@@ -246,6 +229,9 @@ abstract class SchemaUiInfo {
 /// A field that can be used to retrieve and update a
 /// JSON Schema property in a form
 abstract class JsonFormField<T> {
+  /// It lets us know the key in the form's data Map
+  String get idKey;
+
   /// Basic schema information of the field
   SchemaUiInfo get property;
 

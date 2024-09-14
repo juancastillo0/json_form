@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:json_form/json_form.dart';
+import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/models/models.dart';
 
 class JsonFormSchemaUiConfig {
@@ -103,27 +104,32 @@ class JsonFormSchemaUiConfig {
     );
   }
 
-  Widget removeItemWidget(Schema property, void Function() removeItem) {
-    return removeItemBuilder?.call(removeItem, property.idKey) ??
+  Widget removeItemWidget(String idKey, void Function() removeItem) {
+    return removeItemBuilder?.call(removeItem, idKey) ??
         TextButton.icon(
-          key: Key('removeItem_${property.idKey}'),
+          key: Key('removeItem_$idKey'),
           onPressed: removeItem,
           icon: const Icon(Icons.remove),
           label: Text(localizedTexts.removeItem()),
         );
   }
 
-  Widget addItemWidget(SchemaArray schemaArray, void Function() addItem) {
+  Widget addItemWidget(
+    JsonFormValue arrayValue,
+    void Function() addItem,
+  ) {
     String? message;
-    final props = schemaArray.arrayProperties;
-    if (props.maxItems != null && schemaArray.items.length >= props.maxItems!) {
+    final props = (arrayValue.schema as SchemaArray).arrayProperties;
+    if (props.maxItems != null &&
+        arrayValue.children.length >= props.maxItems!) {
       message = localizedTexts.maxItemsTooltip(props.maxItems!);
     }
-    return addItemBuilder?.call(addItem, schemaArray.idKey) ??
+    final idKey = arrayValue.idKey;
+    return addItemBuilder?.call(addItem, idKey) ??
         Tooltip(
           message: message ?? '',
           child: TextButton.icon(
-            key: Key('addItem_${schemaArray.idKey}'),
+            key: Key('addItem_$idKey'),
             onPressed: message == null ? addItem : null,
             icon: const Icon(Icons.add),
             label: Text(localizedTexts.addItem()),
@@ -131,10 +137,10 @@ class JsonFormSchemaUiConfig {
         );
   }
 
-  Widget copyItemWidget(Schema itemSchema, void Function() copyItem) {
-    return copyItemBuilder?.call(copyItem, itemSchema.idKey) ??
+  Widget copyItemWidget(String idKey, void Function() copyItem) {
+    return copyItemBuilder?.call(copyItem, idKey) ??
         TextButton.icon(
-          key: Key('copyItem_${itemSchema.idKey}'),
+          key: Key('copyItem_$idKey'),
           onPressed: copyItem,
           icon: const Icon(Icons.copy),
           label: Text(localizedTexts.copyItem()),

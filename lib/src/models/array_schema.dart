@@ -14,8 +14,7 @@ class SchemaArray extends Schema {
     required super.nullable,
     super.parent,
     super.dependentsAddedBy,
-  })  : items = items ?? [],
-        super(type: SchemaType.array) {
+  })  : super(type: SchemaType.array) {
     this.itemsBaseSchema = itemsBaseSchema is Schema
         ? itemsBaseSchema.copyWith(id: kNoIdKey, parent: this)
         : Schema.fromJson(itemsBaseSchema, parent: this);
@@ -61,22 +60,10 @@ class SchemaArray extends Schema {
       dependentsAddedBy: dependentsAddedBy ?? this.dependentsAddedBy,
       oneOf: oneOf,
     );
-    newSchema.items.addAll(
-      items.map(
-        (e) => e.copyWith(
-          id: e.id,
-          parent: newSchema,
-          dependentsAddedBy: newSchema.dependentsAddedBy,
-        ),
-      ),
-    );
     newSchema.setUiSchema(uiSchema.toJson(), fromOptions: false);
 
     return newSchema;
   }
-
-  /// can be array of [Schema] or [Schema]
-  final List<Schema> items;
 
   // it allow us
   late final Schema itemsBaseSchema;
