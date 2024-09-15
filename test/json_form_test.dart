@@ -121,6 +121,7 @@ class TestUtils {
     toUpdate[haveAny] = 'Yes: More than one';
     expect(find.text(getRid), findsOneWidget);
     toUpdate[getRid] = false;
+    toUpdate.remove('How old is your pet?');
 
     await tapSubmitButton();
     expect(data(), currentData);
@@ -217,7 +218,7 @@ void main() {
         ),
       ),
     );
-    expect(data, {'arrayCheckbox': []});
+    expect(data, {});
 
     // TODO: use JsonFormInput_string as Key?
     await utils.findAndEnterText('string', 'hello');
@@ -225,46 +226,36 @@ void main() {
     expect(
       data,
       {
-        'arrayCheckbox': [],
         'string': 'hello',
         'number': 2.0,
       },
     );
 
-    final submitButton = await utils.tapSubmitButton();
-    expect(
-      data,
-      {
-        'string': 'hello',
-        'number': 2.0,
-        'boolean': false,
-        'enum': null,
-        'enumRadio': null,
-        'arrayCheckbox': [],
-      },
-    );
+    final currentValues = {
+      'string': 'hello',
+      'number': 2.0,
+      'integer': null,
+      'boolean': false,
+      'enum': null,
+      'enumRadio': null,
+      'date': null,
+      'dateTime': null,
+      'arrayCheckbox': []
+    };
+    await utils.tapSubmitButton();
+    expect(data, currentValues);
 
     final integerInput = find.byKey(const Key('integer'));
     expect(integerInput, findsOneWidget);
     await tester.enterText(integerInput, '-3');
+    currentValues['integer'] = -3;
     await tester.enterText(numberInput, '.2');
+    currentValues['number'] = 0.2;
     await tester.pump();
-
     await utils.tapButton('boolean');
-    await tester.tap(submitButton);
-    await tester.pump();
-    expect(
-      data,
-      {
-        'string': 'hello',
-        'number': 0.2,
-        'integer': -3,
-        'boolean': true,
-        'enum': null,
-        'enumRadio': null,
-        'arrayCheckbox': [],
-      },
-    );
+    currentValues['boolean'] = true;
+    await utils.tapSubmitButton();
+    expect(data, currentValues);
 
     final enumDropDown = find.byKey(const Key('enum'));
     expect(enumDropDown, findsOneWidget);
@@ -272,57 +263,25 @@ void main() {
     await tester.pump();
     await tester.tap(find.byKey(const Key('enum_1')), warnIfMissed: false);
     await tester.pump();
+    currentValues['enum'] = 'b';
     await utils.tapSubmitButton();
     await tester.pump();
-    expect(
-      data,
-      {
-        'string': 'hello',
-        'number': 0.2,
-        'integer': -3,
-        'boolean': true,
-        'enum': 'b',
-        'enumRadio': null,
-        'arrayCheckbox': [],
-      },
-    );
+    expect(data, currentValues);
 
     final radio0 = find.byKey(const Key('enumRadio_0'));
     expect(radio0, findsOneWidget);
     await tester.tap(radio0);
-    await tester.tap(submitButton);
-    await tester.pump();
-    expect(
-      data,
-      {
-        'string': 'hello',
-        'number': 0.2,
-        'integer': -3,
-        'boolean': true,
-        'enum': 'b',
-        'enumRadio': 2,
-        'arrayCheckbox': [],
-      },
-    );
+    currentValues['enumRadio'] = 2;
+    await utils.tapSubmitButton();
+    expect(data, currentValues);
 
-    await utils.findAndEnterText('date', '2023-04-02');
-    await utils.findAndEnterText('dateTime', '2021-12-27 13:01:49');
-    await tester.tap(submitButton);
-    await tester.pump();
-    expect(
-      data,
-      {
-        'string': 'hello',
-        'number': 0.2,
-        'integer': -3,
-        'boolean': true,
-        'enum': 'b',
-        'enumRadio': 2,
-        'date': '2023-04-02',
-        'dateTime': '2021-12-27 13:01:49',
-        'arrayCheckbox': [],
-      },
+    await utils.findAndEnterText('date', currentValues['date'] = '2023-04-02');
+    await utils.findAndEnterText(
+      'dateTime',
+      currentValues['dateTime'] = '2021-12-27 13:01:49',
     );
+    await utils.tapSubmitButton();
+    expect(data, currentValues);
 
     int i = 0;
     for (final position in LabelPosition.values) {
@@ -497,6 +456,7 @@ void main() {
     expect(data, {
       'array': ['text0', 'text1'],
       'arrayWithObjects': [],
+      'integer': null,
     });
 
     await tester.enterText(array1Input, 'text0');
@@ -517,12 +477,12 @@ void main() {
     await tester.pump();
 
     await tester.enterText(array0Input, 'text00');
+    await utils.tapSubmitButton();
     expect(data, {
       'array': ['text00', 'text2', null],
       'arrayWithObjects': [],
+      'integer': null,
     });
-
-    await utils.tapSubmitButton();
     expect(find.text('Items must be unique'), findsNothing);
 
     expect(find.byTooltip('You can only add 3 items'), findsOneWidget);
@@ -532,6 +492,7 @@ void main() {
     expect(data, {
       'array': ['text00', 'text2', null],
       'arrayWithObjects': [],
+      'integer': null,
     });
 
     await utils.findAndEnterText('array.4', 'text3');
@@ -539,6 +500,7 @@ void main() {
     expect(data, {
       'array': ['text00', 'text2', 'text3'],
       'arrayWithObjects': [],
+      'integer': null,
     });
     expect(find.byTooltip('You can only add 3 items'), findsOneWidget);
 
@@ -550,6 +512,7 @@ void main() {
     expect(data, {
       'array': ['text00', 'text2'],
       'arrayWithObjects': [],
+      'integer': null,
     });
 
     final arrayWithObjectsAdd =
@@ -956,10 +919,6 @@ void main() {
     }
   });
 
-  // TODO:
-  // format
-  // readOnly
-
   testWidgets('defs and refs', (tester) async {
     final utils = TestUtils(tester);
     Object? data = {};
@@ -1092,7 +1051,6 @@ void main() {
     // parentName is shown
     expect(find.text('parentName'), findsOneWidget);
     await utils.tapSubmitButton();
-    expect(data, currentData);
     // address is required
     expect(find.text('Required'), findsOneWidget);
 
@@ -1275,96 +1233,99 @@ void main() {
             builder: (context, setState_) {
               return JsonForm(
                 jsonSchema: '''{
-          "type": "object",
-          "required": ["number", "email", "uuid", "dateTime"],
-          "properties": {
-            "email": {
-              "type": "string",
-              "format": "email",
-              "ui:options": {
-                "autofocus": true
-              }
-            },
-            "uri": {
-              "type": "string",
-              "format": "uri"
-            },
-            "hostname": {
-              "type": "string",
-              "format": "hostname"
-            },
-            "uuid": {
-              "type": ["string", "null"],
-              "format": "uuid"
-            },
-            "regex": {
-              "type": ["string", "null"],
-              "format": "regex"
-            },
-            "ipv4": {
-              "type": "string",
-              "format": "ipv4"
-            },
-            "ipv6": {
-              "type": "string",
-              "format": "ipv6"
-            },
-            "time": {
-              "type": "string",
-              "format": "time"
-            },
-            
-            "number": {
-              "type": "number",
-              "minimum": 2,
-              "maximum": 12,
-              "multipleOf": 2
-            },
-            "numberExclusive": {
-              "type": ["integer", null],
-              "minimumExclusive": 2,
-              "maximumExclusive": 12
-            },
-            "arrayRoot": {
-              "type": "array",
-              "items": {
-                "\$ref": "#"
-              }
-            },
-            "dateTime": {
-              "type": "string",
-              "format": "date-time"
-            },
-            "arrayInts": {
-              "ui:options": {
-                "ui:removable": true,
-                "items": {
-                  "ui:autofocus": true
-                }
-              },
-              "type": "array",
-              "items": {
-                "type": "integer",
-                "minimumExclusive": 2,
-                "maximumExclusive": 6
-              }
-            }
-          }
-        }''',
-                onFormDataSaved: (p) => data = p as Map<String, Object?>,
+  "type": "object",
+  "required": ["number", "email", "uuid", "dateTime"],
+  "properties": {
+    "email": {
+      "type": "string",
+      "format": "email",
+      "ui:options": {
+        "autofocus": true
+      }
+    },
+    "uri": {
+      "type": "string",
+      "format": "uri"
+    },
+    "hostname": {
+      "type": "string",
+      "format": "hostname"
+    },
+    "uuid": {
+      "type": ["string", "null"],
+      "format": "uuid"
+    },
+    "regex": {
+      "type": ["string", "null"],
+      "format": "regex"
+    },
+    "ipv4": {
+      "type": "string",
+      "format": "ipv4"
+    },
+    "ipv6": {
+      "type": "string",
+      "format": "ipv6"
+    },
+    "time": {
+      "type": "string",
+      "format": "time"
+    },
+    
+    "number": {
+      "type": "number",
+      "minimum": 2,
+      "maximum": 12,
+      "multipleOf": 2
+    },
+    "numberExclusive": {
+      "type": ["integer", null],
+      "minimumExclusive": 2,
+      "maximumExclusive": 12
+    },
+    "arrayRoot": {
+      "type": "array",
+      "items": {
+        "\$ref": "#"
+      }
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "arrayInts": {
+      "ui:options": {
+        "removable": true,
+        "items": {
+          "ui:autofocus": true
+        }
+      },
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimumExclusive": 2,
+        "maximumExclusive": 6
+      }
+    }
+  }
+}''',
+                onFormDataSaved: (p) {
+                  data = p as Map<String, Object?>;
+                },
                 controller: controller,
                 customValidatorHandler: () {
                   return {
-                    'uri': (uri) => uri == null || Uri.parse(uri).isAbsolute
-                        ? null
-                        : 'Should be absolute URI',
-                    'numberExclusive': (n) => n == null || n != '6'
+                    'uri': (uri) =>
+                        (uri as String).isEmpty || Uri.parse(uri).isAbsolute
+                            ? null
+                            : 'Should be absolute URI',
+                    'numberExclusive': (n) => (n as String).isEmpty || n != '6'
                         ? null
                         : 'Should be different than 6',
                     'arrayCheckbox': (a) =>
                         (a as List).contains(3) && a.contains(5)
-                            ? null
-                            : "Can't have 3 and 5 at the same time",
+                            ? "Can't have 3 and 5 at the same time"
+                            : null,
                   };
                 },
                 uiConfig: JsonFormSchemaUiConfig(
@@ -1385,23 +1346,20 @@ void main() {
     );
     final emailField = controller.retrieveField('email')!;
     expect(emailField.focusNode.hasPrimaryFocus, true);
-    expect(data, {
-      'arrayRoot': [],
-      'arrayInts': [],
-    });
+    expect(data, {});
 
     final currentData = <String, Object?>{
-      // 'email': null,
-      // 'uri': null,
-      // 'hostname': null,
-      // 'uuid': null,
-      // 'regex': null,
-      // 'ipv4': null,
-      // 'ipv6': null,
-      // 'time': null,
-      // 'number': null,
-      // 'numberExclusive': null,
-      // 'dateTime': null,
+      'email': null,
+      'uri': null,
+      'hostname': null,
+      'uuid': null,
+      'regex': null,
+      'ipv4': null,
+      'ipv6': null,
+      'time': null,
+      'number': null,
+      'numberExclusive': null,
+      'dateTime': null,
       'arrayRoot': [],
       'arrayInts': [],
     };
@@ -1415,16 +1373,18 @@ void main() {
       'email',
       currentData['email'] = 'hello@mail.com',
     );
-    currentData['number'] = 4;
-    await utils.findAndEnterText('number', '4');
+    await utils.findAndEnterText(
+      'number',
+      (currentData['number'] = 4).toString(),
+    );
     await utils.findAndEnterText(
       'dateTime',
       currentData['dateTime'] = '2002-03-23 12:34:56',
     );
 
     await utils.tapSubmitButton();
-    expect(data, currentData);
     expect(find.text('Required'), findsNothing);
+    expect(data, currentData);
 
     /// Formats
     await utils.findAndEnterText(
@@ -1463,6 +1423,72 @@ void main() {
     await utils.tapSubmitButton();
     expect(data, currentData);
 
+    /// Array of integers
+    await utils.tapButton('addItem_arrayInts');
+    // TODO: final arrayIntsField = controller.retrieveField('arrayInts.1')!;
+    // TODO: expect(arrayIntsField.focusNode.hasPrimaryFocus, true);
+    (currentData['arrayInts'] as List).add(2);
+    await utils.findAndEnterText('arrayInts.1', '2');
+
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+
+    /// Array of root
+    await utils.tapButton('addItem_arrayRoot');
+    final nestedData = <String, Object?>{
+      'email': null,
+      'uri': null,
+      'hostname': null,
+      'uuid': null,
+      'regex': null,
+      'ipv4': null,
+      'ipv6': null,
+      'time': null,
+      'number': null,
+      'numberExclusive': null,
+      'arrayRoot': [],
+      'dateTime': null,
+      'arrayInts': [],
+    };
+    currentData['arrayRoot'] = [nestedData];
+
+    /// Required
+    await utils.tapSubmitButton();
+    expect(find.text('Required'), findsExactly(3));
+
+    /// Apply required
+    await utils.findAndEnterText(
+      'arrayRoot.1.email',
+      nestedData['email'] = 'hello@mail.com',
+    );
+    await utils.findAndEnterText(
+      'arrayRoot.1.number',
+      (nestedData['number'] = 4).toString(),
+    );
+    await utils.findAndEnterText(
+      'arrayRoot.1.dateTime',
+      nestedData['dateTime'] = '2002-03-23 12:34:56',
+    );
+
+    await utils.tapSubmitButton();
+    expect(find.text('Required'), findsNothing);
+    expect(data, currentData);
+
+    await utils.tapButton('copyItem_arrayRoot.1');
+    (currentData['arrayRoot'] as List).add(nestedData);
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+
+    /// Remove items
+    expect(find.byKey(const Key('removeItem_arrayRoot.1')), findsNothing);
+    expect(find.byKey(const Key('removeItem_arrayInts.1')), findsOneWidget);
+    await utils.tapButton('removeItem_arrayInts.1');
+    currentData['arrayInts'] = [];
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+
+    /// Show/hide items
+
     /// Format Errors
     await utils.findAndEnterText(
       'email',
@@ -1487,7 +1513,6 @@ void main() {
     );
 
     await utils.tapSubmitButton();
-    expect(data, currentData);
     expect(find.text('Required'), findsNothing);
     expect(find.text('Should be an email'), findsOneWidget);
     expect(find.text('Invalid time'), findsOneWidget);
@@ -1500,62 +1525,5 @@ void main() {
     expect(find.text('Should be different than 6'), findsOneWidget);
     // TODO: expect(find.text('Invalid format'), findsOneWidget);
     // TODO: expect(find.text('Should be absolute URI'), findsOneWidget);
-
-    /// Array of integers
-    await utils.tapButton('addItem_arrayInts');
-    // TODO: final arrayIntsField = controller.retrieveField('arrayInts.1')!;
-    // TODO: expect(arrayIntsField.focusNode.hasPrimaryFocus, true);
-    (currentData['arrayInts'] as List).add(2);
-    await utils.findAndEnterText('arrayInts.1', '2');
-
-    /// Array of root
-    await utils.tapButton('addItem_arrayRoot');
-    final nestedData = <String, Object?>{
-      'email': null,
-      'uri': null,
-      'hostname': null,
-      'uuid': null,
-      'regex': null,
-      'ipv4': null,
-      'ipv6': null,
-      'time': null,
-      'number': null,
-      'numberExclusive': null,
-      'arrayRoot': [],
-      'dateTime': null,
-      'arrayInts': [],
-    };
-    currentData['arrayRoot'] = [nestedData];
-
-    /// Required
-    expect(find.text('Required'), findsExactly(3));
-
-    /// Apply required
-    await utils.findAndEnterText(
-      'email',
-      nestedData['email'] = 'hello@mail.com',
-    );
-    await utils.findAndEnterText('number', nestedData['number'] = '4');
-    nestedData['dateTime'] = DateTime.parse('2002-03-23 12:34:56');
-    await utils.findAndEnterText('dateTime', '2002-03-23 12:34:56');
-
-    await utils.tapSubmitButton();
-    expect(data, currentData);
-    expect(find.text('Required'), findsNothing);
-
-    await utils.tapButton('copyItem_arrayRoot.1');
-    (currentData['arrayRoot'] as List).add(nestedData);
-    await utils.tapSubmitButton();
-    expect(data, currentData);
-
-    /// Remove items
-    expect(find.byKey(const Key('removeItem_arrayRoot.1')), findsNothing);
-    expect(find.byKey(const Key('removeItem_arrayInts.1')), findsOneWidget);
-    await utils.tapButton('removeItem_arrayInts.1');
-    currentData['arrayInts'] = [];
-    await utils.tapSubmitButton();
-    expect(data, currentData);
-
-    /// Show/hide items
   });
 }

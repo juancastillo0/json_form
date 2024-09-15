@@ -461,6 +461,17 @@ class FormExample {
       FormExample('oneOfDependencies', oneOfDependenciesJsonSchema, '{}');
   static const oneOfConstExample =
       FormExample('oneOfConst', oneOfConstJsonSchema, '{}');
+  static const formatsExample = FormExample(
+    'formats',
+    formatsJsonSchema,
+    '''{
+  "ui:globalOptions": {
+    "copyable": true,
+    "removable": false,
+    "autofocus": false
+  }
+}''',
+  );
 
   static const allExamples = [
     primitivesExample,
@@ -473,6 +484,7 @@ class FormExample {
     dependenciesExample,
     oneOfDependenciesExample,
     oneOfConstExample,
+    formatsExample,
   ];
 }
 
@@ -1032,6 +1044,84 @@ const oneOfConstJsonSchema = '''{
           "required": ["Do you want to get rid of any?"]
         }
       ]
+    }
+  }
+}''';
+
+const formatsJsonSchema = '''{
+  "type": "object",
+  "required": ["number", "email", "uuid", "dateTime"],
+  "properties": {
+    "email": {
+      "type": "string",
+      "format": "email",
+      "ui:options": {
+        "autofocus": true
+      }
+    },
+    "uri": {
+      "type": "string",
+      "format": "uri"
+    },
+    "hostname": {
+      "type": "string",
+      "format": "hostname"
+    },
+    "uuid": {
+      "type": ["string", "null"],
+      "format": "uuid"
+    },
+    "regex": {
+      "type": ["string", "null"],
+      "format": "regex"
+    },
+    "ipv4": {
+      "type": "string",
+      "format": "ipv4"
+    },
+    "ipv6": {
+      "type": "string",
+      "format": "ipv6"
+    },
+    "time": {
+      "type": "string",
+      "format": "time"
+    },
+    
+    "number": {
+      "type": "number",
+      "minimum": 2,
+      "maximum": 12,
+      "multipleOf": 2
+    },
+    "numberExclusive": {
+      "type": ["integer", null],
+      "minimumExclusive": 2,
+      "maximumExclusive": 12
+    },
+    "arrayRoot": {
+      "type": "array",
+      "items": {
+        "\$ref": "#"
+      }
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "arrayInts": {
+      "ui:options": {
+        "removable": true,
+        "items": {
+          "ui:autofocus": true
+        }
+      },
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimumExclusive": 2,
+        "maximumExclusive": 6
+      }
     }
   }
 }''';
