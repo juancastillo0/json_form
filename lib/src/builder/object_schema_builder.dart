@@ -183,7 +183,7 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder>
   }
 
   @override
-  Map<String, Object?> get value => fromValue.toJson() as Map<String, Object?>;
+  Map<String, Object?> get value => fromValue.toJson()! as Map<String, Object?>;
   @override
   final FocusNode focusNode = FocusNode();
   @override

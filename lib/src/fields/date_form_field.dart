@@ -19,7 +19,8 @@ class DateJFormField extends PropertyFieldWidget<DateTime> {
   });
 
   @override
-  _DateJFormFieldState createState() => _DateJFormFieldState();
+  PropertyFieldState<DateTime, DateJFormField> createState() =>
+      _DateJFormFieldState();
 }
 
 class _DateJFormFieldState
@@ -122,7 +123,7 @@ class _DateJFormFieldState
     );
   }
 
-  void _openCalendar() async {
+  Future<void> _openCalendar() async {
     DateTime tempDate = parseDate();
     final defaultYearsRange = [1900, 2099];
     List<int> yearsRange = property.uiSchema.yearsRange ?? defaultYearsRange;
@@ -155,7 +156,7 @@ class _DateJFormFieldState
     widget.onSaved(date);
   }
 
-  void _openTime() async {
+  Future<void> _openTime() async {
     late DateTime date = parseDate();
     final time = await showTimePicker(
       context: context,

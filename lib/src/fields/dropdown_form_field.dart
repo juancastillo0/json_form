@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
-import '../models/models.dart';
+import 'package:json_form/src/models/models.dart';
 
-class DropDownJFormField extends PropertyFieldWidget<dynamic> {
+class DropDownJFormField extends PropertyFieldWidget<Object?> {
   const DropDownJFormField({
     super.key,
     required super.property,
@@ -14,13 +14,14 @@ class DropDownJFormField extends PropertyFieldWidget<dynamic> {
     super.customValidator,
   });
 
-  final Future<dynamic> Function(Map)? customPickerHandler;
+  final Future<Object?> Function(Map<Object?, Object?>)? customPickerHandler;
   @override
-  _DropDownJFormFieldState createState() => _DropDownJFormFieldState();
+  PropertyFieldState<Object?, PropertyFieldWidget<Object?>> createState() =>
+      _DropDownJFormFieldState();
 }
 
 class _DropDownJFormFieldState
-    extends PropertyFieldState<dynamic, DropDownJFormField> {
+    extends PropertyFieldState<Object?, DropDownJFormField> {
   Object? _value;
   @override
   Object? get value => _value;
@@ -31,7 +32,7 @@ class _DropDownJFormFieldState
     });
   }
 
-  late List<dynamic> values;
+  late List<Object?> values;
   late List<String> names;
 
   @override
@@ -50,7 +51,7 @@ class _DropDownJFormFieldState
   Widget build(BuildContext context) {
     assert(
       names.length == values.length,
-      '[enumNames] and [enum]  must be the same size ',
+      '[enumNames] and [enum] must be the same size ',
     );
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     return WrapFieldWithLabel(
@@ -59,12 +60,11 @@ class _DropDownJFormFieldState
         onTap: enabled ? _onTap : null,
         child: AbsorbPointer(
           absorbing: widget.customPickerHandler != null,
-          child: DropdownButtonFormField<dynamic>(
+          child: DropdownButtonFormField<Object?>(
             key: Key(idKey),
             focusNode: focusNode,
             autovalidateMode: uiConfig.autovalidateMode,
             hint: Text(uiConfig.localizedTexts.select()),
-            isExpanded: false,
             validator: (value) {
               if (property.requiredNotNull && value == null) {
                 return uiConfig.localizedTexts.required();
@@ -85,20 +85,20 @@ class _DropDownJFormFieldState
     );
   }
 
-  void _onTap() async {
+  Future<void> _onTap() async {
     if (widget.customPickerHandler == null) return;
     final response = await widget.customPickerHandler!(_getItems());
     if (response != null) _onChanged(response);
   }
 
-  void _onChanged(dynamic value) {
-    if (widget.onChanged != null) widget.onChanged!(value);
+  void _onChanged(Object? value) {
+    widget.onChanged?.call(value);
     setState(() {
       this.value = value;
     });
   }
 
-  List<DropdownMenuItem> _buildItems() {
+  List<DropdownMenuItem<Object?>> _buildItems() {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     return List.generate(
       values.length,
@@ -121,7 +121,7 @@ class _DropDownJFormFieldState
     );
   }
 
-  Map _getItems() {
+  Map<Object?, String> _getItems() {
     return {
       for (var i = 0; i < values.length; i++) values[i]: names[i],
     };

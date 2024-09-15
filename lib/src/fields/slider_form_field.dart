@@ -5,7 +5,6 @@ import 'package:json_form/json_form.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
-import 'package:json_form/src/models/models.dart';
 
 class SliderJFormField extends PropertyFieldWidget<num> {
   const SliderJFormField({
@@ -17,7 +16,8 @@ class SliderJFormField extends PropertyFieldWidget<num> {
   });
 
   @override
-  _SliderJFormFieldState createState() => _SliderJFormFieldState();
+  PropertyFieldState<num, SliderJFormField> createState() =>
+      _SliderJFormFieldState();
 }
 
 class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
@@ -45,7 +45,7 @@ class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
     return FormField<num>(
       key: Key(idKey),
       autovalidateMode: uiConfig.autovalidateMode,
-      initialValue: super.getDefaultValue() ?? values.first,
+      initialValue: super.getDefaultValue<num>() ?? values.first,
       onSaved: (newValue) {
         widget.onSaved(newValue);
       },

@@ -6,7 +6,7 @@ import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
 
-class RadioButtonJFormField extends PropertyFieldWidget<dynamic> {
+class RadioButtonJFormField extends PropertyFieldWidget<Object?> {
   const RadioButtonJFormField({
     super.key,
     required super.property,
@@ -16,11 +16,12 @@ class RadioButtonJFormField extends PropertyFieldWidget<dynamic> {
   });
 
   @override
-  _RadioButtonJFormFieldState createState() => _RadioButtonJFormFieldState();
+  PropertyFieldState<Object?, RadioButtonJFormField> createState() =>
+      _RadioButtonJFormFieldState();
 }
 
 class _RadioButtonJFormFieldState
-    extends PropertyFieldState<dynamic, RadioButtonJFormField> {
+    extends PropertyFieldState<Object?, RadioButtonJFormField> {
   late FormFieldState<Object?> field;
   @override
   Object? get value => field.value;
@@ -29,7 +30,7 @@ class _RadioButtonJFormFieldState
     field.didChange(newValue);
   }
 
-  late List<dynamic> values;
+  late List<Object?> values;
   late List<String> names;
 
   @override
@@ -61,7 +62,7 @@ class _RadioButtonJFormFieldState
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     inspect(property);
 
-    return FormField<dynamic>(
+    return FormField<Object?>(
       key: Key(idKey),
       autovalidateMode: uiConfig.autovalidateMode,
       initialValue: super.getDefaultValue(),
@@ -89,7 +90,7 @@ class _RadioButtonJFormFieldState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: List<Widget>.generate(
                     names.length,
-                    (int i) => RadioListTile(
+                    (int i) => RadioListTile<Object?>(
                       key: Key('${idKey}_$i'),
                       value: values[i],
                       title: Text(
@@ -99,15 +100,13 @@ class _RadioButtonJFormFieldState
                             : uiConfig.fieldInput,
                       ),
                       groupValue: field.value,
-                      autofocus: i == 0 ? property.uiSchema.autofocus : false,
+                      autofocus: i == 0 && property.uiSchema.autofocus,
                       onChanged: enabled
-                          ? (dynamic value) {
+                          ? (Object? value) {
                               log(value.toString());
                               if (value != null) {
                                 field.didChange(value);
-                                if (widget.onChanged != null) {
-                                  widget.onChanged!(value!);
-                                }
+                                widget.onChanged?.call(value);
                               }
                             }
                           : null,

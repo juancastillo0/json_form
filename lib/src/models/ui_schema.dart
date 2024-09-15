@@ -165,7 +165,7 @@ class UiSchemaData {
           hideClearButton = data as bool;
           break;
         case "order":
-          order = List<String>.from(data);
+          order = (data as List).cast();
           break;
 
         ///

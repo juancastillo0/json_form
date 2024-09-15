@@ -7,6 +7,7 @@ import 'package:json_form/src/models/models.dart';
 
 class ArraySchemaBuilder extends StatefulWidget {
   const ArraySchemaBuilder({
+    super.key,
     required this.mainSchema,
     required this.schemaArray,
   });
@@ -43,8 +44,9 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
       schemaArray.id,
     );
     formValue.value ??= [];
-    _initialValue = formValue.value as List;
+    _initialValue = formValue.value! as List;
     if (_initialValue!.isNotEmpty) {
+      // update children
       value = _initialValue!;
     }
   }
@@ -160,11 +162,13 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
                         customValidatorHandler:
                             widgetBuilderInherited.customValidatorHandler,
                         fileHandler: widgetBuilderInherited.fileHandler,
+                        uiConfig: widgetBuilderInherited.uiConfig,
+                        context: context,
                         child: FormFromSchemaBuilder(
                           mainSchema: widget.mainSchema,
                           formValue: item,
                         ),
-                      )..uiConfig = widgetBuilderInherited.uiConfig,
+                      ),
                     ),
                   ],
                 );
@@ -194,9 +198,10 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
                             formValue.children.length.toString(),
                             style: uiConfig.subtitle,
                           ),
-                          showItems
-                              ? const Icon(Icons.arrow_drop_up_outlined)
-                              : const Icon(Icons.arrow_drop_down_outlined),
+                          if (showItems)
+                            const Icon(Icons.arrow_drop_up_outlined)
+                          else
+                            const Icon(Icons.arrow_drop_down_outlined),
                         ],
                       ),
                     ),
@@ -294,7 +299,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
 
   @override
   List<Object?> get value =>
-      isCheckboxes ? field.value! : formValue.toJson() as List<Object?>;
+      isCheckboxes ? field.value! : formValue.toJson()! as List<Object?>;
 
   @override
   final focusNode = FocusNode();

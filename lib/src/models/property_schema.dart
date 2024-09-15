@@ -1,4 +1,4 @@
-import '../models/models.dart';
+import 'package:json_form/src/models/models.dart';
 
 enum PropertyFormat {
   general,
@@ -115,17 +115,17 @@ class SchemaProperty extends Schema {
   }) {
     final property = SchemaProperty(
       id: id,
-      title: json['title'],
+      title: json['title'] as String?,
       type: SchemaType.fromJson(json['type']),
-      format: PropertyFormat.fromString(json['format']),
+      format: PropertyFormat.fromString(json['format'] as String?),
       defaultValue: _safeDefaultValue(json),
-      description: json['description'],
-      enumm: json['enum'],
-      minLength: json['minLength'],
-      maxLength: json['maxLength'],
-      pattern: json['pattern'],
+      description: json['description'] as String?,
+      enumm: json['enum'] as List?,
+      minLength: json['minLength'] as int?,
+      maxLength: json['maxLength'] as int?,
+      pattern: json['pattern'] as String?,
       numberProperties: NumberProperties.fromJson(json),
-      oneOf: json['oneOf'],
+      oneOf: json['oneOf'] as List?,
       parent: parent,
       nullable: SchemaType.isNullable(json['type']),
     );
@@ -165,13 +165,13 @@ class SchemaProperty extends Schema {
 
   final PropertyFormat format;
 
-  /// it means enum
+  /// "enum" property in JSON Schema. The possible values that can be selected
   final List<dynamic>? enumm;
   dynamic get constValue =>
       enumm != null && enumm!.length == 1 ? enumm!.first : null;
   final dynamic defaultValue;
 
-  // propiedades que se llenan con el json
+  // Validation properties
   final int? minLength;
   final int? maxLength;
   final NumberProperties numberProperties;
@@ -217,11 +217,11 @@ class NumberProperties {
 
   factory NumberProperties.fromJson(Map<String, dynamic> json) {
     return NumberProperties(
-      multipleOf: json['multipleOf'],
-      minimum: json['minimum'],
-      exclusiveMinimum: json['exclusiveMinimum'],
-      maximum: json['maximum'],
-      exclusiveMaximum: json['exclusiveMaximum'],
+      multipleOf: json['multipleOf'] as num?,
+      minimum: json['minimum'] as num?,
+      exclusiveMinimum: json['exclusiveMinimum'] as num?,
+      maximum: json['maximum'] as num?,
+      exclusiveMaximum: json['exclusiveMaximum'] as num?,
     );
   }
 

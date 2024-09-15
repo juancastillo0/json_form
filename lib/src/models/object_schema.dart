@@ -1,4 +1,4 @@
-import '../models/models.dart';
+import 'package:json_form/src/models/models.dart';
 
 class SchemaObject extends Schema {
   SchemaObject({
@@ -18,21 +18,21 @@ class SchemaObject extends Schema {
 
   factory SchemaObject.fromJson(
     String id,
-    Map<String, dynamic> json, {
+    Map<String, Object?> json, {
     Schema? parent,
   }) {
     final dependentSchemas = <String, Schema>{};
     final dependentRequired = <String, List<String>>{};
     final schema = SchemaObject(
       id: id,
-      title: json['title'],
-      description: json['description'],
+      title: json['title'] as String?,
+      description: json['description'] as String?,
       required:
-          json["required"] != null ? List<String>.from(json["required"]) : [],
+          json["required"] != null ? (json["required"]! as List).cast() : [],
       nullable: SchemaType.isNullable(json['type']),
       dependentRequired: dependentRequired,
       dependentSchemas: dependentSchemas,
-      oneOf: json['oneOf'],
+      oneOf: json['oneOf'] as List?,
       defs: ((json['\$defs'] ?? json['definitions']) as Map?)?.cast(),
       parent: parent,
     );
@@ -42,7 +42,8 @@ class SchemaObject extends Schema {
       if (value is List) {
         dependentRequired[key] = value.cast();
       } else {
-        dependentSchemas[key] = Schema.fromJson(value, parent: schema);
+        dependentSchemas[key] =
+            Schema.fromJson(value as Map<String, dynamic>, parent: schema);
       }
     });
     (json['dependentSchemas'] as Map<String, dynamic>?)?.forEach((key, value) {
@@ -106,16 +107,16 @@ class SchemaObject extends Schema {
 
   @override
   void setUiSchema(
-    Map<String, dynamic> data, {
+    Map<String, Object?> data, {
     required bool fromOptions,
   }) {
     super.setUiSchema(data, fromOptions: fromOptions);
     // set UI Schema to their properties
-    for (var _property in properties) {
-      final v = data[_property.id] as Map<String, dynamic>?;
+    for (final property_ in properties) {
+      final v = data[property_.id] as Map<String, Object?>?;
       if (v != null || uiSchema.globalOptions != null) {
-        _property.setUiSchema(v ?? {}, fromOptions: false);
-        uiSchema.children[_property.id] = _property.uiSchema;
+        property_.setUiSchema(v ?? {}, fromOptions: false);
+        uiSchema.children[property_.id] = property_.uiSchema;
       }
     }
 
@@ -186,14 +187,14 @@ class SchemaObject extends Schema {
       final isRequired = required.contains(key);
 
       final property = Schema.fromJson(
-        _property,
+        _property as Map<String, dynamic>,
         id: key,
         parent: this,
       );
 
       property.requiredProperty = isRequired;
       if (property is SchemaProperty) {
-        // Asignamos las propiedades que dependen de este
+        // Assign the properties that depend on this one
         property.setDependents(this);
       }
 

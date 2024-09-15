@@ -2,11 +2,10 @@ import 'package:cross_file/cross_file.dart';
 import 'package:flutter/material.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/fields.dart';
+import 'package:json_form/src/fields/shared.dart';
 import 'package:json_form/src/models/json_form_schema_style.dart';
 
-import './shared.dart';
-
-class FileJFormField extends PropertyFieldWidget<dynamic> {
+class FileJFormField extends PropertyFieldWidget<Object?> {
   const FileJFormField({
     super.key,
     required super.property,
@@ -19,10 +18,11 @@ class FileJFormField extends PropertyFieldWidget<dynamic> {
   final Future<List<XFile>?> Function() fileHandler;
 
   @override
-  _FileJFormFieldState createState() => _FileJFormFieldState();
+  PropertyFieldState<Object?, FileJFormField> createState() =>
+      _FileJFormFieldState();
 }
 
-class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
+class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
   late FormFieldState<Object?> field;
   @override
   Object? get value => field.value;

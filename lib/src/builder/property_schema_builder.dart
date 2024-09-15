@@ -3,13 +3,13 @@ import 'dart:developer';
 
 import 'package:cross_file/cross_file.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:json_form/src/builder/logic/object_schema_logic.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/builder/widget_builder.dart';
 import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/models/models.dart';
 import 'package:json_form/src/utils/date_text_input_json_formatter.dart';
-import 'package:intl/intl.dart';
 
 class PropertySchemaBuilder extends StatelessWidget {
   const PropertySchemaBuilder({
@@ -240,7 +240,7 @@ class PropertySchemaBuilder extends StatelessWidget {
     );
   }
 
-  void updateData(BuildContext context, dynamic val) {
+  void updateData(BuildContext context, Object? val) {
     final widgetBuilderInherited = WidgetBuilderInherited.of(context);
     final idKey = JsonFormKeyPath.ofPath(context);
     widgetBuilderInherited.controller.updateObjectData(idKey, val);
@@ -258,12 +258,12 @@ class PropertySchemaBuilder extends StatelessWidget {
 
   void dispatchSelectedForDropDownEventToParent(
     BuildContext context,
-    dynamic value, {
+    Object? value, {
     String? id,
   }) {
     log('dispatchSelectedForDropDownEventToParent() $value ID: $id');
     ObjectSchemaInherited.of(context).listenChangeProperty(
-      (value != null && (value is String ? value.isNotEmpty : true)),
+      value != null && (value is! String || value.isNotEmpty),
       formValue,
       optionalValue: value,
       // TODO: idOptional: id,
@@ -286,18 +286,15 @@ class PropertySchemaBuilder extends StatelessWidget {
     final handlers = customFileHandler();
     assert(handlers.isNotEmpty, 'CustomFileHandler must not be empty');
 
-    if (handlers.containsKey(key))
-      return handlers[key] as Future<List<XFile>?> Function();
-
-    if (handlers.containsKey('*')) {
-      assert(handlers['*'] != null, 'Default file handler must not be null');
-      return handlers['*'] as Future<List<XFile>?> Function();
-    }
+    var h = handlers[key];
+    if (h != null) return h;
+    h = handlers['*'];
+    if (h != null) return h;
 
     throw Exception('no file handler found');
   }
 
-  Future<dynamic> Function(Map<dynamic, dynamic>)? _getCustomPickerHandler(
+  Future<Object?> Function(Map<Object?, Object?>)? _getCustomPickerHandler(
     BuildContext context,
     String key,
   ) {

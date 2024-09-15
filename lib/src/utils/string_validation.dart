@@ -1,5 +1,5 @@
-import 'package:validators/validators.dart' as validators;
 import 'package:json_form/src/models/property_schema.dart';
+import 'package:validators/validators.dart' as validators;
 
 enum StringValidationError {
   minLength,
@@ -21,7 +21,7 @@ List<StringValidationError> validateJsonSchemaString({
     errors.add(StringValidationError.maxLength);
   }
   if (property.pattern != null &&
-      !validators.matches(newValue, property.pattern!)) {
+      !validators.matches(newValue, property.pattern)) {
     errors.add(StringValidationError.noMatchForPattern);
   }
   if (!isValidFormat(property.format, newValue)) {

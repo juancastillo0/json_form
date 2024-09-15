@@ -13,29 +13,22 @@ class WidgetBuilderInherited extends InheritedWidget {
     this.fileHandler,
     this.customPickerHandler,
     this.customValidatorHandler,
-  });
-
+    required BuildContext context,
+    JsonFormSchemaUiConfig? baseConfig,
+    JsonFormSchemaUiConfig? uiConfig,
+  }) : uiConfig = uiConfig ??
+            JsonFormSchemaUiConfig.fromContext(
+              context,
+              baseConfig: baseConfig,
+            );
   final JsonFormController controller;
   final FileHandler? fileHandler;
   final CustomPickerHandler? customPickerHandler;
   final CustomValidatorHandler? customValidatorHandler;
-  late final JsonFormSchemaUiConfig uiConfig;
+  final JsonFormSchemaUiConfig uiConfig;
 
-  // use description for field help message
-  // use id as title for array items
-
-  // implement not-required object
-  // validate nullable and required combinations
-
-  void setJsonFormSchemaStyle(
-    BuildContext context,
-    JsonFormSchemaUiConfig? baseConfig,
-  ) {
-    uiConfig = JsonFormSchemaUiConfig.fromContext(
-      context,
-      baseConfig: baseConfig,
-    );
-  }
+  // TODO: implement not-required object
+  // TODO: validate nullable and required combinations
 
   @override
   bool updateShouldNotify(covariant WidgetBuilderInherited oldWidget) =>
@@ -59,8 +52,8 @@ class WidgetBuilderInherited extends InheritedWidget {
   }
 }
 
-class FieldUpdated {
-  final JsonFormField field;
+class FieldUpdated<T> {
+  final JsonFormField<T> field;
   final Object? newValue;
   final Object? previousValue;
 
@@ -76,8 +69,8 @@ class JsonFormController extends ChangeNotifier {
   Object? rootOutputData;
   Schema? mainSchema;
   GlobalKey<FormState>? formKey;
-  FieldUpdated? _lastEvent;
-  FieldUpdated? get lastEvent => _lastEvent;
+  FieldUpdated<Object?>? _lastEvent;
+  FieldUpdated<Object?>? get lastEvent => _lastEvent;
 
   JsonFormController({
     required Map<String, Object?> data,
@@ -248,7 +241,7 @@ class JsonFormController extends ChangeNotifier {
       formKey.currentState!.save();
 
       log(rootFormValue.toString());
-      return rootFormValue.toJson() as Map<String, Object?>;
+      return rootFormValue.toJson()! as Map<String, Object?>;
     }
     return null;
   }

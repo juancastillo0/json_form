@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
+import 'package:json_form/src/models/models.dart';
 import 'package:json_form/src/utils/either.dart';
-
-import '../models/models.dart';
 
 enum SchemaType {
   string,
@@ -23,11 +22,11 @@ enum SchemaType {
       } else if (json_.every(_notNull) && json_.length != 1) {
         throw UnimplementedError('Union types are not implemented');
       } else {
-        json = json_.firstWhere(
-          _notNull,
-          orElse: () =>
-              throw UnimplementedError('Null types are not implemented'),
-        );
+        json = json_.cast<String>().firstWhere(
+              _notNull,
+              orElse: () =>
+                  throw UnimplementedError('Null types are not implemented'),
+            );
       }
     } else {
       throw FormatException(
@@ -100,7 +99,7 @@ abstract class Schema implements SchemaUiInfo {
       case SchemaType.array:
         schema = SchemaArray.fromJson(id, json, parent: parent);
 
-        // validate if is a file array, it means multiplefile
+        // validate if it is a file array
         if (schema is SchemaArray && schema.isArrayMultipleFile())
           schema = schema.toSchemaPropertyMultipleFiles();
         break;
@@ -143,10 +142,6 @@ abstract class Schema implements SchemaUiInfo {
 
   final UiSchemaData uiSchema = UiSchemaData();
 
-  static String _appendId(String path, String id) {
-    return id != kNoIdKey ? (path.isNotEmpty ? '$path.' : '') + id : path;
-  }
-
   Schema copyWith({
     required String id,
     Schema? parent,
@@ -162,7 +157,7 @@ abstract class Schema implements SchemaUiInfo {
   }
 
   void _setOneOf(List<dynamic> oneOf) {
-    for (Map<String, dynamic> element in oneOf.cast()) {
+    for (final Map<String, dynamic> element in oneOf.cast()) {
       this.oneOf.add(Schema.fromJson(element, parent: this));
     }
   }

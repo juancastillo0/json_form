@@ -40,8 +40,8 @@ class ObjectSchemaInherited extends InheritedWidget {
   void listenChangeProperty(
     bool active,
     JsonFormValue schemaProperty, {
-    dynamic optionalValue,
-  }) async {
+    Object? optionalValue,
+  }) {
     try {
       // Eliminamos los nuevos inputs agregados
       _removeCreatedItemsSafeMode(schemaProperty);
@@ -54,7 +54,7 @@ class ObjectSchemaInherited extends InheritedWidget {
         dev.log('case 1');
 
         // Cuando es una Lista de String y todos ellos ahoran serán requeridos
-        for (var element in objProps) {
+        for (final element in objProps) {
           if (dependentsList.contains(element.id)) {
             if (element.schema is SchemaProperty) {
               dev.log('Este element ${element.id} es ahora $active');
@@ -140,7 +140,7 @@ class ObjectSchemaInherited extends InheritedWidget {
     }
   }
 
-  void _removeCreatedItemsSafeMode(JsonFormValue schemaProperty) async {
+  void _removeCreatedItemsSafeMode(JsonFormValue schemaProperty) {
     final initialLength = schemaProperty.parent!.children.length;
     bool filter(JsonFormValue element) =>
         element.dependentsAddedBy.contains(schemaProperty.id);

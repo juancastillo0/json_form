@@ -8,14 +8,14 @@ import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/builder/object_schema_builder.dart';
 import 'package:json_form/src/builder/property_schema_builder.dart';
 import 'package:json_form/src/models/json_form_schema_style.dart';
-
-import '../models/models.dart';
+import 'package:json_form/src/models/models.dart';
 
 typedef FileHandler = Map<String, Future<List<XFile>?> Function()?> Function();
-typedef CustomPickerHandler = Map<String, Future<dynamic> Function(Map data)>
-    Function();
+typedef CustomPickerHandler
+    = Map<String, Future<Object?> Function(Map<Object?, Object?> data)>
+        Function();
 
-typedef CustomValidatorHandler = Map<String, String? Function(dynamic)?>
+typedef CustomValidatorHandler = Map<String, String? Function(Object?)?>
     Function();
 
 class JsonForm extends StatefulWidget {
@@ -42,7 +42,7 @@ class JsonForm extends StatefulWidget {
   final CustomValidatorHandler? customValidatorHandler;
 
   @override
-  _JsonFormState createState() => _JsonFormState();
+  State<JsonForm> createState() => _JsonFormState();
 }
 
 class _JsonFormState extends State<JsonForm> {
@@ -71,7 +71,7 @@ class _JsonFormState extends State<JsonForm> {
       }
     }
     final mainSchema = Schema.fromJson(
-      json.decode(widget.jsonSchema),
+      json.decode(widget.jsonSchema) as Map<String, Object?>,
       id: kGenesisIdKey,
     );
     final map = widget.uiSchema != null
@@ -104,6 +104,8 @@ class _JsonFormState extends State<JsonForm> {
       fileHandler: widget.fileHandler,
       customPickerHandler: widget.customPickerHandler,
       customValidatorHandler: widget.customValidatorHandler,
+      context: context,
+      baseConfig: widget.uiConfig,
       child: Builder(
         builder: (context) {
           final widgetBuilderInherited = WidgetBuilderInherited.of(context);
@@ -151,7 +153,7 @@ class _JsonFormState extends State<JsonForm> {
           );
         },
       ),
-    )..setJsonFormSchemaStyle(context, widget.uiConfig);
+    );
   }
 
   Widget _buildHeaderTitle(BuildContext context) {

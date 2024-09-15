@@ -3,9 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
-
-import '../utils/utils.dart';
-import '../models/models.dart';
+import 'package:json_form/src/models/models.dart';
+import 'package:json_form/src/utils/utils.dart';
 
 class TextJFormField extends PropertyFieldWidget<String> {
   const TextJFormField({
@@ -17,12 +16,14 @@ class TextJFormField extends PropertyFieldWidget<String> {
   });
 
   @override
-  _TextJFormFieldState createState() => _TextJFormFieldState();
+  PropertyFieldState<String, TextJFormField> createState() =>
+      _TextJFormFieldState();
 }
 
 class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
-  late final textController =
-      TextEditingController(text: super.getDefaultValue()?.toString() ?? '');
+  late final textController = TextEditingController(
+    text: super.getDefaultValue<String>()?.toString() ?? '',
+  );
   @override
   String get value => textController.text;
   @override

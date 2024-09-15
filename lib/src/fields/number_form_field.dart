@@ -15,13 +15,15 @@ class NumberJFormField extends PropertyFieldWidget<num?> {
   });
 
   @override
-  _NumberJFormFieldState createState() => _NumberJFormFieldState();
+  PropertyFieldState<num?, NumberJFormField> createState() =>
+      _NumberJFormFieldState();
 }
 
 class _NumberJFormFieldState
     extends PropertyFieldState<num?, NumberJFormField> {
-  late final textController =
-      TextEditingController(text: super.getDefaultValue()?.toString() ?? '');
+  late final textController = TextEditingController(
+    text: super.getDefaultValue<num>()?.toString() ?? '',
+  );
   @override
   num? get value => parseValue(textController.text);
   @override
@@ -74,7 +76,7 @@ class _NumberJFormFieldState
         onChanged: (value) {
           final v = parseValue(value);
           if (v == null) return;
-          if (widget.onChanged != null) widget.onChanged!(v);
+          widget.onChanged?.call(v);
         },
         enabled: enabled,
         style: readOnly ? uiConfig.fieldInputReadOnly : uiConfig.fieldInput,

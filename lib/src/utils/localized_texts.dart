@@ -41,7 +41,7 @@ class LocalizedTexts {
 
   String maxItemsTooltip(int i) => 'You can only add $i items';
 
-  String? arrayPropertiesError(ArrayProperties config, List value) {
+  String? arrayPropertiesError(ArrayProperties config, List<Object?> value) {
     final errors = config.errors(value);
     final l = <String>[];
     if (errors.contains(ArrayPropertiesError.minItems))
