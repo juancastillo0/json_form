@@ -178,6 +178,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
                     field: schemaArray,
                     mainSchema: widget.mainSchema,
                     trailing: IconButton(
+                      key: Key('JsonForm_showOrHideItems_$idKey'),
                       tooltip: showItems
                           ? uiConfig.localizedTexts.hideItems()
                           : uiConfig.localizedTexts.showItems(),

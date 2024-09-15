@@ -1222,7 +1222,6 @@ void main() {
 
   testWidgets('formats, errors and focus', (tester) async {
     final utils = TestUtils(tester);
-    const LabelPosition labelPosition = LabelPosition.top;
     Map<String, Object?> data = {};
     final controller = JsonFormController(data: data);
     // TODO: file, color
@@ -1328,9 +1327,6 @@ void main() {
                             : null,
                   };
                 },
-                uiConfig: JsonFormSchemaUiConfig(
-                  labelPosition: labelPosition,
-                ),
                 uiSchema: '''{
                   "ui:globalOptions": {
                     "copyable": true,
@@ -1479,6 +1475,13 @@ void main() {
     await utils.tapSubmitButton();
     expect(data, currentData);
 
+    /// Show/hide items
+    expect(find.byKey(const Key('copyItem_arrayRoot.1')), findsOneWidget);
+    await utils.tapButton('JsonForm_showOrHideItems_arrayRoot');
+    expect(find.byKey(const Key('copyItem_arrayRoot.1')), findsNothing);
+    await utils.tapButton('JsonForm_showOrHideItems_arrayRoot');
+    expect(find.byKey(const Key('copyItem_arrayRoot.1')), findsOneWidget);
+
     /// Remove items
     expect(find.byKey(const Key('removeItem_arrayRoot.1')), findsNothing);
     expect(find.byKey(const Key('removeItem_arrayInts.1')), findsOneWidget);
@@ -1487,22 +1490,21 @@ void main() {
     await utils.tapSubmitButton();
     expect(data, currentData);
 
-    /// Show/hide items
-
     /// Format Errors
     await utils.findAndEnterText(
       'email',
       currentData['email'] = 'not-an-email',
     );
-    await utils.findAndEnterText(
-      'uri',
-      currentData['uri'] = 'https://github.com/juancastillo0/json_form',
-    );
+    await utils.findAndEnterText('uri', currentData['uri'] = 'json_form');
     await utils.findAndEnterText('uuid', currentData['uuid'] = '864f4625');
     await utils.findAndEnterText('hostname', currentData['hostname'] = '&^|>');
     await utils.findAndEnterText('regex', currentData['regex'] = '&|)');
     await utils.findAndEnterText('ipv4', currentData['ipv4'] = '180.192');
     await utils.findAndEnterText('ipv6', currentData['ipv6'] = 'd3b5:750f:');
+    await utils.findAndEnterText(
+      'dateTime',
+      currentData['dateTime'] = '2002-03-23 12:34:',
+    );
     await utils.findAndEnterText(
       'time',
       currentData['time'] = '06:2',
@@ -1521,9 +1523,8 @@ void main() {
     expect(find.text('Should be an IPv4'), findsOneWidget);
     expect(find.text('Should be an IPv6'), findsOneWidget);
     expect(find.text('Should be a valid URL'), findsOneWidget);
-    // TODO: expect(find.text('Should be a date'), findsOneWidget);
+    expect(find.text('Invalid date'), findsOneWidget);
     expect(find.text('Should be different than 6'), findsOneWidget);
-    // TODO: expect(find.text('Invalid format'), findsOneWidget);
-    // TODO: expect(find.text('Should be absolute URI'), findsOneWidget);
+    expect(find.text('Should be absolute URI'), findsOneWidget);
   });
 }
