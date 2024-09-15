@@ -61,22 +61,26 @@ class UiSchemaData {
         for (final e in children.entries) e.key: e.value.toJson(),
       };
 
-  void setGlobalOptions(Map<String, Object?> data) {
+  void setGlobalOptions(
+    Map<String, Object?> data, {
+    required bool fromOptions,
+  }) {
     globalOptions ??= UiSchemaData();
-    globalOptions!.setUi(data, parent: this);
-    setUi(data, parent: null);
+    globalOptions!.setUi(data, parent: this, fromOptions: fromOptions);
+    setUi(data, parent: null, fromOptions: fromOptions, fromGlobal: true);
   }
 
   void setUi(
     Map<String, dynamic> uiSchema, {
     required UiSchemaData? parent,
     bool fromOptions = false,
+    bool fromGlobal = false,
   }) {
     this.parent = parent ?? this.parent;
     if (parent != null &&
         parent.globalOptions != null &&
         this != parent.globalOptions) {
-      setGlobalOptions(parent.globalOptions!.toJson());
+      setGlobalOptions(parent.globalOptions!.toJson(), fromOptions: false);
     }
     // if (fromOptions) {
     //   final options = asJson['ui:options'] as Map<String, Object?>? ?? {};
@@ -100,7 +104,8 @@ class UiSchemaData {
       } else {
         return;
       }
-      bool saveInJson = true;
+      if (fromGlobal && _asJson.containsKey(k)) return;
+      bool saveInJson = !fromGlobal;
       switch (k) {
         case "disabled":
           disabled = data as bool;
@@ -179,11 +184,16 @@ class UiSchemaData {
           copyable = data as bool;
           break;
         case "options":
-          setUi(data as Map<String, Object?>, fromOptions: true, parent: null);
+          setUi(
+            data as Map<String, Object?>,
+            fromOptions: true,
+            parent: null,
+            fromGlobal: fromGlobal,
+          );
           saveInJson = false;
           break;
         case "globalOptions":
-          setGlobalOptions(data as Map<String, Object?>);
+          setGlobalOptions(data as Map<String, Object?>, fromOptions: true);
           break;
         default:
           saveInJson = false;

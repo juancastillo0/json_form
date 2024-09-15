@@ -113,8 +113,8 @@ class SchemaObject extends Schema {
     // set UI Schema to their properties
     for (var _property in properties) {
       final v = data[_property.id] as Map<String, dynamic>?;
-      if (v != null) {
-        _property.setUiSchema(v, fromOptions: false);
+      if (v != null || uiSchema.globalOptions != null) {
+        _property.setUiSchema(v ?? {}, fromOptions: false);
         uiSchema.children[_property.id] = _property.uiSchema;
       }
     }
