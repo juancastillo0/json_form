@@ -461,17 +461,8 @@ class FormExample {
       FormExample('oneOfDependencies', oneOfDependenciesJsonSchema, '{}');
   static const oneOfConstExample =
       FormExample('oneOfConst', oneOfConstJsonSchema, '{}');
-  static const formatsExample = FormExample(
-    'formats',
-    formatsJsonSchema,
-    '''{
-  "ui:globalOptions": {
-    "copyable": true,
-    "removable": false,
-    "autofocus": false
-  }
-}''',
-  );
+  static const formatsExample =
+      FormExample('formats', formatsJsonSchema, formatsUiSchema);
 
   static const allExamples = [
     primitivesExample,
@@ -859,7 +850,7 @@ const primitivesJsonSchema = '''{
       "title": "arrayCheckboxTitle",
       "items": {
         "type": "string",
-        "enum": ["a", "b"]
+        "enum": ["e", "f"]
       }
     }
   }
@@ -996,11 +987,11 @@ const oneOfDependenciesJsonSchema = '''{
 
 const oneOfConstJsonSchema = '''{
   "title": "One Of Const",
-  "description": "variants",
+  "description": "Variants configured within oneOfs using const.",
   "type": "object",
   "properties": {
     "Other Property": {
-      "type": "string"
+      "type": ["string", null]
     },
     "example": {
       "\$ref": "#/\$defs/oneOfExample"
@@ -1123,5 +1114,13 @@ const formatsJsonSchema = '''{
         "maximumExclusive": 6
       }
     }
+  }
+}''';
+
+const formatsUiSchema = '''{
+  "ui:globalOptions": {
+    "copyable": true,
+    "removable": false,
+    "autofocus": false
   }
 }''';
