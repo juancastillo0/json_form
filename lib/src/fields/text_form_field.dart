@@ -119,9 +119,6 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
   TextInputFormatter textInputCustomFormatter(PropertyFormat format) {
     late TextInputFormatter textInputFormatter;
     switch (format) {
-      case PropertyFormat.email:
-        textInputFormatter = EmailTextInputJsonFormatter();
-        break;
       default:
         textInputFormatter =
             DefaultTextInputJsonFormatter(pattern: property.pattern);
