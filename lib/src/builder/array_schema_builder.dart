@@ -43,6 +43,10 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
       schemaArray.id,
     );
     formValue.value ??= [];
+    _initialValue = formValue.value as List;
+    if (_initialValue!.isNotEmpty) {
+      value = _initialValue!;
+    }
   }
 
   @override
@@ -250,6 +254,11 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
   void _removeItem(int index) {
     setState(() {
       formValue.children.removeAt(index);
+
+      /// cleans up the output data in the controller
+      WidgetBuilderInherited.of(context)
+          .controller
+          .updateDataInPlace(idKey, (a) => a);
     });
   }
 
@@ -307,6 +316,10 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
       }
       for (var i = 0; i < newValue.length; i++) {
         final item = formValue.children[i];
+        if (item.field == null) {
+          if (mounted) setState(() {});
+          break;
+        }
         item.field!.value = newValue[i];
       }
     }

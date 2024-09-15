@@ -72,18 +72,19 @@ class FieldUpdated {
 }
 
 class JsonFormController extends ChangeNotifier {
-  late final JsonFormValue data;
+  JsonFormValue rootFormValue;
+  Object? rootOutputData;
   Schema? mainSchema;
   GlobalKey<FormState>? formKey;
   FieldUpdated? _lastEvent;
   FieldUpdated? get lastEvent => _lastEvent;
 
   JsonFormController({
-    // TODO: use or remove data
     required Map<String, Object?> data,
     this.mainSchema,
     this.formKey,
-  }) : data = JsonFormValue(
+  })  : rootOutputData = data,
+        rootFormValue = JsonFormValue(
           parent: null,
           schema: mainSchema,
           id: '',
@@ -99,12 +100,15 @@ class JsonFormController extends ChangeNotifier {
 
     final path = JsonFormKeyPath.ofPath(context);
     if (path == "") {
-      return controller.data
-        ..schema = schema
-        ..field = field;
+      return controller.rootFormValue = JsonFormValue(
+        parent: null,
+        schema: schema,
+        id: '',
+      )..field = field;
     } else {
       return controller._transverseObjectData(
         path,
+        isSchemaUpdate: true,
         updateFn: (v) {
           v ??= JsonFormValue(
             id: id,
@@ -122,17 +126,17 @@ class JsonFormController extends ChangeNotifier {
     return _transverseObjectData(path).key?.field;
   }
 
-  /// Retrieves [data]'s [path]
+  /// Retrieves [rootFormValue]'s [path]
   Object? retrieveObjectData(String path) {
     return _transverseObjectData(path).value;
   }
 
-  /// Update [data]'s [path] with [value]
+  /// Update [rootFormValue]'s [path] with [value]
   Object? updateObjectData(String path, Object? value) {
     return updateDataInPlace(path, (_) => value);
   }
 
-  /// Update [data]'s [path] with the value returned in [update]
+  /// Update [rootFormValue]'s [path] with the value returned in [update]
   Object? updateDataInPlace(
     String path,
     Object? Function(Object? previousValue) update,
@@ -143,13 +147,15 @@ class JsonFormController extends ChangeNotifier {
     ).value;
   }
 
-  /// Transverses [data] until [path] and conditionally applies an [update]
+  /// Transverses [rootFormValue] until [path] and conditionally applies an [update]
   MapEntry<JsonFormValue?, Object?> _transverseObjectData(
     String path, {
     JsonFormValue Function(JsonFormValue? previousValue)? updateFn,
+    bool isSchemaUpdate = false,
   }) {
     final update = updateFn != null;
-    JsonFormValue object = data;
+    JsonFormValue object = rootFormValue;
+    dynamic outputValues = rootOutputData;
     log('updateObjectData $object path $path');
 
     final stack = path.split('.');
@@ -161,19 +167,11 @@ class JsonFormController extends ChangeNotifier {
       if (schema is SchemaArray) {
         _keyNumeric = object.children.indexWhere((test) => test.id == _key);
         if (_keyNumeric == -1) {
-          if (update) {
-            // TODO: add other
-            // object.children.add(
-            //   JsonFormValue(
-            //     id: _key,
-            //     parent: object,
-            //     schema: schema.itemsBaseSchema,
-            //   ),
-            // );
-            throw ArgumentError('Array index $_key not found');
-          } else {
-            return const MapEntry(null, null);
-          }
+          return const MapEntry(null, null);
+        }
+        final l = outputValues as List;
+        while (l.length != object.children.length) {
+          l.length > object.children.length ? l.removeLast() : l.add(null);
         }
         schema = schema.itemsBaseSchema;
       } else {
@@ -197,14 +195,19 @@ class JsonFormController extends ChangeNotifier {
 
       if (i == stack.length - 1) {
         JsonFormValue? item = object[_keyNumeric ?? _key];
-        final previous = item?.value;
+        final outputValue = outputValues[_keyNumeric ?? _key];
+        final previous = item?.value ?? outputValue;
         if (update) {
-          final isSchemaUpdate = item == null;
+          final isNewItem = item == null;
           item = updateFn(item);
           if (isSchemaUpdate) {
             item.parent = object;
-            object.children.add(item);
+            if (isNewItem) object.children.add(item);
+            if (outputValue != null) {
+              item.value = outputValue;
+            }
           } else {
+            outputValues[_keyNumeric ?? _key] = item.value;
             _lastEvent = FieldUpdated(
               field: item.field!,
               previousValue: previous,
@@ -215,7 +218,6 @@ class JsonFormController extends ChangeNotifier {
         }
         return MapEntry(item, previous);
       } else {
-        final newContent = schema is SchemaArray ? [] : {};
         final tempObject = object[_keyNumeric ?? _key];
         if (tempObject != null) {
           object = tempObject;
@@ -224,14 +226,20 @@ class JsonFormController extends ChangeNotifier {
             id: _key,
             parent: object,
             schema: schema,
-            value: newContent,
           );
           object.children.add(value);
           object = value;
         }
+
+        Object? outputValue = outputValues[_keyNumeric ?? _key];
+        if (outputValue == null) {
+          outputValue = schema is SchemaArray ? [] : {};
+          outputValues[_keyNumeric ?? _key] = outputValue;
+        }
+        outputValues = outputValue;
       }
     }
-    return MapEntry(data, data.toJson());
+    return MapEntry(rootFormValue, rootFormValue.toJson());
   }
 
   Map<String, Object?>? submit() {
@@ -239,8 +247,8 @@ class JsonFormController extends ChangeNotifier {
     if (formKey.currentState != null && formKey.currentState!.validate()) {
       formKey.currentState!.save();
 
-      log(data.toString());
-      return data.toJson() as Map<String, Object?>;
+      log(rootFormValue.toString());
+      return rootFormValue.toJson() as Map<String, Object?>;
     }
     return null;
   }
