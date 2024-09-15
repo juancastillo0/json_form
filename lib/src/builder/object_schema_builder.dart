@@ -7,11 +7,12 @@ import 'package:json_form/src/fields/shared.dart';
 import 'package:json_form/src/models/models.dart';
 
 class ObjectSchemaBuilder extends StatefulWidget {
-  const ObjectSchemaBuilder({
-    super.key,
+  ObjectSchemaBuilder({
+    Key? key,
     required this.mainSchema,
     required this.schemaObject,
-  });
+    // TODO: validate array key
+  }) : super(key: key ?? ValueKey(schemaObject));
 
   final Schema mainSchema;
   final SchemaObject schemaObject;
@@ -35,18 +36,7 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder>
       this,
       _schemaObject.id,
     );
-    // TODO: test sync
-    if (fromValue.children.isEmpty) {
-      fromValue.children.addAll(
-        _schemaObject.properties.map((e) {
-          return JsonFormValue(
-            id: e.id,
-            parent: fromValue,
-            schema: e,
-          );
-        }),
-      );
-    }
+    syncValues();
   }
 
   @override
@@ -54,7 +44,27 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.schemaObject != widget.schemaObject) {
       _schemaObject = widget.schemaObject;
+      syncValues();
     }
+  }
+
+  void syncValues() {
+    fromValue.children.removeWhere(
+      (c) =>
+          _schemaObject.properties.every((p) => p.id != c.id) &&
+              c.dependentsAddedBy.isEmpty ||
+          c.parent?.schema != _schemaObject,
+    );
+    final added = Set.of(fromValue.children.map((c) => c.id));
+    fromValue.children.addAll(
+      _schemaObject.properties.where((p) => !added.contains(p.id)).map((e) {
+        return JsonFormValue(
+          id: e.id,
+          parent: fromValue,
+          schema: e,
+        );
+      }),
+    );
   }
 
   @override
@@ -101,7 +111,13 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder>
                       return r != null && e.isDependentsActive
                           ? [
                               e,
-                              // TODO: if (r is SchemaObject) ...r.properties else r,
+                              ...((r is SchemaObject) ? r.properties : [r]).map(
+                                (s) => JsonFormValue(
+                                  id: s.id,
+                                  parent: fromValue,
+                                  schema: s,
+                                ),
+                              ),
                             ]
                           : [e];
                     },
@@ -176,12 +192,12 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder>
   SchemaUiInfo get property => widget.schemaObject;
 
   @override
-  set value(Map<String, Object?> value) {
-    value.forEach((k, v) {
+  set value(Map<String, Object?> newValue) {
+    newValue.forEach((k, v) {
       fromValue.children.firstWhere((c) => c.id == k).field!.value = v;
     });
     for (final c in fromValue.children) {
-      if (!value.containsKey(c.id)) {
+      if (!newValue.containsKey(c.id)) {
         c.field!.value = null;
       }
     }

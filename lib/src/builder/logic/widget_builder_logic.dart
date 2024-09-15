@@ -182,7 +182,11 @@ class JsonFormController extends ChangeNotifier {
           (p) => p.id == _key,
           orElse: () => s.dependentSchemas.values.firstWhere(
             (p) => p.id == _key,
-            orElse: () => s.dependentSchemas.values
+            orElse: () => [
+              ...s.dependentSchemas.values,
+              // TODO: select the specific oneOf, pass it as parameter
+              ...s.dependentSchemas.values.expand((e) => e.oneOf),
+            ]
                 .expand(
                   (p) => p is SchemaObject ? p.properties : const <Schema>[],
                 )
@@ -264,6 +268,8 @@ class JsonFormValue {
 
   late final String idKey = JsonFormKeyPath.appendId(parent?.idKey, id);
 
+  List<String> dependentsAddedBy = [];
+
   JsonFormValue? operator [](Object key) {
     if (key is int) {
       return children[key];
@@ -294,6 +300,9 @@ class JsonFormValue {
 
   Object? toJson() {
     if (schema is SchemaArray) {
+      if (schema.uiSchema.widget == 'checkboxes') {
+        return value;
+      }
       return children
           .where((e) => e.field != null)
           .map((e) => e.toJson())

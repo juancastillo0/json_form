@@ -98,17 +98,19 @@ class ObjectSchemaInherited extends InheritedWidget {
                 .map((e) {
               final newProp = e.copyWith(id: e.id, parent: schemaObject);
               // TODO: move dependentsAddedBy to JsonFormValue
-              newProp.dependentsAddedBy.addAll([
-                ...schemaProperty.schema.dependentsAddedBy,
-                schemaProperty.id,
-              ]);
               if (newProp is SchemaProperty)
+                // TODO: validate
                 newProp.setDependents(schemaObject);
-              return JsonFormValue(
+              final v = JsonFormValue(
                 id: e.id,
                 parent: schemaProperty.parent,
                 schema: newProp,
               );
+              v.dependentsAddedBy.addAll([
+                ...schemaProperty.dependentsAddedBy,
+                schemaProperty.id,
+              ]);
+              return v;
             }).toList();
 
             objProps.insertAll(indexProperty + 1, newProperties);
@@ -139,12 +141,12 @@ class ObjectSchemaInherited extends InheritedWidget {
   }
 
   void _removeCreatedItemsSafeMode(JsonFormValue schemaProperty) async {
-    bool filter(Schema element) =>
+    final initialLength = schemaProperty.parent!.children.length;
+    bool filter(JsonFormValue element) =>
         element.dependentsAddedBy.contains(schemaProperty.id);
 
-    if (schemaObject.properties.any(filter)) {
-      schemaObject.properties.removeWhere(filter);
-
+    schemaProperty.parent!.children.removeWhere(filter);
+    if (initialLength != schemaProperty.parent!.children.length) {
       listen(ObjectSchemaDependencyEvent(schemaObject: schemaObject));
     }
   }

@@ -26,7 +26,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
   bool showItems = true;
 
   @override
-  late final String idKey = formValue.idKey;
+  String get idKey => formValue.idKey;
 
   String generateItemId() => (lastItemId++).toString();
 
