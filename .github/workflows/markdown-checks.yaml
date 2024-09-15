@@ -2,6 +2,7 @@ name: Markdown Checks
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 # TODO: dart-fixer extension
