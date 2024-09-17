@@ -10,7 +10,11 @@ import 'package:json_form/src/builder/property_schema_builder.dart';
 import 'package:json_form/src/models/json_form_schema_style.dart';
 import 'package:json_form/src/models/models.dart';
 
+/// Returns a map of paths keys to functions that return the files selected by the user.
 typedef FileHandler = Map<String, Future<List<XFile>?> Function()?> Function();
+
+/// Returns a map of paths keys to functions that receives a map values to strings
+/// and returns the selected value, or null if none was selected.
 typedef CustomPickerHandler
     = Map<String, Future<Object?> Function(Map<Object?, Object?> data)>
         Function();
@@ -18,7 +22,11 @@ typedef CustomPickerHandler
 typedef CustomValidatorHandler = Map<String, String? Function(Object?)?>
     Function();
 
+/// Builds a form with [jsonSchema] and configurations from [uiSchema] and [uiConfig].
+/// You may use [controller] for added functionalities.
 class JsonForm extends StatefulWidget {
+  /// Builds a form with [jsonSchema] and configurations from [uiSchema] and [uiConfig].
+  /// You may use [controller] for added functionalities.
   const JsonForm({
     super.key,
     required this.jsonSchema,
@@ -31,14 +39,30 @@ class JsonForm extends StatefulWidget {
     this.customValidatorHandler,
   });
 
+  /// The JSON schema to build the form from
   final String jsonSchema;
+
+  /// Callback function to be called when the form is submitted
   final void Function(Object) onFormDataSaved;
 
+  /// The controller to be used for the form.
+  /// It can be used to set the initial data, get/set the form data,
+  /// subscribe to changes, etc.
   final JsonFormController? controller;
+
+  /// The UI schema with input configurations for each field
   final String? uiSchema;
+
+  /// The UI configuration with global styles, texts, builders and other Flutter configurations
   final JsonFormSchemaUiConfig? uiConfig;
+
+  /// The file handler to be used for the form
   final FileHandler? fileHandler;
+
+  /// Custom handlers for dropdown buttons
   final CustomPickerHandler? customPickerHandler;
+
+  /// Validators executed when for each field
   final CustomValidatorHandler? customValidatorHandler;
 
   @override
@@ -49,8 +73,6 @@ class _JsonFormState extends State<JsonForm> {
   late JsonFormController controller;
   Schema get mainSchema => controller.mainSchema!;
   GlobalKey<FormState> get _formKey => controller.formKey!;
-
-  _JsonFormState();
 
   @override
   void initState() {

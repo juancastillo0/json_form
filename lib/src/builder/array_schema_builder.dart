@@ -154,7 +154,6 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
                     ),
                     Padding(
                       padding: const EdgeInsets.only(bottom: 5.0, left: 5.0),
-                      // TODO: improve this, necessary for ReorderableListView
                       child: WidgetBuilderInherited(
                         controller: widgetBuilderInherited.controller,
                         customPickerHandler:

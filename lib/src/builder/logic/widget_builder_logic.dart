@@ -52,11 +52,18 @@ class WidgetBuilderInherited extends InheritedWidget {
   }
 }
 
+/// The event that is triggered when a field is updated
 class FieldUpdated<T> {
+  /// The field that was updated
   final JsonFormField<T> field;
+
+  /// The new value of the field
   final Object? newValue;
+
+  /// The previous value of the field
   final Object? previousValue;
 
+  /// The event that is triggered when a field is updated
   const FieldUpdated({
     required this.field,
     required this.newValue,
@@ -64,14 +71,28 @@ class FieldUpdated<T> {
   });
 }
 
+/// The controller for the form
 class JsonFormController extends ChangeNotifier {
+  /// The main (root) value of the form. Contains all the fields and values
   JsonFormValue rootFormValue;
-  Object? rootOutputData;
-  Schema? mainSchema;
-  GlobalKey<FormState>? formKey;
-  FieldUpdated<Object?>? _lastEvent;
-  FieldUpdated<Object?>? get lastEvent => _lastEvent;
 
+  /// The main (root) data of the form.
+  /// Contains all current values by the user and maintains the state
+  Object? rootOutputData;
+
+  /// The main (root) schema of the form
+  // TODO: extract private apis
+  Schema? mainSchema;
+
+  /// The main [Form] key used to validate and submit the form
+  GlobalKey<FormState>? formKey;
+
+  /// The last field updated event.
+  /// Can be used with [addListener] to listen for changes in the form
+  FieldUpdated<Object?>? get lastEvent => _lastEvent;
+  FieldUpdated<Object?>? _lastEvent;
+
+  /// The controller for the form
   JsonFormController({
     required Map<String, Object?> data,
     this.mainSchema,
@@ -114,7 +135,9 @@ class JsonFormController extends ChangeNotifier {
     }
   }
 
-  /// Retrieves the field controller for [path]
+  /// Retrieves the field controller for [path].
+  /// Can be used to trigger get/update the value, retrieve/request focus
+  /// and other functionalities for the field.
   JsonFormField<Object?>? retrieveField(String path) {
     return _transverseObjectData(path).key?.field;
   }
@@ -124,7 +147,7 @@ class JsonFormController extends ChangeNotifier {
     return _transverseObjectData(path).value;
   }
 
-  /// Update [rootFormValue]'s [path] with [value]
+  /// Update [rootFormValue]'s [path] with [value], returning the previous value
   Object? updateObjectData(String path, Object? value) {
     return updateDataInPlace(path, (_) => value);
   }
@@ -235,6 +258,7 @@ class JsonFormController extends ChangeNotifier {
     return MapEntry(rootFormValue, rootFormValue.toJson());
   }
 
+  /// Validates the form and returns the output data if valid
   Map<String, Object?>? submit() {
     final formKey = this.formKey!;
     if (formKey.currentState != null && formKey.currentState!.validate()) {

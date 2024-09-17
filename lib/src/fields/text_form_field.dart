@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
+import 'package:json_form/src/models/json_form_schema_style.dart';
 import 'package:json_form/src/models/models.dart';
 import 'package:json_form/src/utils/utils.dart';
 

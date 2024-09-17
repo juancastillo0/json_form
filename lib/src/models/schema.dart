@@ -2,14 +2,29 @@ import 'package:flutter/widgets.dart';
 import 'package:json_form/src/models/models.dart';
 import 'package:json_form/src/utils/either.dart';
 
+/// The type of the JSON Schema
 enum SchemaType {
+  /// A [String]
   string,
+
+  /// A [double]
   number,
+
+  /// A [bool]
   boolean,
+
+  /// An [int]
   integer,
+
+  /// A [Map] of properties
   object,
+
+  /// A [List] of items
   array;
 
+  /// Parses a [SchemaType] from the type field in the JSON schema.
+  /// If the type is nullable, it returns the non-nullable type.
+  /// If the type is an union, it throws an exception.
   factory SchemaType.fromJson(Object? json_) {
     String json;
     if (json_ is String) {
@@ -36,6 +51,7 @@ enum SchemaType {
     return SchemaType.values.byName(json);
   }
 
+  /// Returns `true` if the type field in the JSON schema is nullable
   static bool isNullable(Object? json) {
     if (json is String) {
       return !_notNull(json);
@@ -210,6 +226,7 @@ Either<Schema, Map<String, Object?>> _resolveRef(String ref, Schema? parent) {
   return Either.right(j);
 }
 
+/// Basic schema information
 abstract class SchemaUiInfo {
   /// User facing title
   String? get title;
@@ -221,8 +238,8 @@ abstract class SchemaUiInfo {
   SchemaType get type;
 }
 
-/// A field that can be used to retrieve and update a
-/// JSON Schema property in a form
+/// A field that can be used to retrieve and update
+/// a JSON Schema property in a form
 abstract class JsonFormField<T> {
   /// It lets us know the key in the form's data Map
   String get idKey;
