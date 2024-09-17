@@ -56,7 +56,7 @@ class _DropDownJFormFieldState
     );
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     return WrapFieldWithLabel(
-      property: property,
+      formValue: formValue,
       child: GestureDetector(
         onTap: enabled ? _onTap : null,
         child: AbsorbPointer(
@@ -67,7 +67,7 @@ class _DropDownJFormFieldState
             autovalidateMode: uiConfig.autovalidateMode,
             hint: Text(uiConfig.localizedTexts.select()),
             validator: (value) {
-              if (property.requiredNotNull && value == null) {
+              if (formValue.isRequiredNotNull && value == null) {
                 return uiConfig.localizedTexts.required();
               }
               if (widget.customValidator != null)
@@ -79,7 +79,7 @@ class _DropDownJFormFieldState
             onChanged: enabled ? _onChanged : null,
             onSaved: widget.onSaved,
             style: readOnly ? uiConfig.fieldInputReadOnly : uiConfig.fieldInput,
-            decoration: uiConfig.inputDecoration(property),
+            decoration: uiConfig.inputDecoration(formValue),
           ),
         ),
       ),

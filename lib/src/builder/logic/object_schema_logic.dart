@@ -58,8 +58,7 @@ class ObjectSchemaInherited extends InheritedWidget {
           if (dependentsList.contains(element.id)) {
             if (element.schema is SchemaProperty) {
               dev.log('Este element ${element.id} es ahora $active');
-              // TODO: use FormValue
-              element.schema.requiredProperty = active;
+              element.requiredFromDependent = active;
             }
           }
         }

@@ -81,7 +81,7 @@ class _RadioButtonJFormFieldState
         return Focus(
           focusNode: focusNode,
           child: WrapFieldWithLabel(
-            property: property,
+            formValue: formValue,
             ignoreFieldLabel: uiConfig.labelPosition != LabelPosition.table,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

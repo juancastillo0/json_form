@@ -65,7 +65,7 @@ class _DateJFormFieldState
     );
 
     return WrapFieldWithLabel(
-      property: property,
+      formValue: formValue,
       child: TextFormField(
         key: Key(idKey),
         controller: txtDateCtrl,
@@ -74,7 +74,7 @@ class _DateJFormFieldState
         autofocus: property.uiSchema.autofocus,
         enableSuggestions: property.uiSchema.autocomplete,
         validator: (value) {
-          if (property.requiredNotNull && (value == null || value.isEmpty)) {
+          if (formValue.isRequiredNotNull && (value == null || value.isEmpty)) {
             return uiConfig.localizedTexts.required();
           }
           if (widget.customValidator != null)
@@ -105,7 +105,7 @@ class _DateJFormFieldState
                 }
               }
             : null,
-        decoration: uiConfig.inputDecoration(property).copyWith(
+        decoration: uiConfig.inputDecoration(formValue).copyWith(
               hintText: formatter.pattern!.toUpperCase(),
               suffixIcon: isDateTime
                   ? Row(

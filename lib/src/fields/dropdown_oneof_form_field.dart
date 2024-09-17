@@ -55,7 +55,7 @@ class _SelectedFormFieldState
   Widget build(BuildContext context) {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     return WrapFieldWithLabel(
-      property: property,
+      formValue: formValue,
       child: GestureDetector(
         onTap: _onTap,
         child: AbsorbPointer(
@@ -67,7 +67,7 @@ class _SelectedFormFieldState
             autovalidateMode: uiConfig.autovalidateMode,
             hint: Text(uiConfig.localizedTexts.select()),
             validator: (value) {
-              if (property.requiredNotNull && value == null) {
+              if (formValue.isRequiredNotNull && value == null) {
                 return uiConfig.localizedTexts.required();
               }
               if (widget.customValidator != null)
@@ -77,7 +77,7 @@ class _SelectedFormFieldState
             items: _buildItems(),
             onChanged: _onChanged,
             onSaved: (v) => widget.onSaved(v?.constValue),
-            decoration: uiConfig.inputDecoration(property),
+            decoration: uiConfig.inputDecoration(formValue),
           ),
         ),
       ),

@@ -48,7 +48,7 @@ class _NumberJFormFieldState
     final decimal = property.type == SchemaType.number;
 
     return WrapFieldWithLabel(
-      property: property,
+      formValue: formValue,
       child: TextFormField(
         key: Key(idKey),
         focusNode: focusNode,
@@ -82,7 +82,7 @@ class _NumberJFormFieldState
         enabled: enabled,
         style: readOnly ? uiConfig.fieldInputReadOnly : uiConfig.fieldInput,
         validator: (String? value) {
-          if (property.requiredNotNull &&
+          if (formValue.isRequiredNotNull &&
               property.uiSchema.emptyValue == null &&
               value != null &&
               value.isEmpty) {
@@ -108,7 +108,7 @@ class _NumberJFormFieldState
             return widget.customValidator!(value);
           return null;
         },
-        decoration: uiConfig.inputDecoration(property),
+        decoration: uiConfig.inputDecoration(formValue),
       ),
     );
   }

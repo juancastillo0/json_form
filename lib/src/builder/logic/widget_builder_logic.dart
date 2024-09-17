@@ -108,7 +108,6 @@ class JsonFormController extends ChangeNotifier {
     BuildContext context,
     Schema schema,
     JsonFormField<Object?> field,
-    String id,
   ) {
     final controller = WidgetBuilderInherited.get(context).controller;
 
@@ -125,7 +124,7 @@ class JsonFormController extends ChangeNotifier {
         isSchemaUpdate: true,
         updateFn: (v) {
           v ??= JsonFormValue(
-            id: id,
+            id: schema.id,
             parent: null,
             schema: schema,
           );
@@ -279,8 +278,14 @@ class JsonFormValue {
   JsonFormField<Object?>? field;
   Object? value;
 
+  late final String idKey = JsonFormKeyPath.appendId(parent?.idKey, id);
+
   /// Whether the dependents have been activated
   bool isDependentsActive = false;
+  List<String> dependentsAddedBy = [];
+  bool requiredFromDependent = false;
+  bool get isRequiredNotNull =>
+      (schema.requiredProperty || requiredFromDependent) && !schema.nullable;
 
   JsonFormValue({
     required this.id,
@@ -290,10 +295,6 @@ class JsonFormValue {
   }) {
     if (schema != null) this.schema = schema;
   }
-
-  late final String idKey = JsonFormKeyPath.appendId(parent?.idKey, id);
-
-  List<String> dependentsAddedBy = [];
 
   JsonFormValue? operator [](Object key) {
     if (key is int) {

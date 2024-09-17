@@ -37,7 +37,7 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     final uiSchema = property.uiSchema;
     return WrapFieldWithLabel(
-      property: property,
+      formValue: formValue,
       child: TextFormField(
         key: Key(idKey),
         focusNode: focusNode,
@@ -60,7 +60,7 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
         readOnly: readOnly,
         onChanged: widget.onChanged,
         validator: (String? value) {
-          if (property.requiredNotNull &&
+          if (formValue.isRequiredNotNull &&
               property.uiSchema.emptyValue == null &&
               (value == null || value.isEmpty)) {
             return uiConfig.localizedTexts.required();
@@ -77,7 +77,7 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
           return null;
         },
         style: readOnly ? uiConfig.fieldInputReadOnly : uiConfig.fieldInput,
-        decoration: uiConfig.inputDecoration(property),
+        decoration: uiConfig.inputDecoration(formValue),
       ),
     );
   }

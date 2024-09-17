@@ -55,7 +55,7 @@ class _CheckboxJFormFieldState
               title: uiConfig.labelPosition == LabelPosition.table
                   ? null
                   : Text(
-                      uiConfig.labelText(property),
+                      uiConfig.labelText(formValue),
                       style: readOnly
                           ? uiConfig.fieldInputReadOnly
                           : uiConfig.fieldInput,

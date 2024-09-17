@@ -39,7 +39,7 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
       key: Key(idKey),
       enabled: enabled,
       validator: (value) {
-        if ((value == null || value.isEmpty) && property.requiredNotNull) {
+        if ((value == null || value.isEmpty) && formValue.isRequiredNotNull) {
           return uiConfig.localizedTexts.required();
         }
 
@@ -63,7 +63,7 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(uiConfig.labelText(property), style: uiConfig.subtitle),
+              Text(uiConfig.labelText(formValue), style: uiConfig.subtitle),
               const SizedBox(height: 10),
               _buildButton(uiConfig, field),
               const SizedBox(height: 10),

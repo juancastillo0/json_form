@@ -60,7 +60,7 @@ class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
         this.field = field;
         final value = field.value!.toDouble();
         return WrapFieldWithLabel(
-          property: property,
+          formValue: formValue,
           ignoreFieldLabel: uiConfig.labelPosition != LabelPosition.table,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

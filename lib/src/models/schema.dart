@@ -148,8 +148,6 @@ abstract class Schema implements SchemaUiInfo {
   bool requiredProperty;
   final bool nullable;
 
-  bool get requiredNotNull => requiredProperty && !nullable;
-
   String get titleOrId => title != null ? title! : id;
 
   // util props

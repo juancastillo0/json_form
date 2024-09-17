@@ -3,6 +3,7 @@ import 'package:json_form/json_form.dart';
 import 'package:json_form/src/builder/general_subtitle_widget.dart';
 import 'package:json_form/src/builder/logic/object_schema_logic.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
+import 'package:json_form/src/builder/widget_builder.dart';
 import 'package:json_form/src/fields/shared.dart';
 import 'package:json_form/src/models/models.dart';
 
@@ -30,12 +31,7 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder>
   void initState() {
     super.initState();
     _schemaObject = widget.schemaObject;
-    fromValue = JsonFormController.setField(
-      context,
-      _schemaObject,
-      this,
-      _schemaObject.id,
-    );
+    fromValue = JsonFormController.setField(context, _schemaObject, this);
     syncValues();
   }
 

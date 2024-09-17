@@ -37,7 +37,7 @@ abstract class PropertyFieldWidget<T> extends StatefulWidget {
 
 abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
     extends State<W> implements JsonFormField<T> {
-  late JsonFormValue fromValue;
+  late JsonFormValue formValue;
   @override
   final focusNode = FocusNode();
   @override
@@ -51,14 +51,13 @@ abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
   set value(T newValue);
 
   @override
-  String get idKey => fromValue.idKey;
+  String get idKey => formValue.idKey;
 
   @override
   void initState() {
     super.initState();
     triggerDefaultValue();
-    fromValue =
-        JsonFormController.setField(context, property, this, property.id);
+    formValue = JsonFormController.setField(context, property, this);
   }
 
   @override
