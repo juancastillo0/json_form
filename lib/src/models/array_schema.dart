@@ -13,7 +13,7 @@ class SchemaArray extends Schema {
     required super.nullable,
     super.parent,
     super.dependentsAddedBy,
-  }) : super(type: SchemaType.array) {
+  }) : super(type: JsonSchemaType.array) {
     this.itemsBaseSchema = itemsBaseSchema is Schema
         ? itemsBaseSchema.copyWith(id: kNoIdKey, parent: this)
         : Schema.fromJson(
@@ -36,7 +36,7 @@ class SchemaArray extends Schema {
       arrayProperties: ArrayProperties.fromJson(json),
       itemsBaseSchema: json['items'],
       parent: parent,
-      nullable: SchemaType.isNullable(json['type']),
+      nullable: JsonSchemaType.isNullable(json['type']),
     );
     schemaArray.dependentsAddedBy.addAll(parent?.dependentsAddedBy ?? const []);
 
@@ -81,7 +81,7 @@ class SchemaArray extends Schema {
     return SchemaProperty(
       id: id,
       title: title,
-      type: SchemaType.string,
+      type: JsonSchemaType.string,
       format: PropertyFormat.dataUrl,
       requiredProperty: requiredProperty,
       nullable: nullable,

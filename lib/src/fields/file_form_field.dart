@@ -135,7 +135,7 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
   }
 
   Widget _buildButton(
-    JsonFormSchemaUiConfig uiConfig,
+    JsonFormUiConfig uiConfig,
     FormFieldState<List<XFile>> field,
   ) {
     final onTap = _onTap(field);

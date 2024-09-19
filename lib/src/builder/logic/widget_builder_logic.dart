@@ -14,10 +14,10 @@ class WidgetBuilderInherited extends InheritedWidget {
     this.customPickerHandler,
     this.customValidatorHandler,
     required BuildContext context,
-    JsonFormSchemaUiConfig? baseConfig,
-    JsonFormSchemaUiConfig? uiConfig,
+    JsonFormUiConfig? baseConfig,
+    JsonFormUiConfig? uiConfig,
   }) : uiConfig = uiConfig ??
-            JsonFormSchemaUiConfig.fromContext(
+            JsonFormUiConfig.fromContext(
               context,
               baseConfig: baseConfig,
             );
@@ -25,7 +25,7 @@ class WidgetBuilderInherited extends InheritedWidget {
   final FileHandler? fileHandler;
   final CustomPickerHandler? customPickerHandler;
   final CustomValidatorHandler? customValidatorHandler;
-  final JsonFormSchemaUiConfig uiConfig;
+  final JsonFormUiConfig uiConfig;
 
   // TODO: implement not-required object
   // TODO: validate nullable and required combinations
@@ -53,7 +53,7 @@ class WidgetBuilderInherited extends InheritedWidget {
 }
 
 /// The event that is triggered when a field is updated
-class FieldUpdated<T> {
+class JsonFormUpdate<T> {
   /// The field that was updated
   final JsonFormField<T> field;
 
@@ -64,74 +64,57 @@ class FieldUpdated<T> {
   final Object? previousValue;
 
   /// The event that is triggered when a field is updated
-  const FieldUpdated({
+  const JsonFormUpdate({
     required this.field,
     required this.newValue,
     required this.previousValue,
   });
 }
 
-/// The controller for the form
+/// The controller for the form.
+/// Can be used to validate and [submit] the form, subscribe or [addListener] to the form's updates
+/// or the [lastEvent], and [retrieveField]s to access their values or trigger actions
 class JsonFormController extends ChangeNotifier {
   /// The main (root) value of the form. Contains all the fields and values
-  JsonFormValue rootFormValue;
+  JsonFormValue _rootFormValue;
 
   /// The main (root) data of the form.
   /// Contains all current values by the user and maintains the state
-  Object? rootOutputData;
+  Object rootOutputData;
 
   /// The main (root) schema of the form
   // TODO: extract private apis
-  Schema? mainSchema;
+  Schema? _mainSchema;
 
   /// The main [Form] key used to validate and submit the form
   GlobalKey<FormState>? formKey;
 
   /// The last field updated event.
   /// Can be used with [addListener] to listen for changes in the form
-  FieldUpdated<Object?>? get lastEvent => _lastEvent;
-  FieldUpdated<Object?>? _lastEvent;
+  JsonFormUpdate<Object?>? get lastEvent => _lastEvent;
+  JsonFormUpdate<Object?>? _lastEvent;
 
   /// The controller for the form
   JsonFormController({
-    required Map<String, Object?> data,
-    this.mainSchema,
+    required Object initialData,
     this.formKey,
-  })  : rootOutputData = data,
-        rootFormValue = JsonFormValue(
+  })  : rootOutputData = initialData,
+        _rootFormValue = JsonFormValue(
           parent: null,
-          schema: mainSchema,
+          schema: null,
           id: '',
         );
 
-  static JsonFormValue setField(
-    BuildContext context,
-    Schema schema,
-    JsonFormField<Object?> field,
-  ) {
-    final controller = WidgetBuilderInherited.get(context).controller;
+  /// Validates the form and returns the output data if valid
+  Map<String, Object?>? submit() {
+    final formKey = this.formKey!;
+    if (formKey.currentState != null && formKey.currentState!.validate()) {
+      formKey.currentState!.save();
 
-    final path = JsonFormKeyPath.ofPath(context);
-    if (path == "") {
-      return controller.rootFormValue = JsonFormValue(
-        parent: null,
-        schema: schema,
-        id: '',
-      )..field = field;
-    } else {
-      return controller._transverseObjectData(
-        path,
-        isSchemaUpdate: true,
-        updateFn: (v) {
-          v ??= JsonFormValue(
-            id: schema.id,
-            parent: null,
-            schema: schema,
-          );
-          return v..field = field;
-        },
-      ).key!;
+      log(_rootFormValue.toString());
+      return _rootFormValue.toJson()! as Map<String, Object?>;
     }
+    return null;
   }
 
   /// Retrieves the field controller for [path].
@@ -141,35 +124,14 @@ class JsonFormController extends ChangeNotifier {
     return _transverseObjectData(path).key?.field;
   }
 
-  /// Retrieves [rootFormValue]'s [path]
-  Object? retrieveObjectData(String path) {
-    return _transverseObjectData(path).value;
-  }
-
-  /// Update [rootFormValue]'s [path] with [value], returning the previous value
-  Object? updateObjectData(String path, Object? value) {
-    return updateDataInPlace(path, (_) => value);
-  }
-
-  /// Update [rootFormValue]'s [path] with the value returned in [update]
-  Object? updateDataInPlace(
-    String path,
-    Object? Function(Object? previousValue) update,
-  ) {
-    return _transverseObjectData(
-      path,
-      updateFn: (v) => v!..value = update(v.value),
-    ).value;
-  }
-
-  /// Transverses [rootFormValue] until [path] and conditionally applies an [update]
+  /// Transverses [_rootFormValue] until [path] and conditionally applies an [update]
   MapEntry<JsonFormValue?, Object?> _transverseObjectData(
     String path, {
     JsonFormValue Function(JsonFormValue? previousValue)? updateFn,
     bool isSchemaUpdate = false,
   }) {
     final update = updateFn != null;
-    JsonFormValue object = rootFormValue;
+    JsonFormValue object = _rootFormValue;
     dynamic outputValues = rootOutputData;
     log('updateObjectData $object path $path');
 
@@ -223,7 +185,7 @@ class JsonFormController extends ChangeNotifier {
             }
           } else {
             outputValues[_keyNumeric ?? _key] = item.value;
-            _lastEvent = FieldUpdated(
+            _lastEvent = JsonFormUpdate(
               field: item.field!,
               previousValue: previous,
               newValue: item.value,
@@ -248,25 +210,76 @@ class JsonFormController extends ChangeNotifier {
 
         Object? outputValue = outputValues[_keyNumeric ?? _key];
         if (outputValue == null) {
-          outputValue = schema is SchemaArray ? [] : {};
+          if (schema is SchemaArray) {
+            outputValue = outputValue is List ? outputValue : [];
+          } else {
+            assert(schema is SchemaObject);
+            outputValue =
+                outputValue is Map ? outputValue : <String, Object?>{};
+          }
           outputValues[_keyNumeric ?? _key] = outputValue;
         }
         outputValues = outputValue;
       }
     }
-    return MapEntry(rootFormValue, rootFormValue.toJson());
+    return MapEntry(_rootFormValue, _rootFormValue.toJson());
+  }
+}
+
+extension PrivateJsonFormController on JsonFormController {
+  /// The main (root) schema of the form
+  Schema? get mainSchema => _mainSchema;
+  @visibleForTesting
+  set mainSchema(Schema? newSchema) => _mainSchema = newSchema;
+
+  /// Retrieves [_rootFormValue]'s [path]
+  Object? retrieveData(String path) {
+    return _transverseObjectData(path).value;
   }
 
-  /// Validates the form and returns the output data if valid
-  Map<String, Object?>? submit() {
-    final formKey = this.formKey!;
-    if (formKey.currentState != null && formKey.currentState!.validate()) {
-      formKey.currentState!.save();
+  /// Update [_rootFormValue]'s [path] with [value], returning the previous value
+  Object? updateData(String path, Object? value) {
+    return updateDataInPlace(path, (_) => value);
+  }
 
-      log(rootFormValue.toString());
-      return rootFormValue.toJson()! as Map<String, Object?>;
+  /// Update [_rootFormValue]'s [path] with the value returned in [update]
+  Object? updateDataInPlace(
+    String path,
+    Object? Function(Object? previousValue) update,
+  ) {
+    return _transverseObjectData(
+      path,
+      updateFn: (v) => v!..value = update(v.value),
+    ).value;
+  }
+
+  static JsonFormValue setField(
+    BuildContext context,
+    Schema schema,
+    JsonFormField<Object?> field,
+  ) {
+    final controller = WidgetBuilderInherited.get(context).controller;
+    final path = JsonFormKeyPath.getPath(context);
+    if (path == "") {
+      controller._mainSchema = schema;
+      return controller._rootFormValue = JsonFormValue(
+        parent: null,
+        schema: schema,
+        id: '',
+        field: field,
+      );
+    } else {
+      return controller._transverseObjectData(
+        path,
+        isSchemaUpdate: true,
+        updateFn: (v) {
+          v ??= JsonFormValue(id: schema.id, parent: null, schema: null);
+          return v
+            ..schema = schema
+            ..field = field;
+        },
+      ).key!;
     }
-    return null;
   }
 }
 
@@ -283,7 +296,11 @@ class JsonFormValue {
   /// Whether the dependents have been activated
   bool isDependentsActive = false;
   List<String> dependentsAddedBy = [];
+
+  /// Whether the field is required because another field has a value
   bool requiredFromDependent = false;
+
+  /// Whether the field is required and not nullable
   bool get isRequiredNotNull =>
       (schema.requiredProperty || requiredFromDependent) && !schema.nullable;
 
@@ -292,6 +309,7 @@ class JsonFormValue {
     required this.parent,
     required Schema? schema,
     this.value,
+    this.field,
   }) {
     if (schema != null) this.schema = schema;
   }
@@ -343,7 +361,7 @@ class JsonFormValue {
     }
   }
 
-  void addArrayChildren(Object? value, String id) {
+  void addArrayChild(Object? value, String id) {
     final schema_ = schema;
     if (schema_ is! SchemaArray)
       throw ArgumentError('schema $schema_ is not an array');

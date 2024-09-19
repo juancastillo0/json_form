@@ -40,7 +40,7 @@ class _DropDownJFormFieldState
   void initState() {
     super.initState();
     final enumNames = property.uiSchema.enumNames;
-    values = property.type == SchemaType.boolean
+    values = property.type == JsonSchemaType.boolean
         ? [true, false]
         : (property.enumm ?? enumNames ?? []);
     names = enumNames ?? values.map((v) => v.toString()).toList();

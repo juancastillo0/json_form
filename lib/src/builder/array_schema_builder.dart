@@ -39,7 +39,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
   @override
   void initState() {
     super.initState();
-    formValue = JsonFormController.setField(context, schemaArray, this);
+    formValue = PrivateJsonFormController.setField(context, schemaArray, this);
     formValue.value ??= [];
     _initialValue = formValue.value! as List;
     if (_initialValue!.isNotEmpty) {
@@ -249,7 +249,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
 
   void _addItem() {
     setState(() {
-      formValue.addArrayChildren(null, generateItemId());
+      formValue.addArrayChild(null, generateItemId());
     });
   }
 
@@ -301,7 +301,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
   final focusNode = FocusNode();
 
   @override
-  SchemaUiInfo get property => schemaArray;
+  JsonSchemaInfo get property => schemaArray;
 
   @override
   set value(List<Object?> newValue) {
@@ -311,7 +311,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
     } else {
       while (formValue.children.length != newValue.length) {
         if (formValue.children.length < newValue.length) {
-          formValue.addArrayChildren(null, generateItemId());
+          formValue.addArrayChild(null, generateItemId());
         } else {
           formValue.children.removeLast();
         }

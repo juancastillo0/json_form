@@ -54,7 +54,7 @@ class JsonForm extends StatefulWidget {
   final String? uiSchema;
 
   /// The UI configuration with global styles, texts, builders and other Flutter configurations
-  final JsonFormSchemaUiConfig? uiConfig;
+  final JsonFormUiConfig? uiConfig;
 
   /// The file handler to be used for the form
   final FileHandler? fileHandler;
@@ -71,7 +71,7 @@ class JsonForm extends StatefulWidget {
 
 class _JsonFormState extends State<JsonForm> {
   late JsonFormController controller;
-  Schema get mainSchema => controller.mainSchema!;
+  late Schema mainSchema;
   GlobalKey<FormState> get _formKey => controller.formKey!;
 
   @override
@@ -85,7 +85,7 @@ class _JsonFormState extends State<JsonForm> {
     required bool schemaChanged,
   }) {
     if (controllerChanged) {
-      controller = widget.controller ?? JsonFormController(data: {});
+      controller = widget.controller ?? JsonFormController(initialData: {});
       controller.formKey ??= GlobalKey<FormState>();
       if (controller.mainSchema != null &&
           (!schemaChanged || widget.jsonSchema.isEmpty)) {
@@ -102,7 +102,7 @@ class _JsonFormState extends State<JsonForm> {
     if (map != null) {
       mainSchema.setUiSchema(map, fromOptions: false);
     }
-    controller.mainSchema = mainSchema;
+    this.mainSchema = mainSchema;
   }
 
   @override
@@ -280,7 +280,7 @@ class JsonFormKeyPath extends InheritedWidget {
 
   String get path => appendId(parent?.path, id);
 
-  static String ofPath(BuildContext context, {String id = ''}) {
+  static String getPath(BuildContext context, {String id = ''}) {
     return JsonFormKeyPath(
       id: id,
       context: context,

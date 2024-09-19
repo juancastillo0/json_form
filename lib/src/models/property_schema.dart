@@ -70,14 +70,14 @@ enum PropertyFormat {
 
 dynamic _safeDefaultValue(Map<String, dynamic> json) {
   final value = json['default'];
-  final type = SchemaType.fromJson(json['type']);
-  if (type == SchemaType.boolean) {
+  final type = JsonSchemaType.fromJson(json['type']);
+  if (type == JsonSchemaType.boolean) {
     if (value is String) return value == 'true';
     if (value is int) return value == 1;
-  } else if (type == SchemaType.number) {
+  } else if (type == JsonSchemaType.number) {
     if (value is String) return double.tryParse(value);
     if (value is int) return value.toDouble();
-  } else if (type == SchemaType.integer) {
+  } else if (type == JsonSchemaType.integer) {
     if (value is String) return int.tryParse(value);
     if (value is double) return value.toInt();
   }
@@ -116,7 +116,7 @@ class SchemaProperty extends Schema {
     final property = SchemaProperty(
       id: id,
       title: json['title'] as String?,
-      type: SchemaType.fromJson(json['type']),
+      type: JsonSchemaType.fromJson(json['type']),
       format: PropertyFormat.fromString(json['format'] as String?),
       defaultValue: _safeDefaultValue(json),
       description: json['description'] as String?,
@@ -127,7 +127,7 @@ class SchemaProperty extends Schema {
       numberProperties: NumberProperties.fromJson(json),
       oneOf: json['oneOf'] as List?,
       parent: parent,
-      nullable: SchemaType.isNullable(json['type']),
+      nullable: JsonSchemaType.isNullable(json['type']),
     );
     property.dependentsAddedBy.addAll(parent?.dependentsAddedBy ?? const []);
 

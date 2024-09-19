@@ -29,7 +29,7 @@ class PropertySchemaBuilder extends StatelessWidget {
     final widgetBuilderInherited = WidgetBuilderInherited.of(context);
 
     final schemaPropertySorted = schemaProperty;
-    final idKey = JsonFormKeyPath.ofPath(context);
+    final idKey = JsonFormKeyPath.getPath(context);
     final customValidator = _getCustomValidator(context, idKey);
 
     final enumNames = schemaProperty.uiSchema.enumNames;
@@ -105,8 +105,8 @@ class PropertySchemaBuilder extends StatelessWidget {
       );
     } else {
       switch (schemaProperty.type) {
-        case SchemaType.integer:
-        case SchemaType.number:
+        case JsonSchemaType.integer:
+        case JsonSchemaType.number:
           _field = NumberJFormField(
             property: schemaPropertySorted,
             onSaved: (val) {
@@ -123,7 +123,7 @@ class PropertySchemaBuilder extends StatelessWidget {
             customValidator: customValidator,
           );
           break;
-        case SchemaType.boolean:
+        case JsonSchemaType.boolean:
           _field = CheckboxJFormField(
             property: schemaPropertySorted,
             onChanged: (value) {
@@ -137,7 +137,7 @@ class PropertySchemaBuilder extends StatelessWidget {
             customValidator: customValidator,
           );
           break;
-        case SchemaType.string:
+        case JsonSchemaType.string:
         default:
           if (schemaProperty.format == PropertyFormat.date ||
               schemaProperty.format == PropertyFormat.dateTime) {
@@ -242,8 +242,8 @@ class PropertySchemaBuilder extends StatelessWidget {
 
   void updateData(BuildContext context, Object? val) {
     final widgetBuilderInherited = WidgetBuilderInherited.of(context);
-    final idKey = JsonFormKeyPath.ofPath(context);
-    widgetBuilderInherited.controller.updateObjectData(idKey, val);
+    final idKey = JsonFormKeyPath.getPath(context);
+    widgetBuilderInherited.controller.updateData(idKey, val);
   }
 
   void dispatchStringEventToParent(BuildContext context, String value) {

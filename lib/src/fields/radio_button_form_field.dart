@@ -39,11 +39,11 @@ class _RadioButtonJFormFieldState
     // fill enum property
     final enumNames = property.uiSchema.enumNames;
     switch (property.type) {
-      case SchemaType.boolean:
+      case JsonSchemaType.boolean:
         values = [true, false];
         break;
-      case SchemaType.integer:
-      case SchemaType.number:
+      case JsonSchemaType.integer:
+      case JsonSchemaType.number:
         values = property.enumm ?? property.numberProperties.options();
         break;
       default:

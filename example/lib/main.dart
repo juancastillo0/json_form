@@ -68,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late final uiTextController = TextEditingController(text: uiSchema);
   String json = FormExample.allExamples.first.jsonSchema;
   String uiSchema = FormExample.allExamples.first.uiSchema;
-  JsonFormController jsonFormController = JsonFormController(data: {});
+  JsonFormController jsonFormController = JsonFormController(initialData: {});
 
   Future<List<XFile>?> defaultCustomFileHandler() async {
     await Future.delayed(const Duration(seconds: 3));
@@ -92,8 +92,8 @@ class _MyHomePageState extends State<MyHomePage> {
               label: const Text('Custom Submit'),
             );
 
-  JsonFormSchemaUiConfig customUiConfig() {
-    return JsonFormSchemaUiConfig(
+  JsonFormUiConfig customUiConfig() {
+    return JsonFormUiConfig(
       labelPosition: labelPosition,
       inputWrapperBuilder: (property, input) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 5),
@@ -198,7 +198,7 @@ class _MyHomePageState extends State<MyHomePage> {
             // },
             uiConfig: customUIConfig
                 ? customUiConfig()
-                : JsonFormSchemaUiConfig(
+                : JsonFormUiConfig(
                     labelPosition: labelPosition,
                     submitButtonBuilder:
                         customOutsideSubmitButton ? submitButtonBuilder : null,

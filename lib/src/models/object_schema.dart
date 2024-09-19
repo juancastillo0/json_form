@@ -14,7 +14,7 @@ class SchemaObject extends Schema {
     super.requiredProperty,
     super.parent,
     super.dependentsAddedBy,
-  }) : super(type: SchemaType.object);
+  }) : super(type: JsonSchemaType.object);
 
   factory SchemaObject.fromJson(
     String id,
@@ -29,7 +29,7 @@ class SchemaObject extends Schema {
       description: json['description'] as String?,
       required:
           json["required"] != null ? (json["required"]! as List).cast() : [],
-      nullable: SchemaType.isNullable(json['type']),
+      nullable: JsonSchemaType.isNullable(json['type']),
       dependentRequired: dependentRequired,
       dependentSchemas: dependentSchemas,
       oneOf: json['oneOf'] as List?,

@@ -5,10 +5,10 @@ import 'package:json_form/src/models/models.dart';
 
 /// Global configuration for the UI of the form.
 /// Contains styles, texts, builders and other Flutter configurations.
-class JsonFormSchemaUiConfig {
+class JsonFormUiConfig {
   /// Global configuration for the UI of the form.
   /// Contains styles, texts, builders and other Flutter configurations.
-  const JsonFormSchemaUiConfig({
+  const JsonFormUiConfig({
     this.title,
     this.titleAlign,
     this.subtitle,
@@ -99,23 +99,23 @@ class JsonFormSchemaUiConfig {
 
   /// Render a custom title and description widget.
   /// This is used for objects, arrays and fields (when using labelPosition = [LabelPosition.table]).
-  final Widget? Function(SchemaUiInfo info)? titleAndDescriptionBuilder;
+  final Widget? Function(JsonSchemaInfo info)? titleAndDescriptionBuilder;
 
   /// Render a custom field wrapper widget. Already contains the label
-  final Widget? Function(SchemaUiInfo property, Widget input)?
+  final Widget? Function(JsonSchemaInfo property, Widget input)?
       fieldWrapperBuilder;
 
   /// Render a custom field wrapper widget. Does not contain the label
-  final Widget? Function(SchemaUiInfo property, Widget input)?
+  final Widget? Function(JsonSchemaInfo property, Widget input)?
       inputWrapperBuilder;
 
-  factory JsonFormSchemaUiConfig.fromContext(
+  factory JsonFormUiConfig.fromContext(
     BuildContext context, {
-    JsonFormSchemaUiConfig? baseConfig,
+    JsonFormUiConfig? baseConfig,
   }) {
     final textTheme = Theme.of(context).textTheme;
 
-    return JsonFormSchemaUiConfig(
+    return JsonFormUiConfig(
       title: baseConfig?.title ?? textTheme.titleLarge,
       titleAlign: baseConfig?.titleAlign ?? TextAlign.center,
       subtitle: baseConfig?.subtitle ??
@@ -151,7 +151,7 @@ class JsonFormSchemaUiConfig {
 
   @override
   bool operator ==(Object other) {
-    return other is JsonFormSchemaUiConfig &&
+    return other is JsonFormUiConfig &&
         other.error == error &&
         other.title == title &&
         other.titleAlign == titleAlign &&
@@ -219,7 +219,7 @@ enum LabelPosition {
   input,
 }
 
-extension JsonFormSchemaUiConfigExtension on JsonFormSchemaUiConfig {
+extension JsonFormUiConfigExtension on JsonFormUiConfig {
   String labelText(JsonFormValue fromValue) =>
       '${fromValue.schema.titleOrId}${fromValue.isRequiredNotNull ? "*" : ""}';
 

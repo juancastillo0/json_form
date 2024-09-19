@@ -3,7 +3,7 @@ import 'package:json_form/src/models/models.dart';
 import 'package:json_form/src/utils/either.dart';
 
 /// The type of the JSON Schema
-enum SchemaType {
+enum JsonSchemaType {
   /// A [String]
   string,
 
@@ -22,10 +22,10 @@ enum SchemaType {
   /// A [List] of items
   array;
 
-  /// Parses a [SchemaType] from the type field in the JSON schema.
+  /// Parses a [JsonSchemaType] from the type field in the JSON schema.
   /// If the type is nullable, it returns the non-nullable type.
   /// If the type is an union, it throws an exception.
-  factory SchemaType.fromJson(Object? json_) {
+  factory JsonSchemaType.fromJson(Object? json_) {
     String json;
     if (json_ is String) {
       json = json_;
@@ -48,7 +48,7 @@ enum SchemaType {
         'Expected String or List<String> found ${json_.runtimeType} in SchemaType.fromJson',
       );
     }
-    return SchemaType.values.byName(json);
+    return JsonSchemaType.values.byName(json);
   }
 
   /// Returns `true` if the type field in the JSON schema is nullable
@@ -67,7 +67,7 @@ enum SchemaType {
   static bool _notNull(Object? v) => v != 'null' && v != null;
 }
 
-abstract class Schema implements SchemaUiInfo {
+abstract class Schema implements JsonSchemaInfo {
   Schema({
     required this.id,
     required this.type,
@@ -107,12 +107,12 @@ abstract class Schema implements SchemaUiInfo {
     _tryCastType(json);
     json['type'] ??= 'object';
 
-    switch (SchemaType.fromJson(json['type'])) {
-      case SchemaType.object:
+    switch (JsonSchemaType.fromJson(json['type'])) {
+      case JsonSchemaType.object:
         schema = SchemaObject.fromJson(id, json, parent: parent);
         break;
 
-      case SchemaType.array:
+      case JsonSchemaType.array:
         schema = SchemaArray.fromJson(id, json, parent: parent);
 
         // validate if it is a file array
@@ -141,7 +141,7 @@ abstract class Schema implements SchemaUiInfo {
   @override
   String? get description => uiSchema.description ?? _description;
   @override
-  final SchemaType type;
+  final JsonSchemaType type;
   final Map<String, Map<String, Object?>>? defs;
   final List<Schema> oneOf;
 
@@ -185,13 +185,13 @@ abstract class Schema implements SchemaUiInfo {
     }
     if (json['type'] == null && enumm != null) {
       if (enumm.every((e) => e is String)) {
-        json['type'] = SchemaType.string.name;
+        json['type'] = JsonSchemaType.string.name;
       } else if (enumm.every((e) => e is int)) {
-        json['type'] = SchemaType.integer.name;
+        json['type'] = JsonSchemaType.integer.name;
       } else if (enumm.every((e) => e is num)) {
-        json['type'] = SchemaType.number.name;
+        json['type'] = JsonSchemaType.number.name;
       } else if (enumm.every((e) => e is bool)) {
-        json['type'] = SchemaType.boolean.name;
+        json['type'] = JsonSchemaType.boolean.name;
       }
     }
   }
@@ -225,7 +225,7 @@ Either<Schema, Map<String, Object?>> _resolveRef(String ref, Schema? parent) {
 }
 
 /// Basic schema information
-abstract class SchemaUiInfo {
+abstract class JsonSchemaInfo {
   /// User facing title
   String? get title;
 
@@ -233,17 +233,17 @@ abstract class SchemaUiInfo {
   String? get description;
 
   /// The kind of the JSON Schema
-  SchemaType get type;
+  JsonSchemaType get type;
 }
 
 /// A field that can be used to retrieve and update
 /// a JSON Schema property in a form
 abstract class JsonFormField<T> {
-  /// It lets us know the key in the form's data Map
+  /// The path in the form's data Map. Joined by dots as a JSON Path.
   String get idKey;
 
   /// Basic schema information of the field
-  SchemaUiInfo get property;
+  JsonSchemaInfo get property;
 
   /// The current value of the field input
   T get value;

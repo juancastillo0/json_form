@@ -34,7 +34,7 @@ class _NumberJFormFieldState
 
   num? parseValue(String? value) {
     if (value == null || value.isEmpty) return null;
-    return property.type == SchemaType.integer
+    return property.type == JsonSchemaType.integer
         ? int.tryParse(value)
         : double.tryParse(value);
   }
@@ -45,7 +45,7 @@ class _NumberJFormFieldState
     final numberProperties = property.numberProperties;
     final signed = (numberProperties.minimum ?? -1) < 0 &&
         (numberProperties.exclusiveMinimum ?? -1) < 0;
-    final decimal = property.type == SchemaType.number;
+    final decimal = property.type == JsonSchemaType.number;
 
     return WrapFieldWithLabel(
       formValue: formValue,

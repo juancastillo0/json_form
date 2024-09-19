@@ -57,7 +57,7 @@ abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
   void initState() {
     super.initState();
     triggerDefaultValue();
-    formValue = JsonFormController.setField(context, property, this);
+    formValue = PrivateJsonFormController.setField(context, property, this);
   }
 
   @override
@@ -84,8 +84,7 @@ abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
 
   D? getDefaultValue<D>({bool parse = true}) {
     final widgetBuilderInherited = WidgetBuilderInherited.get(context);
-    final objectData =
-        widgetBuilderInherited.controller.retrieveObjectData(idKey);
+    final objectData = widgetBuilderInherited.controller.retrieveData(idKey);
     final isDate = property.format == PropertyFormat.date ||
         property.format == PropertyFormat.dateTime;
     var data = (objectData is D || isDate && parse && objectData is String

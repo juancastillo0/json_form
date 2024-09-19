@@ -84,7 +84,7 @@ class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
                       autofocus: property.uiSchema.autofocus,
                       onChanged: enabled
                           ? (double value) {
-                              final v = property.type == SchemaType.integer
+                              final v = property.type == JsonSchemaType.integer
                                   ? value.round()
                                   : value;
                               field.didChange(v);

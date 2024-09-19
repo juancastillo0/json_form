@@ -141,7 +141,7 @@ void main() {
     late void Function(void Function()) setState;
     LabelPosition labelPosition = LabelPosition.top;
     Map<String, Object?> data = {};
-    final controller = JsonFormController(data: data);
+    final controller = JsonFormController(initialData: data);
     // TODO: file, color
     await tester.pumpWidget(
       MaterialApp(
@@ -153,7 +153,7 @@ void main() {
                 jsonSchema: primitivesJsonSchema,
                 onFormDataSaved: (p) => data = p as Map<String, Object?>,
                 controller: controller,
-                uiConfig: JsonFormSchemaUiConfig(
+                uiConfig: JsonFormUiConfig(
                   labelPosition: labelPosition,
                 ),
                 uiSchema: primitivesUiSchema,
@@ -682,9 +682,8 @@ void main() {
             );
             mainSchema.setUiSchema(uiSchema.toJson(), fromOptions: false);
             controller = JsonFormController(
-              data: data! as Map<String, dynamic>,
-              mainSchema: mainSchema,
-            );
+              initialData: data! as Map<String, dynamic>,
+            )..mainSchema = mainSchema;
           });
           break;
         default:
@@ -831,7 +830,7 @@ void main() {
   testWidgets('formats, errors and focus', (tester) async {
     final utils = TestUtils(tester);
     Map<String, Object?> data = {};
-    final controller = JsonFormController(data: data);
+    final controller = JsonFormController(initialData: data);
     // TODO: file, color
     await tester.pumpWidget(
       MaterialApp(

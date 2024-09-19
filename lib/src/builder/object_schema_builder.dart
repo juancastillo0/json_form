@@ -31,7 +31,8 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder>
   void initState() {
     super.initState();
     _schemaObject = widget.schemaObject;
-    fromValue = JsonFormController.setField(context, _schemaObject, this);
+    fromValue =
+        PrivateJsonFormController.setField(context, _schemaObject, this);
     syncValues();
   }
 
@@ -185,7 +186,7 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder>
   @override
   String get idKey => fromValue.idKey;
   @override
-  SchemaUiInfo get property => widget.schemaObject;
+  JsonSchemaInfo get property => widget.schemaObject;
 
   @override
   set value(Map<String, Object?> newValue) {
