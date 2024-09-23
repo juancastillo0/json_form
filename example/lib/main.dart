@@ -154,17 +154,18 @@ class _MyHomePageState extends State<MyHomePage> {
             uiSchema: uiSchema,
             controller: jsonFormController,
             onFormDataSaved: onFormDataSaved,
-            fileHandler: () => {
-              'files': defaultCustomFileHandler,
-              'file': () async {
-                return [
-                  XFile(
-                    'https://cdn.mos.cms.futurecdn.net/LEkEkAKZQjXZkzadbHHsVj-970-80.jpg',
-                  )
-                ];
-              },
-              '*': defaultCustomFileHandler
-            },
+            fieldFilePicker: (field) =>
+                {
+                  'files': defaultCustomFileHandler,
+                  'file': () async {
+                    return [
+                      XFile(
+                        'https://cdn.mos.cms.futurecdn.net/LEkEkAKZQjXZkzadbHHsVj-970-80.jpg',
+                      )
+                    ];
+                  },
+                }[field.idKey] ??
+                defaultCustomFileHandler,
             // customPickerHandler: () => {
             //   '*': (data) async {
             //     return showDialog(
@@ -203,11 +204,21 @@ class _MyHomePageState extends State<MyHomePage> {
                     submitButtonBuilder:
                         customOutsideSubmitButton ? submitButtonBuilder : null,
                   ),
-            customValidatorHandler: () => {
+            fieldValidator: (field) => {
               'files': (value) {
                 return null;
-              }
-            },
+              },
+              'uri': (uri) =>
+                  (uri as String).isEmpty || Uri.parse(uri).isAbsolute
+                      ? null
+                      : 'Should be absolute URI',
+              'numberExclusive': (n) => (n as String).isEmpty || n != '6'
+                  ? null
+                  : 'Should be different than 6',
+              'arrayCheckbox': (a) => (a as List).contains(3) && a.contains(5)
+                  ? "Can't have 3 and 5 at the same time"
+                  : null,
+            }[field.idKey],
           ),
         ),
         if (customOutsideSubmitButton)

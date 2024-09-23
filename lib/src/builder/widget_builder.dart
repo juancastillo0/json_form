@@ -11,16 +11,20 @@ import 'package:json_form/src/models/json_form_schema_style.dart';
 import 'package:json_form/src/models/models.dart';
 
 /// Returns a map of paths keys to functions that return the files selected by the user.
-typedef FileHandler = Map<String, Future<List<XFile>?> Function()?> Function();
+typedef FileHandler = Future<List<XFile>?> Function() Function(
+  JsonFormField<Object?> field,
+);
 
 /// Returns a map of paths keys to functions that receives a map values to strings
 /// and returns the selected value, or null if none was selected.
 typedef CustomPickerHandler
-    = Map<String, Future<Object?> Function(Map<Object?, Object?> data)>
-        Function();
+    = Future<Object?> Function(Map<Object?, String> options)? Function(
+  JsonFormField<Object?> field,
+);
 
-typedef CustomValidatorHandler = Map<String, String? Function(Object?)?>
-    Function();
+typedef CustomValidatorHandler = String? Function(dynamic newValue)? Function(
+  JsonFormField<Object?> field,
+);
 
 /// Builds a form with [jsonSchema] and configurations from [uiSchema] and [uiConfig].
 /// You may use [controller] for added functionalities.
@@ -34,9 +38,9 @@ class JsonForm extends StatefulWidget {
     this.controller,
     this.uiSchema,
     this.uiConfig,
-    this.fileHandler,
-    this.customPickerHandler,
-    this.customValidatorHandler,
+    this.fieldValidator,
+    this.fieldDropdownPicker,
+    this.fieldFilePicker,
   });
 
   /// The JSON schema to build the form from
@@ -56,14 +60,18 @@ class JsonForm extends StatefulWidget {
   /// The UI configuration with global styles, texts, builders and other Flutter configurations
   final JsonFormUiConfig? uiConfig;
 
-  /// The file handler to be used for the form
-  final FileHandler? fileHandler;
+  /// A custom validator that receives the field and returns an error message
+  /// or null if the field is valid. If the error is an empty String, it will
+  /// be considered an error in validation, but no error message will be shown.
+  final CustomValidatorHandler? fieldValidator;
 
-  /// Custom handlers for dropdown buttons
-  final CustomPickerHandler? customPickerHandler;
+  /// A custom picker that receives the field and returns a Future with the selected value.
+  /// If no Future is returned, the default selector will be shown.
+  /// If the Future completes with a null value, the default field will be considered as not selected.
+  final CustomPickerHandler? fieldDropdownPicker;
 
-  /// Validators executed when for each field
-  final CustomValidatorHandler? customValidatorHandler;
+  /// A file picker that receives the field and returns a Function that selects the files.
+  final FileHandler? fieldFilePicker;
 
   @override
   State<JsonForm> createState() => _JsonFormState();
@@ -123,9 +131,7 @@ class _JsonFormState extends State<JsonForm> {
   Widget build(BuildContext context) {
     return WidgetBuilderInherited(
       controller: controller,
-      fileHandler: widget.fileHandler,
-      customPickerHandler: widget.customPickerHandler,
-      customValidatorHandler: widget.customValidatorHandler,
+      jsonForm: widget,
       context: context,
       baseConfig: widget.uiConfig,
       child: Builder(

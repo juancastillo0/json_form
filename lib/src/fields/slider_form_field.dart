@@ -10,9 +10,6 @@ class SliderJFormField extends PropertyFieldWidget<num> {
   const SliderJFormField({
     super.key,
     required super.property,
-    required super.onSaved,
-    super.onChanged,
-    super.customValidator,
   });
 
   @override
@@ -46,15 +43,9 @@ class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
       key: Key(idKey),
       autovalidateMode: uiConfig.autovalidateMode,
       initialValue: super.getDefaultValue<num>() ?? values.first,
-      onSaved: (newValue) {
-        widget.onSaved(newValue);
-      },
-      validator: (value) {
-        if (widget.customValidator != null)
-          return widget.customValidator!(value);
-
-        return null;
-      },
+      // TODO: map or parse?
+      onSaved: onSaved,
+      validator: customValidator,
       enabled: enabled,
       builder: (field) {
         this.field = field;
@@ -88,7 +79,7 @@ class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
                                   ? value.round()
                                   : value;
                               field.didChange(v);
-                              widget.onChanged!(v);
+                              onChanged(v);
                             }
                           : null,
                     ),

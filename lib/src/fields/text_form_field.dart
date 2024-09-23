@@ -11,9 +11,6 @@ class TextJFormField extends PropertyFieldWidget<String> {
   const TextJFormField({
     super.key,
     required super.property,
-    required super.onSaved,
-    super.onChanged,
-    super.customValidator,
   });
 
   @override
@@ -51,22 +48,20 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
         maxLines: uiSchema.widget == "textarea" ? null : 1,
         obscureText: uiSchema.widget == "password",
         controller: textController,
-        onSaved: (v) => widget.onSaved(
+        onSaved: (v) => onSaved(
           v == null || v.isEmpty ? property.uiSchema.emptyValue : v,
         ),
         maxLength: property.maxLength,
         inputFormatters: [textInputCustomFormatter(property.format)],
         autovalidateMode: uiConfig.autovalidateMode,
         readOnly: readOnly,
-        onChanged: widget.onChanged,
+        onChanged: onChanged,
         validator: (String? value) {
           if (formValue.isRequiredNotNull &&
               property.uiSchema.emptyValue == null &&
               (value == null || value.isEmpty)) {
             return uiConfig.localizedTexts.required();
           }
-          if (widget.customValidator != null)
-            return widget.customValidator!(value);
           if (value != null && value.isNotEmpty) {
             final error = uiConfig.localizedTexts.stringError(
               property,
@@ -74,7 +69,7 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
             );
             if (error != null) return error;
           }
-          return null;
+          return customValidator(value);
         },
         style: readOnly ? uiConfig.fieldInputReadOnly : uiConfig.fieldInput,
         decoration: uiConfig.inputDecoration(formValue),

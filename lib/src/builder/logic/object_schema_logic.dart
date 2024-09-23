@@ -96,7 +96,6 @@ class ObjectSchemaInherited extends InheritedWidget {
                 // Agregamos que fue dependiente de este, para que luego pueda ser eliminado.
                 .map((e) {
               final newProp = e.copyWith(id: e.id, parent: schemaObject);
-              // TODO: move dependentsAddedBy to JsonFormValue
               if (newProp is SchemaProperty)
                 // TODO: validate
                 newProp.setDependents(schemaObject);

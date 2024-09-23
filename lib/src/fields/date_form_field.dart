@@ -14,9 +14,6 @@ class DateJFormField extends PropertyFieldWidget<DateTime> {
   const DateJFormField({
     super.key,
     required super.property,
-    required super.onSaved,
-    super.onChanged,
-    super.customValidator,
   });
 
   @override
@@ -77,14 +74,12 @@ class _DateJFormFieldState
           if (formValue.isRequiredNotNull && (value == null || value.isEmpty)) {
             return uiConfig.localizedTexts.required();
           }
-          if (widget.customValidator != null)
-            return widget.customValidator!(value);
           if (value != null &&
               value.isNotEmpty &&
               formatter.tryParse(value) == null)
             return uiConfig.localizedTexts.invalidDate();
 
-          return null;
+          return customValidator(value);
         },
         // inputFormatters: [DateTextInputJsonFormatter()],
         readOnly: readOnly,
@@ -92,14 +87,13 @@ class _DateJFormFieldState
         style: readOnly ? uiConfig.fieldInputReadOnly : uiConfig.fieldInput,
         onSaved: (value) {
           if (value != null && value.isNotEmpty)
-            widget.onSaved(formatter.parse(value));
+            onSaved(formatter.parse(value));
         },
         onChanged: enabled
             ? (value) {
                 try {
-                  if (widget.onChanged != null &&
-                      DateTime.tryParse(value) != null)
-                    widget.onChanged!(formatter.parse(value));
+                  if (DateTime.tryParse(value) != null)
+                    onChanged(formatter.parse(value));
                 } catch (e) {
                   return;
                 }
@@ -154,7 +148,7 @@ class _DateJFormFieldState
       second: tempDate.second,
     );
     txtDateCtrl.text = formatter.format(date);
-    widget.onSaved(date);
+    onSaved(date);
   }
 
   Future<void> _openTime() async {
@@ -168,6 +162,6 @@ class _DateJFormFieldState
     // TODO: seconds
     date = date.copyWith(hour: time.hour, minute: time.minute);
     txtDateCtrl.text = formatter.format(date);
-    widget.onSaved(date);
+    onSaved(date);
   }
 }

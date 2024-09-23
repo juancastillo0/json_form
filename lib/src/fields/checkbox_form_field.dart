@@ -8,9 +8,6 @@ class CheckboxJFormField extends PropertyFieldWidget<bool> {
   const CheckboxJFormField({
     super.key,
     required super.property,
-    required super.onSaved,
-    super.onChanged,
-    super.customValidator,
   });
 
   @override
@@ -36,8 +33,8 @@ class _CheckboxJFormFieldState
       key: Key(idKey),
       initialValue: super.getDefaultValue() ?? false,
       autovalidateMode: uiConfig.autovalidateMode,
-      onSaved: widget.onSaved,
-      validator: widget.customValidator,
+      onSaved: onSaved,
+      validator: customValidator,
       enabled: enabled,
       builder: (field) {
         this.field = field;
@@ -63,8 +60,8 @@ class _CheckboxJFormFieldState
               onChanged: enabled
                   ? (bool? value) {
                       field.didChange(value);
-                      if (widget.onChanged != null && value != null) {
-                        widget.onChanged!(value);
+                      if (value != null) {
+                        onChanged(value);
                       }
                     }
                   : null,

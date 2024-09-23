@@ -10,9 +10,6 @@ class RadioButtonJFormField extends PropertyFieldWidget<Object?> {
   const RadioButtonJFormField({
     super.key,
     required super.property,
-    required super.onSaved,
-    super.onChanged,
-    super.customValidator,
   });
 
   @override
@@ -66,15 +63,8 @@ class _RadioButtonJFormFieldState
       key: Key(idKey),
       autovalidateMode: uiConfig.autovalidateMode,
       initialValue: super.getDefaultValue(),
-      onSaved: (newValue) {
-        widget.onSaved(newValue);
-      },
-      validator: (value) {
-        if (widget.customValidator != null)
-          return widget.customValidator!(value);
-
-        return null;
-      },
+      onSaved: onSaved,
+      validator: customValidator,
       enabled: enabled,
       builder: (field) {
         this.field = field;
@@ -106,7 +96,7 @@ class _RadioButtonJFormFieldState
                               log(value.toString());
                               if (value != null) {
                                 field.didChange(value);
-                                widget.onChanged?.call(value);
+                                onChanged(value);
                               }
                             }
                           : null,

@@ -153,11 +153,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
                       padding: const EdgeInsets.only(bottom: 5.0, left: 5.0),
                       child: WidgetBuilderInherited(
                         controller: widgetBuilderInherited.controller,
-                        customPickerHandler:
-                            widgetBuilderInherited.customPickerHandler,
-                        customValidatorHandler:
-                            widgetBuilderInherited.customValidatorHandler,
-                        fileHandler: widgetBuilderInherited.fileHandler,
+                        jsonForm: widgetBuilderInherited.jsonForm,
                         uiConfig: widgetBuilderInherited.uiConfig,
                         context: context,
                         child: FormFromSchemaBuilder(

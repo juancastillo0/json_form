@@ -55,12 +55,17 @@ bool isValidFormat(PropertyFormat format, String value) {
     case PropertyFormat.hostname:
     case PropertyFormat.idnHostname:
     case PropertyFormat.uriTemplate:
-    case PropertyFormat.dataUrl:
     case PropertyFormat.uri:
     case PropertyFormat.uriReference:
     case PropertyFormat.iri:
     case PropertyFormat.iriReference:
-      return validators.isURL(value);
+      return validators.isURL(value, requireTld: false);
+    case PropertyFormat.dataUrl:
+      return validators.isURL(
+        value,
+        protocols: const ['data'],
+        requireProtocol: true,
+      );
     // TODO:
     case PropertyFormat.date:
     case PropertyFormat.dateTime:

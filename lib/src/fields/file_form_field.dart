@@ -1,6 +1,7 @@
 import 'package:cross_file/cross_file.dart';
 import 'package:flutter/material.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
+import 'package:json_form/src/builder/widget_builder.dart';
 import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
 import 'package:json_form/src/models/json_form_schema_style.dart';
@@ -9,13 +10,7 @@ class FileJFormField extends PropertyFieldWidget<Object?> {
   const FileJFormField({
     super.key,
     required super.property,
-    required super.onSaved,
-    super.onChanged,
-    required this.fileHandler,
-    super.customValidator,
   });
-
-  final Future<List<XFile>?> Function() fileHandler;
 
   @override
   PropertyFieldState<Object?, FileJFormField> createState() =>
@@ -31,6 +26,20 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
     field.didChange(newValue);
   }
 
+  FileHandler? _previousPicker;
+  Future<List<XFile>?> Function()? _customPicker;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentPicker = WidgetBuilderInherited.of(context).fieldFilePicker;
+    if (_previousPicker != currentPicker) {
+      _customPicker = currentPicker?.call(this);
+      _previousPicker = currentPicker;
+    }
+    if (_customPicker == null) throw Exception('no file handler found');
+  }
+
   @override
   Widget build(BuildContext context) {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
@@ -43,16 +52,14 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
           return uiConfig.localizedTexts.required();
         }
 
-        if (widget.customValidator != null)
-          return widget.customValidator!(value);
-        return null;
+        return customValidator(value);
       },
       onSaved: (newValue) {
         if (newValue != null) {
           final response =
               property.isMultipleFile ? newValue : (newValue.first);
 
-          widget.onSaved(response);
+          onSaved(response);
         }
       },
       builder: (field) {
@@ -114,19 +121,17 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
   void change(FormFieldState<List<XFile>> field, List<XFile>? values) {
     field.didChange(values);
 
-    if (widget.onChanged != null) {
-      final response = property.isMultipleFile
-          ? values
-          : (values != null && values.isNotEmpty ? values.first : null);
-      widget.onChanged!(response);
-    }
+    final response = property.isMultipleFile
+        ? values
+        : (values != null && values.isNotEmpty ? values.first : null);
+    onChanged(response);
   }
 
   VoidCallback? _onTap(FormFieldState<List<XFile>> field) {
     if (!enabled) return null;
 
     return () async {
-      final result = await widget.fileHandler();
+      final result = await _customPicker!();
 
       if (result != null) {
         change(field, result);

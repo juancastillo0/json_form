@@ -10,9 +10,7 @@ class WidgetBuilderInherited extends InheritedWidget {
     super.key,
     required this.controller,
     required super.child,
-    this.fileHandler,
-    this.customPickerHandler,
-    this.customValidatorHandler,
+    required this.jsonForm,
     required BuildContext context,
     JsonFormUiConfig? baseConfig,
     JsonFormUiConfig? uiConfig,
@@ -22,9 +20,10 @@ class WidgetBuilderInherited extends InheritedWidget {
               baseConfig: baseConfig,
             );
   final JsonFormController controller;
-  final FileHandler? fileHandler;
-  final CustomPickerHandler? customPickerHandler;
-  final CustomValidatorHandler? customValidatorHandler;
+  final JsonForm jsonForm;
+  FileHandler? get fieldFilePicker => jsonForm.fieldFilePicker;
+  CustomPickerHandler? get fieldDropdownPicker => jsonForm.fieldDropdownPicker;
+  CustomValidatorHandler? get fieldValidator => jsonForm.fieldValidator;
   final JsonFormUiConfig uiConfig;
 
   // TODO: implement not-required object
@@ -33,7 +32,10 @@ class WidgetBuilderInherited extends InheritedWidget {
   @override
   bool updateShouldNotify(covariant WidgetBuilderInherited oldWidget) =>
       controller.mainSchema != oldWidget.controller.mainSchema ||
-      uiConfig != oldWidget.uiConfig;
+      uiConfig != oldWidget.uiConfig ||
+      fieldValidator != oldWidget.fieldValidator ||
+      fieldDropdownPicker != oldWidget.fieldDropdownPicker ||
+      fieldFilePicker != oldWidget.fieldFilePicker;
 
   static WidgetBuilderInherited of(BuildContext context) {
     final result =

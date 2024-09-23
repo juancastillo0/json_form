@@ -843,20 +843,25 @@ void main() {
                   data = p as Map<String, Object?>;
                 },
                 controller: controller,
-                customValidatorHandler: () {
-                  return {
-                    'uri': (uri) => (uri! as String).isEmpty ||
-                            Uri.parse(uri as String).isAbsolute
-                        ? null
-                        : 'Should be absolute URI',
-                    'numberExclusive': (n) => (n! as String).isEmpty || n != '6'
-                        ? null
-                        : 'Should be different than 6',
-                    'arrayCheckbox': (a) =>
-                        (a! as List).contains(3) && (a as List).contains(5)
-                            ? "Can't have 3 and 5 at the same time"
-                            : null,
-                  };
+                fieldValidator: (field) {
+                  switch (field.idKey) {
+                    case 'uri':
+                      return (uri) => (uri! as String).isEmpty ||
+                              Uri.parse(uri as String).isAbsolute
+                          ? null
+                          : 'Should be absolute URI';
+                    case 'numberExclusive':
+                      return (n) => (n! as String).isEmpty || n != '6'
+                          ? null
+                          : 'Should be different than 6';
+                    case 'arrayCheckbox':
+                      return (a) =>
+                          (a! as List).contains(3) && (a as List).contains(5)
+                              ? "Can't have 3 and 5 at the same time"
+                              : null;
+                    default:
+                      return null;
+                  }
                 },
                 uiSchema: formatsUiSchema,
               );
@@ -1020,7 +1025,7 @@ void main() {
       'email',
       currentData['email'] = 'not-an-email',
     );
-    await utils.findAndEnterText('uri', currentData['uri'] = 'json_form');
+    await utils.findAndEnterText('uri', currentData['uri'] = 'json-form');
     await utils.findAndEnterText('uuid', currentData['uuid'] = '864f4625');
     await utils.findAndEnterText('hostname', currentData['hostname'] = '&^|>');
     await utils.findAndEnterText('regex', currentData['regex'] = '&|)');

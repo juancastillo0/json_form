@@ -10,9 +10,6 @@ class NumberJFormField extends PropertyFieldWidget<num?> {
   const NumberJFormField({
     super.key,
     required super.property,
-    required super.onSaved,
-    super.onChanged,
-    super.customValidator,
   });
 
   @override
@@ -70,14 +67,14 @@ class _NumberJFormFieldState
               : value;
           final v = parseValue(value);
           if (v == null) return;
-          widget.onSaved(v);
+          onSaved(v);
         },
         autovalidateMode: uiConfig.autovalidateMode,
         readOnly: readOnly,
         onChanged: (value) {
           final v = parseValue(value);
           if (v == null) return;
-          widget.onChanged?.call(v);
+          onChanged(v);
         },
         enabled: enabled,
         style: readOnly ? uiConfig.fieldInputReadOnly : uiConfig.fieldInput,
@@ -104,9 +101,7 @@ class _NumberJFormFieldState
             if (error != null) return error;
           }
 
-          if (widget.customValidator != null)
-            return widget.customValidator!(value);
-          return null;
+          return customValidator(value);
         },
         decoration: uiConfig.inputDecoration(formValue),
       ),
