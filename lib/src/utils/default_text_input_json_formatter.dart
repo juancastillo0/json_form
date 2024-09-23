@@ -13,7 +13,7 @@ class DefaultTextInputJsonFormatter extends TextInputFormatter {
     }
 
     if (pattern == null) {
-      if (!RegExp(r'.').hasMatch(newValue.text)) {
+      if (!RegExp('.').hasMatch(newValue.text)) {
         return oldValue;
       }
     } else {

@@ -1,17 +1,31 @@
 import 'package:flutter/widgets.dart';
+import 'package:json_form/src/models/models.dart';
 import 'package:json_form/src/utils/either.dart';
 
-import '../models/models.dart';
-
-enum SchemaType {
+/// The type of the JSON Schema
+enum JsonSchemaType {
+  /// A [String]
   string,
+
+  /// A [double]
   number,
+
+  /// A [bool]
   boolean,
+
+  /// An [int]
   integer,
+
+  /// A [Map] of properties
   object,
+
+  /// A [List] of items
   array;
 
-  factory SchemaType.fromJson(Object? json_) {
+  /// Parses a [JsonSchemaType] from the type field in the JSON schema.
+  /// If the type is nullable, it returns the non-nullable type.
+  /// If the type is an union, it throws an exception.
+  factory JsonSchemaType.fromJson(Object? json_) {
     String json;
     if (json_ is String) {
       json = json_;
@@ -23,20 +37,21 @@ enum SchemaType {
       } else if (json_.every(_notNull) && json_.length != 1) {
         throw UnimplementedError('Union types are not implemented');
       } else {
-        json = json_.firstWhere(
-          _notNull,
-          orElse: () =>
-              throw UnimplementedError('Null types are not implemented'),
-        );
+        json = json_.cast<String>().firstWhere(
+              _notNull,
+              orElse: () =>
+                  throw UnimplementedError('Null types are not implemented'),
+            );
       }
     } else {
       throw FormatException(
         'Expected String or List<String> found ${json_.runtimeType} in SchemaType.fromJson',
       );
     }
-    return SchemaType.values.byName(json);
+    return JsonSchemaType.values.byName(json);
   }
 
+  /// Returns `true` if the type field in the JSON schema is nullable
   static bool isNullable(Object? json) {
     if (json is String) {
       return !_notNull(json);
@@ -52,7 +67,7 @@ enum SchemaType {
   static bool _notNull(Object? v) => v != 'null' && v != null;
 }
 
-abstract class Schema implements SchemaUiInfo {
+abstract class Schema implements JsonSchemaInfo {
   Schema({
     required this.id,
     required this.type,
@@ -92,15 +107,15 @@ abstract class Schema implements SchemaUiInfo {
     _tryCastType(json);
     json['type'] ??= 'object';
 
-    switch (SchemaType.fromJson(json['type'])) {
-      case SchemaType.object:
+    switch (JsonSchemaType.fromJson(json['type'])) {
+      case JsonSchemaType.object:
         schema = SchemaObject.fromJson(id, json, parent: parent);
         break;
 
-      case SchemaType.array:
+      case JsonSchemaType.array:
         schema = SchemaArray.fromJson(id, json, parent: parent);
 
-        // validate if is a file array, it means multiplefile
+        // validate if it is a file array
         if (schema is SchemaArray && schema.isArrayMultipleFile())
           schema = schema.toSchemaPropertyMultipleFiles();
         break;
@@ -126,40 +141,20 @@ abstract class Schema implements SchemaUiInfo {
   @override
   String? get description => uiSchema.description ?? _description;
   @override
-  final SchemaType type;
+  final JsonSchemaType type;
   final Map<String, Map<String, Object?>>? defs;
   final List<Schema> oneOf;
 
-  JsonFormField? formField;
   bool requiredProperty;
   final bool nullable;
 
-  bool get requiredNotNull => requiredProperty && !nullable;
-
-  String get titleOrId => title != null
-      ? title!
-      : parent is SchemaArray && int.tryParse(id) != null
-          ? '${(parent as SchemaArray).items.indexOf(this) + 1}.'
-          : id;
+  String get titleOrId => title != null ? title! : id;
 
   // util props
   final Schema? parent;
-  String? get parentIdKey => parent?.idKey;
   final List<String> dependentsAddedBy;
 
   final UiSchemaData uiSchema = UiSchemaData();
-
-  @override
-  String get idKey {
-    if (parentIdKey != null && parentIdKey != kGenesisIdKey) {
-      return _appendId(parentIdKey!, id);
-    }
-    return id;
-  }
-
-  static String _appendId(String path, String id) {
-    return id != kNoIdKey ? (path.isNotEmpty ? '$path.' : '') + id : path;
-  }
 
   Schema copyWith({
     required String id,
@@ -176,7 +171,7 @@ abstract class Schema implements SchemaUiInfo {
   }
 
   void _setOneOf(List<dynamic> oneOf) {
-    for (Map<String, dynamic> element in oneOf.cast()) {
+    for (final Map<String, dynamic> element in oneOf.cast()) {
       this.oneOf.add(Schema.fromJson(element, parent: this));
     }
   }
@@ -190,13 +185,13 @@ abstract class Schema implements SchemaUiInfo {
     }
     if (json['type'] == null && enumm != null) {
       if (enumm.every((e) => e is String)) {
-        json['type'] = SchemaType.string.name;
+        json['type'] = JsonSchemaType.string.name;
       } else if (enumm.every((e) => e is int)) {
-        json['type'] = SchemaType.integer.name;
+        json['type'] = JsonSchemaType.integer.name;
       } else if (enumm.every((e) => e is num)) {
-        json['type'] = SchemaType.number.name;
+        json['type'] = JsonSchemaType.number.name;
       } else if (enumm.every((e) => e is bool)) {
-        json['type'] = SchemaType.boolean.name;
+        json['type'] = JsonSchemaType.boolean.name;
       }
     }
   }
@@ -229,10 +224,8 @@ Either<Schema, Map<String, Object?>> _resolveRef(String ref, Schema? parent) {
   return Either.right(j);
 }
 
-abstract class SchemaUiInfo {
-  /// It lets us know the key in the form's data Map
-  String get idKey;
-
+/// Basic schema information
+abstract class JsonSchemaInfo {
   /// User facing title
   String? get title;
 
@@ -240,14 +233,17 @@ abstract class SchemaUiInfo {
   String? get description;
 
   /// The kind of the JSON Schema
-  SchemaType get type;
+  JsonSchemaType get type;
 }
 
-/// A field that can be used to retrieve and update a
-/// JSON Schema property in a form
+/// A field that can be used to retrieve and update
+/// a JSON Schema property in a form
 abstract class JsonFormField<T> {
+  /// The path in the form's data Map. Joined by dots as a JSON Path.
+  String get idKey;
+
   /// Basic schema information of the field
-  SchemaUiInfo get property;
+  JsonSchemaInfo get property;
 
   /// The current value of the field input
   T get value;

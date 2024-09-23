@@ -1,4 +1,4 @@
-import '../models/models.dart';
+import 'package:json_form/src/models/models.dart';
 
 enum PropertyFormat {
   general,
@@ -70,14 +70,14 @@ enum PropertyFormat {
 
 dynamic _safeDefaultValue(Map<String, dynamic> json) {
   final value = json['default'];
-  final type = SchemaType.fromJson(json['type']);
-  if (type == SchemaType.boolean) {
+  final type = JsonSchemaType.fromJson(json['type']);
+  if (type == JsonSchemaType.boolean) {
     if (value is String) return value == 'true';
     if (value is int) return value == 1;
-  } else if (type == SchemaType.number) {
+  } else if (type == JsonSchemaType.number) {
     if (value is String) return double.tryParse(value);
     if (value is int) return value.toDouble();
-  } else if (type == SchemaType.integer) {
+  } else if (type == JsonSchemaType.integer) {
     if (value is String) return int.tryParse(value);
     if (value is double) return value.toInt();
   }
@@ -115,19 +115,19 @@ class SchemaProperty extends Schema {
   }) {
     final property = SchemaProperty(
       id: id,
-      title: json['title'],
-      type: SchemaType.fromJson(json['type']),
-      format: PropertyFormat.fromString(json['format']),
+      title: json['title'] as String?,
+      type: JsonSchemaType.fromJson(json['type']),
+      format: PropertyFormat.fromString(json['format'] as String?),
       defaultValue: _safeDefaultValue(json),
-      description: json['description'],
-      enumm: json['enum'],
-      minLength: json['minLength'],
-      maxLength: json['maxLength'],
-      pattern: json['pattern'],
+      description: json['description'] as String?,
+      enumm: json['enum'] as List?,
+      minLength: json['minLength'] as int?,
+      maxLength: json['maxLength'] as int?,
+      pattern: json['pattern'] as String?,
       numberProperties: NumberProperties.fromJson(json),
-      oneOf: json['oneOf'],
+      oneOf: json['oneOf'] as List?,
       parent: parent,
-      nullable: SchemaType.isNullable(json['type']),
+      nullable: JsonSchemaType.isNullable(json['type']),
     );
     property.dependentsAddedBy.addAll(parent?.dependentsAddedBy ?? const []);
 
@@ -165,22 +165,19 @@ class SchemaProperty extends Schema {
 
   final PropertyFormat format;
 
-  /// it means enum
+  /// "enum" property in JSON Schema. The possible values that can be selected
   final List<dynamic>? enumm;
   dynamic get constValue =>
       enumm != null && enumm!.length == 1 ? enumm!.first : null;
   final dynamic defaultValue;
 
-  // propiedades que se llenan con el json
+  // Validation properties
   final int? minLength;
   final int? maxLength;
   final NumberProperties numberProperties;
   final String? pattern;
   final bool isMultipleFile;
   PropertyDependents? dependents;
-
-  /// Whether the dependents have been activated
-  bool isDependentsActive = false;
 
   void setDependents(SchemaObject schema) {
     if (schema.dependentRequired.containsKey(id) ||
@@ -220,11 +217,11 @@ class NumberProperties {
 
   factory NumberProperties.fromJson(Map<String, dynamic> json) {
     return NumberProperties(
-      multipleOf: json['multipleOf'],
-      minimum: json['minimum'],
-      exclusiveMinimum: json['exclusiveMinimum'],
-      maximum: json['maximum'],
-      exclusiveMaximum: json['exclusiveMaximum'],
+      multipleOf: json['multipleOf'] as num?,
+      minimum: json['minimum'] as num?,
+      exclusiveMinimum: json['exclusiveMinimum'] as num?,
+      maximum: json['maximum'] as num?,
+      exclusiveMaximum: json['exclusiveMaximum'] as num?,
     );
   }
 

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
+import 'package:json_form/src/models/json_form_schema_style.dart';
 import 'package:json_form/src/models/property_schema.dart';
 
 import 'package:json_form/src/utils/date_text_input_json_formatter.dart';
@@ -13,13 +14,11 @@ class DateJFormField extends PropertyFieldWidget<DateTime> {
   const DateJFormField({
     super.key,
     required super.property,
-    required super.onSaved,
-    super.onChanged,
-    super.customValidator,
   });
 
   @override
-  _DateJFormFieldState createState() => _DateJFormFieldState();
+  PropertyFieldState<DateTime, DateJFormField> createState() =>
+      _DateJFormFieldState();
 }
 
 class _DateJFormFieldState
@@ -63,26 +62,24 @@ class _DateJFormFieldState
     );
 
     return WrapFieldWithLabel(
-      property: property,
+      formValue: formValue,
       child: TextFormField(
-        key: Key(property.idKey),
+        key: Key(idKey),
         controller: txtDateCtrl,
         focusNode: focusNode,
         keyboardType: TextInputType.phone,
         autofocus: property.uiSchema.autofocus,
         enableSuggestions: property.uiSchema.autocomplete,
         validator: (value) {
-          if (property.requiredNotNull && (value == null || value.isEmpty)) {
+          if (formValue.isRequiredNotNull && (value == null || value.isEmpty)) {
             return uiConfig.localizedTexts.required();
           }
-          if (widget.customValidator != null)
-            return widget.customValidator!(value);
           if (value != null &&
               value.isNotEmpty &&
               formatter.tryParse(value) == null)
             return uiConfig.localizedTexts.invalidDate();
 
-          return null;
+          return customValidator(value);
         },
         // inputFormatters: [DateTextInputJsonFormatter()],
         readOnly: readOnly,
@@ -90,20 +87,19 @@ class _DateJFormFieldState
         style: readOnly ? uiConfig.fieldInputReadOnly : uiConfig.fieldInput,
         onSaved: (value) {
           if (value != null && value.isNotEmpty)
-            widget.onSaved(formatter.parse(value));
+            onSaved(formatter.parse(value));
         },
         onChanged: enabled
             ? (value) {
                 try {
-                  if (widget.onChanged != null &&
-                      DateTime.tryParse(value) != null)
-                    widget.onChanged!(formatter.parse(value));
+                  if (DateTime.tryParse(value) != null)
+                    onChanged(formatter.parse(value));
                 } catch (e) {
                   return;
                 }
               }
             : null,
-        decoration: uiConfig.inputDecoration(property).copyWith(
+        decoration: uiConfig.inputDecoration(formValue).copyWith(
               hintText: formatter.pattern!.toUpperCase(),
               suffixIcon: isDateTime
                   ? Row(
@@ -122,7 +118,7 @@ class _DateJFormFieldState
     );
   }
 
-  void _openCalendar() async {
+  Future<void> _openCalendar() async {
     DateTime tempDate = parseDate();
     final defaultYearsRange = [1900, 2099];
     List<int> yearsRange = property.uiSchema.yearsRange ?? defaultYearsRange;
@@ -152,10 +148,10 @@ class _DateJFormFieldState
       second: tempDate.second,
     );
     txtDateCtrl.text = formatter.format(date);
-    widget.onSaved(date);
+    onSaved(date);
   }
 
-  void _openTime() async {
+  Future<void> _openTime() async {
     late DateTime date = parseDate();
     final time = await showTimePicker(
       context: context,
@@ -166,6 +162,6 @@ class _DateJFormFieldState
     // TODO: seconds
     date = date.copyWith(hour: time.hour, minute: time.minute);
     txtDateCtrl.text = formatter.format(date);
-    widget.onSaved(date);
+    onSaved(date);
   }
 }

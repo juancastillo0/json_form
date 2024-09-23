@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/models/json_form_schema_style.dart';
-import 'package:json_form/src/models/property_schema.dart';
 
 class CustomErrorText extends StatelessWidget {
   const CustomErrorText({super.key, required this.text});
@@ -22,17 +21,18 @@ class CustomErrorText extends StatelessWidget {
 class WrapFieldWithLabel extends StatelessWidget {
   const WrapFieldWithLabel({
     super.key,
-    required this.property,
+    required this.formValue,
     required this.child,
     this.ignoreFieldLabel = false,
   });
 
-  final SchemaProperty property;
+  final JsonFormValue formValue;
   final Widget child;
   final bool ignoreFieldLabel;
 
   @override
   Widget build(BuildContext context) {
+    final property = formValue.schema;
     final directionality = Directionality.of(context);
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
 
@@ -52,7 +52,7 @@ class WrapFieldWithLabel extends StatelessWidget {
             uiConfig.labelPosition != LabelPosition.table;
     if (!showLabel) return child;
 
-    final labelText = uiConfig.labelText(property);
+    final labelText = uiConfig.labelText(formValue);
     final label = Text(
       labelText,
       style: uiConfig.fieldLabel,

@@ -1,41 +1,42 @@
-import '../models/models.dart';
+import 'package:json_form/src/models/models.dart';
 
 class SchemaArray extends Schema {
   SchemaArray({
     required super.id,
     required super.defs,
     required super.oneOf,
-    required dynamic itemsBaseSchema,
+    required Object? itemsBaseSchema,
     super.title,
     super.description,
     this.arrayProperties = const ArrayProperties(),
-    List<Schema>? items,
     super.requiredProperty,
     required super.nullable,
     super.parent,
     super.dependentsAddedBy,
-  })  : items = items ?? [],
-        super(type: SchemaType.array) {
+  }) : super(type: JsonSchemaType.array) {
     this.itemsBaseSchema = itemsBaseSchema is Schema
         ? itemsBaseSchema.copyWith(id: kNoIdKey, parent: this)
-        : Schema.fromJson(itemsBaseSchema, parent: this);
+        : Schema.fromJson(
+            itemsBaseSchema! as Map<String, Object?>,
+            parent: this,
+          );
   }
 
   factory SchemaArray.fromJson(
     String id,
-    Map<String, dynamic> json, {
+    Map<String, Object?> json, {
     Schema? parent,
   }) {
     final schemaArray = SchemaArray(
       id: id,
-      oneOf: json['oneOf'],
+      oneOf: json['oneOf'] as List?,
       defs: ((json['\$defs'] ?? json['definitions']) as Map?)?.cast(),
-      title: json['title'],
-      description: json['description'],
+      title: json['title'] as String?,
+      description: json['description'] as String?,
       arrayProperties: ArrayProperties.fromJson(json),
       itemsBaseSchema: json['items'],
       parent: parent,
-      nullable: SchemaType.isNullable(json['type']),
+      nullable: JsonSchemaType.isNullable(json['type']),
     );
     schemaArray.dependentsAddedBy.addAll(parent?.dependentsAddedBy ?? const []);
 
@@ -61,22 +62,10 @@ class SchemaArray extends Schema {
       dependentsAddedBy: dependentsAddedBy ?? this.dependentsAddedBy,
       oneOf: oneOf,
     );
-    newSchema.items.addAll(
-      items.map(
-        (e) => e.copyWith(
-          id: e.id,
-          parent: newSchema,
-          dependentsAddedBy: newSchema.dependentsAddedBy,
-        ),
-      ),
-    );
     newSchema.setUiSchema(uiSchema.toJson(), fromOptions: false);
 
     return newSchema;
   }
-
-  /// can be array of [Schema] or [Schema]
-  final List<Schema> items;
 
   // it allow us
   late final Schema itemsBaseSchema;
@@ -92,7 +81,7 @@ class SchemaArray extends Schema {
     return SchemaProperty(
       id: id,
       title: title,
-      type: SchemaType.string,
+      type: JsonSchemaType.string,
       format: PropertyFormat.dataUrl,
       requiredProperty: requiredProperty,
       nullable: nullable,
@@ -106,7 +95,7 @@ class SchemaArray extends Schema {
 
   @override
   void setUiSchema(
-    Map<String, dynamic> data, {
+    Map<String, Object?> data, {
     required bool fromOptions,
   }) {
     super.setUiSchema(data, fromOptions: fromOptions);
@@ -136,15 +125,15 @@ class ArrayProperties {
     this.uniqueItems,
   });
 
-  factory ArrayProperties.fromJson(Map<String, dynamic> json) {
+  factory ArrayProperties.fromJson(Map<String, Object?> json) {
     return ArrayProperties(
-      minItems: json['minItems'],
-      maxItems: json['maxItems'],
-      uniqueItems: json['uniqueItems'],
+      minItems: json['minItems'] as int?,
+      maxItems: json['maxItems'] as int?,
+      uniqueItems: json['uniqueItems'] as bool?,
     );
   }
 
-  List<ArrayPropertiesError> errors(List<dynamic> value) {
+  List<ArrayPropertiesError> errors(List<Object?> value) {
     final errors = <ArrayPropertiesError>[];
     if (minItems != null && value.length < minItems!)
       errors.add(ArrayPropertiesError.minItems);

@@ -84,18 +84,18 @@ class DateTextInputJsonFormatter extends TextInputFormatter {
   }
 
   String _addSeparators(String value, String separator) {
-    value = value.replaceAll('-', '');
-    var newString = '';
-    for (int i = 0; i < value.length; i++) {
-      newString += value[i];
+    final v = value.replaceAll('-', '');
+    final newString = StringBuffer();
+    for (int i = 0; i < v.length; i++) {
+      newString.write(v[i]);
       if (i == 1) {
-        newString += separator;
+        newString.write(separator);
       }
       if (i == 3) {
-        newString += separator;
+        newString.write(separator);
       }
     }
-    return newString;
+    return newString.toString();
   }
 
   TextSelection updateCursorPosition(String text) {
