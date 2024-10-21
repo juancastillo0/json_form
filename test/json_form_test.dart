@@ -97,7 +97,7 @@ class TestUtils {
       warnIfMissed: false,
     );
     await tester.pump();
-    toUpdate[haveAny] = "Yes: One";
+    toUpdate[haveAny] = 'Yes: One';
     expect(find.text('How old is your pet?'), findsOneWidget);
 
     await tapSubmitButton();
@@ -789,7 +789,7 @@ void main() {
     );
 
     final Map<String, Object?> currentData = {
-      'Do you have any pets?': "No",
+      'Do you have any pets?': 'No',
     };
     await utils.petsDependencies(currentData, null, () => data);
   });

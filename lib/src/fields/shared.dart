@@ -65,7 +65,6 @@ class WrapFieldWithLabel extends StatelessWidget {
         : const SizedBox(width: 20);
 
     return Flex(
-      crossAxisAlignment: CrossAxisAlignment.center,
       direction: uiConfig.labelPosition == LabelPosition.top
           ? Axis.vertical
           : Axis.horizontal,

@@ -45,8 +45,8 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
           uiSchema.widget,
         ),
         enabled: enabled,
-        maxLines: uiSchema.widget == "textarea" ? null : 1,
-        obscureText: uiSchema.widget == "password",
+        maxLines: uiSchema.widget == 'textarea' ? null : 1,
+        obscureText: uiSchema.widget == 'password',
         controller: textController,
         onSaved: (v) => onSaved(
           v == null || v.isEmpty ? property.uiSchema.emptyValue : v,

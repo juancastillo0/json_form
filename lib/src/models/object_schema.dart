@@ -28,7 +28,7 @@ class SchemaObject extends Schema {
       title: json['title'] as String?,
       description: json['description'] as String?,
       required:
-          json["required"] != null ? (json["required"]! as List).cast() : [],
+          json['required'] != null ? (json['required']! as List).cast() : [],
       nullable: JsonSchemaType.isNullable(json['type']),
       dependentRequired: dependentRequired,
       dependentSchemas: dependentSchemas,

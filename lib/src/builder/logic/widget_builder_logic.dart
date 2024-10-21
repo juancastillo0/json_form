@@ -262,7 +262,7 @@ extension PrivateJsonFormController on JsonFormController {
   ) {
     final controller = WidgetBuilderInherited.get(context).controller;
     final path = JsonFormKeyPath.getPath(context);
-    if (path == "") {
+    if (path == '') {
       controller._mainSchema = schema;
       return controller._rootFormValue = JsonFormValue(
         parent: null,
