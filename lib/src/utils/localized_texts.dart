@@ -22,7 +22,7 @@ class LocalizedTexts {
 
   /// Used when a [String] does not match the [pattern]
   String noMatchForPattern({required String pattern}) =>
-      'No match for $pattern';
+      'No match for pattern "$pattern"';
 
   /// Hint for dropdown buttons
   String select() => 'Select';

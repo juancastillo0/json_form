@@ -1098,8 +1098,8 @@ const formatsJsonSchema = '''{
     },
     "numberExclusive": {
       "type": ["integer", null],
-      "minimumExclusive": 2,
-      "maximumExclusive": 12
+      "exclusiveMinimum": 2,
+      "exclusiveMaximum": 12
     },
     "arrayRoot": {
       "type": "array",
@@ -1121,8 +1121,8 @@ const formatsJsonSchema = '''{
       "type": "array",
       "items": {
         "type": "integer",
-        "minimumExclusive": 2,
-        "maximumExclusive": 6
+        "exclusiveMinimum": 2,
+        "exclusiveMaximum": 6
       }
     }
   }

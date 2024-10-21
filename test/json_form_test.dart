@@ -521,7 +521,7 @@ void main() {
 
     await utils.findAndEnterText('object1.objectNested.value', 'ab');
     await utils.tapSubmitButton();
-    expect(find.text('No match for ^[a-b]+\$'), findsNothing);
+    expect(find.text('No match for pattern "^[a-b]+\$"'), findsNothing);
     expect(data, {
       'object1': {
         'objectNested': {'valueNested': false, 'value': 'ab'},
@@ -792,6 +792,88 @@ void main() {
       'Do you have any pets?': "No",
     };
     await utils.petsDependencies(currentData, null, () => data);
+  });
+
+  testWidgets('number validation errors', (tester) async {
+    final utils = TestUtils(tester);
+    Object? data = {
+      // TODO: 'stringPattern': '23903',
+    };
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: JsonForm(
+            jsonSchema: '''
+{ 
+  "type": "object",
+  "properties": {
+    "number": {
+      "type": "number",
+      "minimum": 2,
+      "maximum": 12,
+      "multipleOf": 2
+    },
+    "numberExclusive": {
+      "type": ["integer", null],
+      "exclusiveMinimum": 2,
+      "exclusiveMaximum": 10
+    }
+  }
+}''',
+            onFormDataSaved: (p) => data = p,
+          ),
+        ),
+      ),
+    );
+    expect(find.text('pattern'), findsNothing);
+    final currentData = <String, Object?>{
+      'number': null,
+      'numberExclusive': null,
+      // TODO:
+      // 'stringPattern': '23903',
+    };
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+
+    await utils.findAndEnterText(
+      'numberExclusive',
+      (currentData['numberExclusive'] = 2).toString(),
+    );
+    await utils.findAndEnterText(
+      'number',
+      (currentData['number'] = 3).toString(),
+    );
+    await utils.tapSubmitButton();
+    expect(find.text('The value must be a multiple of 2'), findsOneWidget);
+    expect(find.text('The value must be greater than 2'), findsOneWidget);
+    // TODO: expect(find.text('No match for pattern "[0-9]{0,5}[a-z]"'), findsOneWidget);
+
+    await utils.findAndEnterText(
+      'numberExclusive',
+      (currentData['numberExclusive'] = 11).toString(),
+    );
+    await utils.findAndEnterText(
+      'number',
+      (currentData['number'] = 0).toString(),
+    );
+    await utils.tapSubmitButton();
+    expect(find.text('11'), findsOneWidget);
+    expect(find.text('The value must be less than 10'), findsOneWidget);
+    expect(
+      find.text('The value must be greater than or equal to 2'),
+      findsOneWidget,
+    );
+
+    await utils.findAndEnterText(
+      'number',
+      (currentData['number'] = 4).toString(),
+    );
+    await utils.findAndEnterText(
+      'numberExclusive',
+      (currentData['numberExclusive'] = 5).toString(),
+    );
+    await utils.tapSubmitButton();
+    expect(data, currentData);
   });
 
   testWidgets('one of const', (tester) async {
