@@ -7,6 +7,7 @@ import 'package:json_form/src/builder/array_schema_builder.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/builder/object_schema_builder.dart';
 import 'package:json_form/src/builder/property_schema_builder.dart';
+import 'package:json_form/src/fields/shared.dart';
 import 'package:json_form/src/models/json_form_schema_style.dart';
 import 'package:json_form/src/models/models.dart';
 
@@ -157,7 +158,7 @@ class _JsonFormState extends State<JsonForm> {
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     child: ElevatedButton(
-                      key: const Key('JsonForm_submitButton'),
+                      key: JsonFormKeys.submitButton,
                       onPressed: onSubmit,
                       child: Text(
                         uiConfig.localizedTexts.submit(),
@@ -168,7 +169,7 @@ class _JsonFormState extends State<JsonForm> {
           );
 
           return SingleChildScrollView(
-            key: const Key('JsonForm_scrollView'),
+            key: JsonFormKeys.scrollView,
             child: uiConfig.formBuilder?.call(_formKey, formChild) ??
                 Form(
                   key: _formKey,

@@ -105,3 +105,27 @@ class FormSection extends StatelessWidget {
     );
   }
 }
+
+// ignore: avoid_classes_with_only_static_members
+class JsonFormKeys {
+  static const Key submitButton = Key('JsonForm_submitButton');
+  static const Key scrollView = Key('JsonForm_scrollView');
+
+  static Key selectDate(String idKey) => Key('JsonForm_selectDate_$idKey');
+  static Key selectTime(String idKey) => Key('JsonForm_selectTime_$idKey');
+  static ValueKey<String> objectProperty(String idKey) =>
+      ValueKey('JsonForm_objectProperty_$idKey');
+
+  static Key arrayCheckboxItem(String arrayKey, int index) =>
+      Key('JsonForm_item_${arrayKey}_$index');
+  static Key arrayItem(String itemKey) => Key('JsonForm_item_$itemKey');
+  static Key showOrHideItems(String arrayKey) =>
+      Key('JsonForm_showOrHideItems_$arrayKey');
+
+  static Key removeItem(String idKey) => Key('removeItem_$idKey');
+  static Key addItem(String idKey) => Key('addItem_$idKey');
+  static Key copyItem(String idKey) => Key('copyItem_$idKey');
+
+  static Key inputField(String idKey) => Key(idKey);
+  static Key inputFieldItem(String idKey, int index) => Key('${idKey}_$index');
+}

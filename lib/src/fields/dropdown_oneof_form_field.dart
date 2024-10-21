@@ -69,7 +69,7 @@ class _SelectedFormFieldState
         child: AbsorbPointer(
           absorbing: _customPicker != null,
           child: DropdownButtonFormField<SchemaProperty>(
-            key: Key(idKey),
+            key: JsonFormKeys.inputField(idKey),
             focusNode: focusNode,
             value: valueSelected,
             autovalidateMode: uiConfig.autovalidateMode,
@@ -113,7 +113,7 @@ class _SelectedFormFieldState
         .cast<SchemaProperty>()
         .map(
           (item) => DropdownMenuItem<SchemaProperty>(
-            key: Key('${idKey}_${i++}'),
+            key: JsonFormKeys.inputFieldItem(idKey, i++),
             value: item,
             child: Text(
               item.titleOrId,

@@ -40,7 +40,7 @@ class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
     inspect(property);
 
     return FormField<num>(
-      key: Key(idKey),
+      key: JsonFormKeys.inputField(idKey),
       autovalidateMode: uiConfig.autovalidateMode,
       initialValue: super.getDefaultValue<num>() ?? values.first,
       // TODO: map or parse?

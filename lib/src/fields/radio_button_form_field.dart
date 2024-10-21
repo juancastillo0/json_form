@@ -60,7 +60,7 @@ class _RadioButtonJFormFieldState
     inspect(property);
 
     return FormField<Object?>(
-      key: Key(idKey),
+      key: JsonFormKeys.inputField(idKey),
       autovalidateMode: uiConfig.autovalidateMode,
       initialValue: super.getDefaultValue(),
       onSaved: onSaved,
@@ -81,7 +81,7 @@ class _RadioButtonJFormFieldState
                   children: List<Widget>.generate(
                     names.length,
                     (int i) => RadioListTile<Object?>(
-                      key: Key('${idKey}_$i'),
+                      key: JsonFormKeys.inputFieldItem(idKey, i),
                       value: values[i],
                       title: Text(
                         names[i],

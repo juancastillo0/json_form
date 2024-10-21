@@ -58,7 +58,7 @@ class _DropDownJFormFieldState
         child: AbsorbPointer(
           absorbing: _customPicker != null,
           child: DropdownButtonFormField<Object?>(
-            key: Key(idKey),
+            key: JsonFormKeys.inputField(idKey),
             focusNode: focusNode,
             autovalidateMode: uiConfig.autovalidateMode,
             hint: Text(uiConfig.localizedTexts.select()),
@@ -115,7 +115,7 @@ class _DropDownJFormFieldState
         final readOnlyValue = readOnly ||
             (property.uiSchema.enumDisabled?.contains(values[i]) ?? false);
         return DropdownMenuItem(
-          key: Key('${idKey}_$i'),
+          key: JsonFormKeys.inputFieldItem(idKey, i),
           value: values[i],
           enabled: !readOnlyValue,
           child: Text(

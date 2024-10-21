@@ -94,7 +94,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
                             ? schema.uiSchema.enumNames![index]
                             : option.toString();
                         return CheckboxListTile(
-                          key: Key('JsonForm_item_${idKey}_$index'),
+                          key: JsonFormKeys.arrayCheckboxItem(idKey, index),
                           title: Text(
                             title,
                             style: uiConfig.fieldInput,
@@ -118,7 +118,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
                 final idKey = JsonFormKeyPath.appendId(this.idKey, item.id);
 
                 return Column(
-                  key: Key('JsonForm_item_$idKey'),
+                  key: JsonFormKeys.arrayItem(idKey),
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -174,7 +174,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
                     field: schemaArray,
                     mainSchema: widget.mainSchema,
                     trailing: IconButton(
-                      key: Key('JsonForm_showOrHideItems_$idKey'),
+                      key: JsonFormKeys.showOrHideItems(idKey),
                       tooltip: showItems
                           ? uiConfig.localizedTexts.hideItems()
                           : uiConfig.localizedTexts.showItems(),

@@ -57,6 +57,7 @@ class _DateJFormFieldState
   Widget build(BuildContext context) {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     final dateIcon = IconButton(
+      key: JsonFormKeys.selectDate(idKey),
       icon: const Icon(Icons.date_range_outlined),
       onPressed: enabled ? _openCalendar : null,
     );
@@ -64,7 +65,7 @@ class _DateJFormFieldState
     return WrapFieldWithLabel(
       formValue: formValue,
       child: TextFormField(
-        key: Key(idKey),
+        key: JsonFormKeys.inputField(idKey),
         controller: txtDateCtrl,
         focusNode: focusNode,
         keyboardType: TextInputType.phone,
@@ -107,6 +108,7 @@ class _DateJFormFieldState
                       children: [
                         dateIcon,
                         IconButton(
+                          key: JsonFormKeys.selectTime(idKey),
                           icon: const Icon(Icons.access_time_rounded),
                           onPressed: enabled ? _openTime : null,
                         ),

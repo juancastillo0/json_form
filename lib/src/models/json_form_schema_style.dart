@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:json_form/json_form.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
+import 'package:json_form/src/fields/shared.dart';
 import 'package:json_form/src/models/models.dart';
 
 /// Global configuration for the UI of the form.
@@ -239,7 +240,7 @@ extension JsonFormUiConfigExtension on JsonFormUiConfig {
   Widget removeItemWidget(String idKey, void Function() removeItem) {
     return removeItemBuilder?.call(removeItem, idKey) ??
         TextButton.icon(
-          key: Key('removeItem_$idKey'),
+          key: JsonFormKeys.removeItem(idKey),
           onPressed: removeItem,
           icon: const Icon(Icons.remove),
           label: Text(localizedTexts.removeItem()),
@@ -261,7 +262,7 @@ extension JsonFormUiConfigExtension on JsonFormUiConfig {
         Tooltip(
           message: message ?? '',
           child: TextButton.icon(
-            key: Key('addItem_$idKey'),
+            key: JsonFormKeys.addItem(idKey),
             onPressed: message == null ? addItem : null,
             icon: const Icon(Icons.add),
             label: Text(localizedTexts.addItem()),
@@ -272,7 +273,7 @@ extension JsonFormUiConfigExtension on JsonFormUiConfig {
   Widget copyItemWidget(String idKey, void Function() copyItem) {
     return copyItemBuilder?.call(copyItem, idKey) ??
         TextButton.icon(
-          key: Key('copyItem_$idKey'),
+          key: JsonFormKeys.copyItem(idKey),
           onPressed: copyItem,
           icon: const Icon(Icons.copy),
           label: Text(localizedTexts.copyItem()),

@@ -45,7 +45,7 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
 
     return FormField<List<XFile>>(
-      key: Key(idKey),
+      key: JsonFormKeys.inputField(idKey),
       enabled: enabled,
       validator: (value) {
         if ((value == null || value.isEmpty) && formValue.isRequiredNotNull) {
@@ -82,7 +82,7 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
                   final file = field.value![index];
 
                   return ListTile(
-                    key: Key('${idKey}_$index'),
+                    key: JsonFormKeys.inputFieldItem(idKey, index),
                     title: Text(
                       file.path.characters
                           .takeLastWhile((p0) => p0 != '/')
