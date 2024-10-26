@@ -25,13 +25,10 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
   late FormFieldState<List<Object?>> field;
   late final JsonFormValue formValue;
   SchemaArray get schemaArray => widget.schemaArray;
-  int lastItemId = 1;
   bool showItems = true;
 
   @override
   String get idKey => formValue.idKey;
-
-  String generateItemId() => (lastItemId++).toString();
 
   bool get isCheckboxes => schemaArray.uiSchema.widget == 'checkboxes';
   List<Object?>? _initialValue;
@@ -245,7 +242,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
 
   void _addItem() {
     setState(() {
-      formValue.addArrayChild(null, generateItemId());
+      formValue.addArrayChild(null);
     });
   }
 
@@ -262,11 +259,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
 
   void _copyItem(int index) {
     setState(() {
-      final newValue = formValue.children[index].copyWith(
-        id: generateItemId(),
-        parent: formValue,
-      );
-      formValue.children.add(newValue);
+      formValue.addArrayChild(null, baseValue: formValue.children[index]);
     });
   }
 
@@ -307,7 +300,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
     } else {
       while (formValue.children.length != newValue.length) {
         if (formValue.children.length < newValue.length) {
-          formValue.addArrayChild(null, generateItemId());
+          formValue.addArrayChild(null);
         } else {
           formValue.children.removeLast();
         }

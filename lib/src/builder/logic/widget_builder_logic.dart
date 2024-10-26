@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:json_form/src/builder/widget_builder.dart';
+import 'package:json_form/src/helpers/helpers.dart';
 import 'package:json_form/src/models/json_form_schema_style.dart';
 import 'package:json_form/src/models/models.dart';
 
@@ -269,6 +270,7 @@ extension PrivateJsonFormController on JsonFormController {
         schema: schema,
         id: '',
         field: field,
+        value: controller.rootOutputData,
       );
     } else {
       return controller._transverseObjectData(
@@ -289,6 +291,8 @@ class JsonFormValue {
   final String id;
   JsonFormValue? parent;
   final List<JsonFormValue> children = [];
+  int _lastItemId = 1;
+  String _generateItemId() => (_lastItemId++).toString();
   late Schema schema;
   JsonFormField<Object?>? field;
   Object? value;
@@ -336,11 +340,12 @@ class JsonFormValue {
       id: id,
       parent: parent,
       schema: schema,
-      value: value,
+      value: copyJson(value),
     );
     formValue.children.addAll(
       children.map((c) => c.copyWith(id: c.id, parent: formValue)),
     );
+    formValue._lastItemId = _lastItemId;
     return formValue;
   }
 
@@ -363,17 +368,24 @@ class JsonFormValue {
     }
   }
 
-  void addArrayChild(Object? value, String id) {
+  void addArrayChild(Object? value, {JsonFormValue? baseValue}) {
     final schema_ = schema;
     if (schema_ is! SchemaArray)
       throw ArgumentError('schema $schema_ is not an array');
-    children.add(
-      JsonFormValue(
-        id: id,
+    final JsonFormValue newValue;
+    if (baseValue != null) {
+      newValue = baseValue.copyWith(
+        id: _generateItemId(),
+        parent: this,
+      );
+    } else {
+      newValue = JsonFormValue(
+        id: _generateItemId(),
         parent: this,
         schema: schema_.itemsBaseSchema,
         value: value,
-      ),
-    );
+      );
+    }
+    children.add(newValue);
   }
 }
