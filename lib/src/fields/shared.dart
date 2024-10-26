@@ -111,8 +111,10 @@ class JsonFormKeys {
   static const Key submitButton = Key('JsonForm_submitButton');
   static const Key scrollView = Key('JsonForm_scrollView');
 
-  static Key selectDate(String idKey) => Key('JsonForm_selectDate_$idKey');
-  static Key selectTime(String idKey) => Key('JsonForm_selectTime_$idKey');
+  static ValueKey<String> selectDate(String idKey) =>
+      ValueKey('JsonForm_selectDate_$idKey');
+  static ValueKey<String> selectTime(String idKey) =>
+      ValueKey('JsonForm_selectTime_$idKey');
   static ValueKey<String> objectProperty(String idKey) =>
       ValueKey('JsonForm_objectProperty_$idKey');
 

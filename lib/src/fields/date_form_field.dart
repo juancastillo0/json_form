@@ -50,7 +50,8 @@ class _DateJFormFieldState
   }
 
   DateTime parseDate() {
-    return formatter.tryParse(txtDateCtrl.text) ?? DateTime.now();
+    return formatter.tryParse(txtDateCtrl.text) ??
+        DateTime.now().copyWith(second: 0, millisecond: 0, microsecond: 0);
   }
 
   @override
@@ -162,7 +163,11 @@ class _DateJFormFieldState
     );
     if (time == null) return;
     // TODO: seconds
-    date = date.copyWith(hour: time.hour, minute: time.minute);
+    date = date.copyWith(
+      hour: time.hour,
+      minute: time.minute,
+      second: date.second,
+    );
     txtDateCtrl.text = formatter.format(date);
     onSaved(date);
   }

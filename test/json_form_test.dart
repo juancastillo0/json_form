@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/builder/widget_builder.dart';
+import 'package:json_form/src/fields/shared.dart';
 import 'package:json_form/src/models/json_form_schema_style.dart';
 import 'package:json_form/src/models/models.dart';
 // ignore: avoid_relative_lib_imports
@@ -770,6 +771,103 @@ void main() {
 
     await utils.findAndEnterText('parentName', 'pn');
     currentData['parentName'] = 'pn';
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+  });
+
+  testWidgets('date and time buttons', (tester) async {
+    final utils = TestUtils(tester);
+    Object? data = {};
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: JsonForm(
+            jsonSchema: '''
+{ 
+  "type": "object",
+  "properties": {
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    }
+  }
+}''',
+            onFormDataSaved: (p) => data = p,
+          ),
+        ),
+      ),
+    );
+
+    final Map<String, Object?> currentData = {
+      'dateTime': null,
+      'date': null,
+    };
+
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+
+    await utils.tapButton(JsonFormKeys.selectDate('dateTime').value);
+    expect(
+      find.byWidgetPredicate((w) => w is CalendarDatePicker),
+      findsOneWidget,
+    );
+
+    final now = DateTime.now();
+    await tester.tap(
+      find.byKey(ValueKey(DateTime(now.year, now.month, 5))),
+    );
+    await tester.tap(find.text('OK'));
+    await tester.pump();
+
+    await utils.tapButton(JsonFormKeys.selectTime('dateTime').value);
+    expect(
+      find.byWidgetPredicate((w) => w is TimePickerDialog),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byIcon(Icons.keyboard_outlined));
+    await tester.pump();
+
+    final isPM = now.hour >= 12;
+    await tester.enterText(
+      find
+          .byWidgetPredicate(
+            (w) =>
+                w is TextFormField &&
+                w.restorationId == 'hour_minute_text_form_field' &&
+                w.controller!.text ==
+                    (isPM ? now.hour - 12 : now.hour).toString(),
+          )
+          .first,
+      '10',
+    );
+    // TODO: TextPainter await tester.tap(find.text('10'));
+    await tester.tap(find.text('OK'));
+    await tester.pump();
+
+    final mon = now.month < 10 ? '0${now.month}' : now.month;
+    final min = now.minute < 10 ? '0${now.minute}' : now.minute;
+
+    currentData['dateTime'] =
+        '${now.year}-$mon-05 ${isPM ? '22' : '10'}:$min:00';
+    await utils.tapSubmitButton();
+    expect(data, currentData);
+
+    await utils.tapButton(JsonFormKeys.selectDate('date').value);
+
+    expect(
+      find.byWidgetPredicate((w) => w is CalendarDatePicker),
+      findsOneWidget,
+    );
+    await tester.tap(find.text('OK'));
+    await tester.pump();
+    final day = now.day < 10 ? '0${now.day}' : now.day;
+    currentData['date'] = '${now.year}-$mon-$day';
+
     await utils.tapSubmitButton();
     expect(data, currentData);
   });
