@@ -579,6 +579,26 @@ void main() {
     await utils.tapSubmitButton();
     expect(data, currentData);
 
+    expect(
+      find.byWidgetPredicate(
+        (w) =>
+            w is FormField<bool> &&
+            !w.enabled &&
+            w.key == JsonFormKeys.inputField('object.boolReadOnly'),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byWidgetPredicate(
+        (w) =>
+            w is TextFormField &&
+            !w.enabled &&
+            w.key == JsonFormKeys.inputField('object.nameDisabled') &&
+            w.controller!.text == 'disabled default',
+      ),
+      findsOneWidget,
+    );
+
     await utils.tapButton('integerRadio_0');
     currentData['integerRadio'] = -1;
     await utils.tapSubmitButton();
