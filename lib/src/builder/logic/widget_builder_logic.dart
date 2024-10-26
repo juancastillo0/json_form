@@ -108,13 +108,13 @@ class JsonFormController extends ChangeNotifier {
         );
 
   /// Validates the form and returns the output data if valid
-  Map<String, Object?>? submit() {
+  Object? submit() {
     final formKey = this.formKey!;
     if (formKey.currentState != null && formKey.currentState!.validate()) {
       formKey.currentState!.save();
 
       log(_rootFormValue.toString());
-      return _rootFormValue.toJson()! as Map<String, Object?>;
+      return _rootFormValue.toJson();
     }
     return null;
   }
