@@ -1133,9 +1133,12 @@ void main() {
     await utils.tapButton('addItem_arrayInts');
     // TODO: final arrayIntsField = controller.retrieveField('arrayInts.1')!;
     // TODO: expect(arrayIntsField.focusNode.hasPrimaryFocus, true);
-    (currentData['arrayInts']! as List).add(2);
     await utils.findAndEnterText('arrayInts.1', '2');
+    await utils.tapSubmitButton();
+    expect(find.text('The value must be greater than 2'), findsOneWidget);
 
+    (currentData['arrayInts']! as List).add(3);
+    await utils.findAndEnterText('arrayInts.1', '3');
     await utils.tapSubmitButton();
     expect(data, currentData);
 
