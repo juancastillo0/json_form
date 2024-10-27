@@ -6,21 +6,19 @@ import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
 
-class RadioButtonJFormField extends PropertyFieldWidget<dynamic> {
+class RadioButtonJFormField extends PropertyFieldWidget<Object?> {
   const RadioButtonJFormField({
     super.key,
     required super.property,
-    required super.onSaved,
-    super.onChanged,
-    super.customValidator,
   });
 
   @override
-  _RadioButtonJFormFieldState createState() => _RadioButtonJFormFieldState();
+  PropertyFieldState<Object?, RadioButtonJFormField> createState() =>
+      _RadioButtonJFormFieldState();
 }
 
 class _RadioButtonJFormFieldState
-    extends PropertyFieldState<dynamic, RadioButtonJFormField> {
+    extends PropertyFieldState<Object?, RadioButtonJFormField> {
   late FormFieldState<Object?> field;
   @override
   Object? get value => field.value;
@@ -29,7 +27,7 @@ class _RadioButtonJFormFieldState
     field.didChange(newValue);
   }
 
-  late List<dynamic> values;
+  late List<Object?> values;
   late List<String> names;
 
   @override
@@ -38,11 +36,11 @@ class _RadioButtonJFormFieldState
     // fill enum property
     final enumNames = property.uiSchema.enumNames;
     switch (property.type) {
-      case SchemaType.boolean:
+      case JsonSchemaType.boolean:
         values = [true, false];
         break;
-      case SchemaType.integer:
-      case SchemaType.number:
+      case JsonSchemaType.integer:
+      case JsonSchemaType.number:
         values = property.enumm ?? property.numberProperties.options();
         break;
       default:
@@ -61,26 +59,19 @@ class _RadioButtonJFormFieldState
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     inspect(property);
 
-    return FormField<dynamic>(
-      key: Key(property.idKey),
+    return FormField<Object?>(
+      key: JsonFormKeys.inputField(idKey),
       autovalidateMode: uiConfig.autovalidateMode,
       initialValue: super.getDefaultValue(),
-      onSaved: (newValue) {
-        widget.onSaved(newValue);
-      },
-      validator: (value) {
-        if (widget.customValidator != null)
-          return widget.customValidator!(value);
-
-        return null;
-      },
+      onSaved: onSaved,
+      validator: customValidator,
       enabled: enabled,
       builder: (field) {
         this.field = field;
         return Focus(
           focusNode: focusNode,
           child: WrapFieldWithLabel(
-            property: property,
+            formValue: formValue,
             ignoreFieldLabel: uiConfig.labelPosition != LabelPosition.table,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,8 +80,8 @@ class _RadioButtonJFormFieldState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: List<Widget>.generate(
                     names.length,
-                    (int i) => RadioListTile(
-                      key: Key('${property.idKey}_$i'),
+                    (int i) => RadioListTile<Object?>(
+                      key: JsonFormKeys.inputFieldItem(idKey, i),
                       value: values[i],
                       title: Text(
                         names[i],
@@ -99,15 +90,13 @@ class _RadioButtonJFormFieldState
                             : uiConfig.fieldInput,
                       ),
                       groupValue: field.value,
-                      autofocus: i == 0 ? property.uiSchema.autofocus : false,
+                      autofocus: i == 0 && property.uiSchema.autofocus,
                       onChanged: enabled
-                          ? (dynamic value) {
+                          ? (Object? value) {
                               log(value.toString());
                               if (value != null) {
                                 field.didChange(value);
-                                if (widget.onChanged != null) {
-                                  widget.onChanged!(value!);
-                                }
+                                onChanged(value);
                               }
                             }
                           : null,

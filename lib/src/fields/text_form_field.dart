@@ -3,26 +3,25 @@ import 'package:flutter/services.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
-
-import '../utils/utils.dart';
-import '../models/models.dart';
+import 'package:json_form/src/models/json_form_schema_style.dart';
+import 'package:json_form/src/models/models.dart';
+import 'package:json_form/src/utils/utils.dart';
 
 class TextJFormField extends PropertyFieldWidget<String> {
   const TextJFormField({
     super.key,
     required super.property,
-    required super.onSaved,
-    super.onChanged,
-    super.customValidator,
   });
 
   @override
-  _TextJFormFieldState createState() => _TextJFormFieldState();
+  PropertyFieldState<String, TextJFormField> createState() =>
+      _TextJFormFieldState();
 }
 
 class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
-  late final textController =
-      TextEditingController(text: super.getDefaultValue()?.toString() ?? '');
+  late final textController = TextEditingController(
+    text: super.getDefaultValue<String>()?.toString() ?? '',
+  );
   @override
   String get value => textController.text;
   @override
@@ -35,9 +34,9 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     final uiSchema = property.uiSchema;
     return WrapFieldWithLabel(
-      property: property,
+      formValue: formValue,
       child: TextFormField(
-        key: Key(property.idKey),
+        key: JsonFormKeys.inputField(idKey),
         focusNode: focusNode,
         autofocus: uiSchema.autofocus,
         enableSuggestions: uiSchema.autocomplete,
@@ -46,25 +45,23 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
           uiSchema.widget,
         ),
         enabled: enabled,
-        maxLines: uiSchema.widget == "textarea" ? null : 1,
-        obscureText: uiSchema.widget == "password",
+        maxLines: uiSchema.widget == 'textarea' ? null : 1,
+        obscureText: uiSchema.widget == 'password',
         controller: textController,
-        onSaved: (v) => widget.onSaved(
+        onSaved: (v) => onSaved(
           v == null || v.isEmpty ? property.uiSchema.emptyValue : v,
         ),
         maxLength: property.maxLength,
         inputFormatters: [textInputCustomFormatter(property.format)],
         autovalidateMode: uiConfig.autovalidateMode,
         readOnly: readOnly,
-        onChanged: widget.onChanged,
+        onChanged: onChanged,
         validator: (String? value) {
-          if (property.requiredNotNull &&
+          if (formValue.isRequiredNotNull &&
               property.uiSchema.emptyValue == null &&
               (value == null || value.isEmpty)) {
             return uiConfig.localizedTexts.required();
           }
-          if (widget.customValidator != null)
-            return widget.customValidator!(value);
           if (value != null && value.isNotEmpty) {
             final error = uiConfig.localizedTexts.stringError(
               property,
@@ -72,10 +69,10 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
             );
             if (error != null) return error;
           }
-          return null;
+          return customValidator(value);
         },
         style: readOnly ? uiConfig.fieldInputReadOnly : uiConfig.fieldInput,
-        decoration: uiConfig.inputDecoration(property),
+        decoration: uiConfig.inputDecoration(formValue),
       ),
     );
   }
@@ -119,9 +116,6 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
   TextInputFormatter textInputCustomFormatter(PropertyFormat format) {
     late TextInputFormatter textInputFormatter;
     switch (format) {
-      case PropertyFormat.email:
-        textInputFormatter = EmailTextInputJsonFormatter();
-        break;
       default:
         textInputFormatter =
             DefaultTextInputJsonFormatter(pattern: property.pattern);

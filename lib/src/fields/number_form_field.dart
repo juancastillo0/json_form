@@ -3,25 +3,25 @@ import 'package:flutter/services.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
+import 'package:json_form/src/models/json_form_schema_style.dart';
 import 'package:json_form/src/models/schema.dart';
 
 class NumberJFormField extends PropertyFieldWidget<num?> {
   const NumberJFormField({
     super.key,
     required super.property,
-    required super.onSaved,
-    super.onChanged,
-    super.customValidator,
   });
 
   @override
-  _NumberJFormFieldState createState() => _NumberJFormFieldState();
+  PropertyFieldState<num?, NumberJFormField> createState() =>
+      _NumberJFormFieldState();
 }
 
 class _NumberJFormFieldState
     extends PropertyFieldState<num?, NumberJFormField> {
-  late final textController =
-      TextEditingController(text: super.getDefaultValue()?.toString() ?? '');
+  late final textController = TextEditingController(
+    text: super.getDefaultValue<num>()?.toString() ?? '',
+  );
   @override
   num? get value => parseValue(textController.text);
   @override
@@ -31,7 +31,7 @@ class _NumberJFormFieldState
 
   num? parseValue(String? value) {
     if (value == null || value.isEmpty) return null;
-    return property.type == SchemaType.integer
+    return property.type == JsonSchemaType.integer
         ? int.tryParse(value)
         : double.tryParse(value);
   }
@@ -42,12 +42,12 @@ class _NumberJFormFieldState
     final numberProperties = property.numberProperties;
     final signed = (numberProperties.minimum ?? -1) < 0 &&
         (numberProperties.exclusiveMinimum ?? -1) < 0;
-    final decimal = property.type == SchemaType.number;
+    final decimal = property.type == JsonSchemaType.number;
 
     return WrapFieldWithLabel(
-      property: property,
+      formValue: formValue,
       child: TextFormField(
-        key: Key(property.idKey),
+        key: JsonFormKeys.inputField(idKey),
         focusNode: focusNode,
         keyboardType: TextInputType.numberWithOptions(
           decimal: decimal,
@@ -67,19 +67,19 @@ class _NumberJFormFieldState
               : value;
           final v = parseValue(value);
           if (v == null) return;
-          widget.onSaved(v);
+          onSaved(v);
         },
         autovalidateMode: uiConfig.autovalidateMode,
         readOnly: readOnly,
         onChanged: (value) {
           final v = parseValue(value);
           if (v == null) return;
-          if (widget.onChanged != null) widget.onChanged!(v);
+          onChanged(v);
         },
         enabled: enabled,
         style: readOnly ? uiConfig.fieldInputReadOnly : uiConfig.fieldInput,
         validator: (String? value) {
-          if (property.requiredNotNull &&
+          if (formValue.isRequiredNotNull &&
               property.uiSchema.emptyValue == null &&
               value != null &&
               value.isEmpty) {
@@ -101,11 +101,9 @@ class _NumberJFormFieldState
             if (error != null) return error;
           }
 
-          if (widget.customValidator != null)
-            return widget.customValidator!(value);
-          return null;
+          return customValidator(value);
         },
-        decoration: uiConfig.inputDecoration(property),
+        decoration: uiConfig.inputDecoration(formValue),
       ),
     );
   }

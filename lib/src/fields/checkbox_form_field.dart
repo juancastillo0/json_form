@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:json_form/json_form.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
+import 'package:json_form/src/models/json_form_schema_style.dart';
 
 class CheckboxJFormField extends PropertyFieldWidget<bool> {
   const CheckboxJFormField({
     super.key,
     required super.property,
-    required super.onSaved,
-    super.onChanged,
-    super.customValidator,
   });
 
   @override
-  _CheckboxJFormFieldState createState() => _CheckboxJFormFieldState();
+  PropertyFieldState<bool, CheckboxJFormField> createState() =>
+      _CheckboxJFormFieldState();
 }
 
 class _CheckboxJFormFieldState
@@ -32,11 +30,11 @@ class _CheckboxJFormFieldState
     final widgetBuilderInherited = WidgetBuilderInherited.of(context);
     final uiConfig = widgetBuilderInherited.uiConfig;
     return FormField<bool>(
-      key: Key(property.idKey),
+      key: JsonFormKeys.inputField(idKey),
       initialValue: super.getDefaultValue() ?? false,
       autovalidateMode: uiConfig.autovalidateMode,
-      onSaved: widget.onSaved,
-      validator: widget.customValidator,
+      onSaved: onSaved,
+      validator: customValidator,
       enabled: enabled,
       builder: (field) {
         this.field = field;
@@ -54,7 +52,7 @@ class _CheckboxJFormFieldState
               title: uiConfig.labelPosition == LabelPosition.table
                   ? null
                   : Text(
-                      uiConfig.labelText(property),
+                      uiConfig.labelText(formValue),
                       style: readOnly
                           ? uiConfig.fieldInputReadOnly
                           : uiConfig.fieldInput,
@@ -62,8 +60,8 @@ class _CheckboxJFormFieldState
               onChanged: enabled
                   ? (bool? value) {
                       field.didChange(value);
-                      if (widget.onChanged != null && value != null) {
-                        widget.onChanged!(value);
+                      if (value != null) {
+                        onChanged(value);
                       }
                     }
                   : null,

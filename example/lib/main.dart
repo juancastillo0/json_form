@@ -68,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
   late final uiTextController = TextEditingController(text: uiSchema);
   String json = FormExample.allExamples.first.jsonSchema;
   String uiSchema = FormExample.allExamples.first.uiSchema;
-  JsonFormController jsonFormController = JsonFormController(data: {});
+  JsonFormController jsonFormController = JsonFormController(initialData: {});
 
   Future<List<XFile>?> defaultCustomFileHandler() async {
     await Future.delayed(const Duration(seconds: 3));
@@ -92,8 +92,8 @@ class _MyHomePageState extends State<MyHomePage> {
               label: const Text('Custom Submit'),
             );
 
-  JsonFormSchemaUiConfig customUiConfig() {
-    return JsonFormSchemaUiConfig(
+  JsonFormUiConfig customUiConfig() {
+    return JsonFormUiConfig(
       labelPosition: labelPosition,
       inputWrapperBuilder: (property, input) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 5),
@@ -154,17 +154,18 @@ class _MyHomePageState extends State<MyHomePage> {
             uiSchema: uiSchema,
             controller: jsonFormController,
             onFormDataSaved: onFormDataSaved,
-            fileHandler: () => {
-              'files': defaultCustomFileHandler,
-              'file': () async {
-                return [
-                  XFile(
-                    'https://cdn.mos.cms.futurecdn.net/LEkEkAKZQjXZkzadbHHsVj-970-80.jpg',
-                  )
-                ];
-              },
-              '*': defaultCustomFileHandler
-            },
+            fieldFilePicker: (field) =>
+                {
+                  'files': defaultCustomFileHandler,
+                  'file': () async {
+                    return [
+                      XFile(
+                        'https://cdn.mos.cms.futurecdn.net/LEkEkAKZQjXZkzadbHHsVj-970-80.jpg',
+                      )
+                    ];
+                  },
+                }[field.idKey] ??
+                defaultCustomFileHandler,
             // customPickerHandler: () => {
             //   '*': (data) async {
             //     return showDialog(
@@ -198,16 +199,26 @@ class _MyHomePageState extends State<MyHomePage> {
             // },
             uiConfig: customUIConfig
                 ? customUiConfig()
-                : JsonFormSchemaUiConfig(
+                : JsonFormUiConfig(
                     labelPosition: labelPosition,
                     submitButtonBuilder:
                         customOutsideSubmitButton ? submitButtonBuilder : null,
                   ),
-            customValidatorHandler: () => {
+            fieldValidator: (field) => {
               'files': (value) {
                 return null;
-              }
-            },
+              },
+              'uri': (uri) =>
+                  (uri as String).isEmpty || Uri.parse(uri).isAbsolute
+                      ? null
+                      : 'Should be absolute URI',
+              'numberExclusive': (n) => (n as String).isEmpty || n != '6'
+                  ? null
+                  : 'Should be different than 6',
+              'arrayCheckbox': (a) => (a as List).contains(3) && a.contains(5)
+                  ? "Can't have 3 and 5 at the same time"
+                  : null,
+            }[field.idKey],
           ),
         ),
         if (customOutsideSubmitButton)
@@ -461,6 +472,8 @@ class FormExample {
       FormExample('oneOfDependencies', oneOfDependenciesJsonSchema, '{}');
   static const oneOfConstExample =
       FormExample('oneOfConst', oneOfConstJsonSchema, '{}');
+  static const formatsExample =
+      FormExample('formats', formatsJsonSchema, formatsUiSchema);
 
   static const allExamples = [
     primitivesExample,
@@ -473,6 +486,7 @@ class FormExample {
     dependenciesExample,
     oneOfDependenciesExample,
     oneOfConstExample,
+    formatsExample,
   ];
 }
 
@@ -847,7 +861,7 @@ const primitivesJsonSchema = '''{
       "title": "arrayCheckboxTitle",
       "items": {
         "type": "string",
-        "enum": ["a", "b"]
+        "enum": ["e", "f"]
       }
     }
   }
@@ -984,11 +998,11 @@ const oneOfDependenciesJsonSchema = '''{
 
 const oneOfConstJsonSchema = '''{
   "title": "One Of Const",
-  "description": "variants",
+  "description": "Variants configured within oneOfs using const.",
   "type": "object",
   "properties": {
     "Other Property": {
-      "type": "string"
+      "type": ["string", null]
     },
     "example": {
       "\$ref": "#/\$defs/oneOfExample"
@@ -1033,5 +1047,91 @@ const oneOfConstJsonSchema = '''{
         }
       ]
     }
+  }
+}''';
+
+const formatsJsonSchema = '''{
+  "type": "object",
+  "required": ["number", "email", "uuid", "dateTime"],
+  "properties": {
+    "email": {
+      "type": "string",
+      "format": "email",
+      "ui:options": {
+        "autofocus": true
+      }
+    },
+    "uri": {
+      "type": "string",
+      "format": "uri"
+    },
+    "hostname": {
+      "type": "string",
+      "format": "hostname"
+    },
+    "uuid": {
+      "type": ["string", "null"],
+      "format": "uuid"
+    },
+    "regex": {
+      "type": ["string", "null"],
+      "format": "regex"
+    },
+    "ipv4": {
+      "type": "string",
+      "format": "ipv4"
+    },
+    "ipv6": {
+      "type": "string",
+      "format": "ipv6"
+    },
+    "time": {
+      "type": "string",
+      "format": "time"
+    },
+    
+    "number": {
+      "type": "number",
+      "minimum": 2,
+      "maximum": 12,
+      "multipleOf": 2
+    },
+    "numberExclusive": {
+      "type": ["integer", null],
+      "exclusiveMinimum": 2,
+      "exclusiveMaximum": 12
+    },
+    "arrayRoot": {
+      "type": "array",
+      "items": {
+        "\$ref": "#"
+      }
+    },
+    "dateTime": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "arrayInts": {
+      "ui:options": {
+        "removable": true,
+        "items": {
+          "ui:autofocus": true
+        }
+      },
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "exclusiveMinimum": 2,
+        "exclusiveMaximum": 6
+      }
+    }
+  }
+}''';
+
+const formatsUiSchema = '''{
+  "ui:globalOptions": {
+    "copyable": true,
+    "removable": false,
+    "autofocus": false
   }
 }''';

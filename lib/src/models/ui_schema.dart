@@ -61,22 +61,26 @@ class UiSchemaData {
         for (final e in children.entries) e.key: e.value.toJson(),
       };
 
-  void setGlobalOptions(Map<String, Object?> data) {
+  void setGlobalOptions(
+    Map<String, Object?> data, {
+    required bool fromOptions,
+  }) {
     globalOptions ??= UiSchemaData();
-    globalOptions!.setUi(data, parent: this);
-    setUi(data, parent: null);
+    globalOptions!.setUi(data, parent: this, fromOptions: fromOptions);
+    setUi(data, parent: null, fromOptions: fromOptions, fromGlobal: true);
   }
 
   void setUi(
     Map<String, dynamic> uiSchema, {
     required UiSchemaData? parent,
     bool fromOptions = false,
+    bool fromGlobal = false,
   }) {
     this.parent = parent ?? this.parent;
     if (parent != null &&
         parent.globalOptions != null &&
         this != parent.globalOptions) {
-      setGlobalOptions(parent.globalOptions!.toJson());
+      setGlobalOptions(parent.globalOptions!.toJson(), fromOptions: false);
     }
     // if (fromOptions) {
     //   final options = asJson['ui:options'] as Map<String, Object?>? ?? {};
@@ -100,90 +104,96 @@ class UiSchemaData {
       } else {
         return;
       }
-      bool saveInJson = true;
+      if (fromGlobal && _asJson.containsKey(k)) return;
+      bool saveInJson = !fromGlobal;
       switch (k) {
-        case "disabled":
+        case 'disabled':
           disabled = data as bool;
           break;
         // TODO: filePreview, label=false, type:password
         // rows/width
-        case "autofocus":
+        case 'autofocus':
           autofocus = data as bool;
           break;
-        case "autocomplete":
+        case 'autocomplete':
           autocomplete = data as bool;
           break;
-        case "hideError":
+        case 'hideError':
           hideError = data as bool;
           break;
-        case "enumDisabled":
+        case 'enumDisabled':
           enumDisabled = (data as List).cast();
           break;
-        case "enumNames":
+        case 'enumNames':
           enumNames = (data as List).cast();
           break;
-        case "emptyValue":
+        case 'emptyValue':
           emptyValue = data as String;
           break;
-        case "title":
+        case 'title':
           title = data as String;
           break;
-        case "description":
+        case 'description':
           description = data as String;
           break;
-        case "help":
+        case 'help':
           help = data as String;
           break;
-        case "placeholder":
+        case 'placeholder':
           placeholder = data as String;
           break;
-        case "readonly":
+        case 'readonly':
           readOnly = data as bool;
           break;
-        case "hidden":
+        case 'hidden':
           hidden = data as bool;
           break;
-        case "widget":
+        case 'widget':
           // TODO: password, textarea, inputType:tel,email?
           widget = data as String;
           break;
-        case "yearsRange":
+        case 'yearsRange':
           yearsRange = data as List<int>;
           break;
-        case "format":
+        case 'format':
           format = data as String;
           break;
-        case "hideNowButton":
+        case 'hideNowButton':
           hideNowButton = data as bool;
           break;
-        case "hideClearButton":
+        case 'hideClearButton':
           hideClearButton = data as bool;
           break;
-        case "order":
-          order = List<String>.from(data);
+        case 'order':
+          order = (data as List).cast();
           break;
 
         ///
         /// Array Properties
         ///
-        case "addable":
+        case 'addable':
           addable = data as bool;
           break;
-        case "removable":
+        case 'removable':
           removable = data as bool;
           break;
-        case "orderable":
+        case 'orderable':
           orderable = data as bool;
           break;
-        case "copyable":
+        case 'copyable':
           copyable = data as bool;
           break;
-        case "options":
-          setUi(data as Map<String, Object?>, fromOptions: true, parent: null);
+        case 'options':
+          setUi(
+            data as Map<String, Object?>,
+            fromOptions: true,
+            parent: null,
+            fromGlobal: fromGlobal,
+          );
           saveInJson = false;
           break;
-        case "globalOptions":
-          setGlobalOptions(data as Map<String, Object?>);
+        case 'globalOptions':
+          setGlobalOptions(data as Map<String, Object?>, fromOptions: true);
           break;
         default:
           saveInJson = false;

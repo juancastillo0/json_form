@@ -1,27 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
+import 'package:json_form/src/builder/widget_builder.dart';
 import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
+import 'package:json_form/src/models/json_form_schema_style.dart';
 import 'package:json_form/src/models/property_schema.dart';
 
-class DropdownOneOfJFormField extends PropertyFieldWidget<dynamic> {
+class DropdownOneOfJFormField extends PropertyFieldWidget<Object?> {
   const DropdownOneOfJFormField({
     super.key,
     required super.property,
-    required super.onSaved,
-    super.onChanged,
-    this.customPickerHandler,
-    super.customValidator,
   });
 
-  final Future<dynamic> Function(Map)? customPickerHandler;
-
   @override
-  _SelectedFormFieldState createState() => _SelectedFormFieldState();
+  PropertyFieldState<Object?, DropdownOneOfJFormField> createState() =>
+      _SelectedFormFieldState();
 }
 
 class _SelectedFormFieldState
-    extends PropertyFieldState<dynamic, DropdownOneOfJFormField> {
+    extends PropertyFieldState<Object?, DropdownOneOfJFormField> {
   SchemaProperty? valueSelected;
   @override
   Object? get value => valueSelected?.constValue;
@@ -36,9 +33,23 @@ class _SelectedFormFieldState
   void initState() {
     super.initState();
     // fill selected value
-    final defaultValue = super.getDefaultValue();
+    final defaultValue = super.getDefaultValue<Object?>();
     if (defaultValue != null) {
       valueSelected = parseValue(defaultValue);
+    }
+  }
+
+  CustomPickerHandler? _previousPicker;
+  Future<Object?> Function(Map<Object?, String>)? _customPicker;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentPicker =
+        WidgetBuilderInherited.of(context).fieldDropdownPicker;
+    if (_previousPicker != currentPicker) {
+      _customPicker = currentPicker?.call(this);
+      _previousPicker = currentPicker;
     }
   }
 
@@ -52,39 +63,36 @@ class _SelectedFormFieldState
   Widget build(BuildContext context) {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     return WrapFieldWithLabel(
-      property: property,
+      formValue: formValue,
       child: GestureDetector(
         onTap: _onTap,
         child: AbsorbPointer(
-          absorbing: widget.customPickerHandler != null,
+          absorbing: _customPicker != null,
           child: DropdownButtonFormField<SchemaProperty>(
-            key: Key(property.idKey),
+            key: JsonFormKeys.inputField(idKey),
             focusNode: focusNode,
             value: valueSelected,
             autovalidateMode: uiConfig.autovalidateMode,
             hint: Text(uiConfig.localizedTexts.select()),
-            isExpanded: false,
             validator: (value) {
-              if (property.requiredNotNull && value == null) {
+              if (formValue.isRequiredNotNull && value == null) {
                 return uiConfig.localizedTexts.required();
               }
-              if (widget.customValidator != null)
-                return widget.customValidator!(value);
-              return null;
+              return customValidator(value);
             },
             items: _buildItems(),
             onChanged: _onChanged,
-            onSaved: (v) => widget.onSaved(v?.constValue),
-            decoration: uiConfig.inputDecoration(property),
+            onSaved: (v) => onSaved(v?.constValue),
+            decoration: uiConfig.inputDecoration(formValue),
           ),
         ),
       ),
     );
   }
 
-  void _onTap() async {
-    if (widget.customPickerHandler == null) return;
-    final response = await widget.customPickerHandler!(_getItems());
+  Future<void> _onTap() async {
+    if (_customPicker == null) return;
+    final response = await _customPicker!(_getItems());
 
     if (response != null) _onChanged(response as SchemaProperty);
   }
@@ -95,9 +103,7 @@ class _SelectedFormFieldState
     setState(() {
       valueSelected = value;
     });
-    if (widget.onChanged != null) {
-      widget.onChanged!(value?.constValue);
-    }
+    onChanged(value?.constValue);
   }
 
   List<DropdownMenuItem<SchemaProperty>>? _buildItems() {
@@ -107,7 +113,7 @@ class _SelectedFormFieldState
         .cast<SchemaProperty>()
         .map(
           (item) => DropdownMenuItem<SchemaProperty>(
-            key: Key('${property.idKey}_${i++}'),
+            key: JsonFormKeys.inputFieldItem(idKey, i++),
             value: item,
             child: Text(
               item.titleOrId,
@@ -119,12 +125,9 @@ class _SelectedFormFieldState
         .toList(growable: false);
   }
 
-  Map _getItems() {
-    final Map data = {};
-    for (final element in property.oneOf) {
-      data[element] = element.title;
-    }
-
-    return data;
+  Map<Object?, String> _getItems() {
+    return {
+      for (final element in property.oneOf) element: element.titleOrId,
+    };
   }
 }

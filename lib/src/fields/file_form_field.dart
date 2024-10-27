@@ -1,28 +1,23 @@
 import 'package:cross_file/cross_file.dart';
 import 'package:flutter/material.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
+import 'package:json_form/src/builder/widget_builder.dart';
 import 'package:json_form/src/fields/fields.dart';
+import 'package:json_form/src/fields/shared.dart';
 import 'package:json_form/src/models/json_form_schema_style.dart';
 
-import './shared.dart';
-
-class FileJFormField extends PropertyFieldWidget<dynamic> {
+class FileJFormField extends PropertyFieldWidget<Object?> {
   const FileJFormField({
     super.key,
     required super.property,
-    required super.onSaved,
-    super.onChanged,
-    required this.fileHandler,
-    super.customValidator,
   });
 
-  final Future<List<XFile>?> Function() fileHandler;
-
   @override
-  _FileJFormFieldState createState() => _FileJFormFieldState();
+  PropertyFieldState<Object?, FileJFormField> createState() =>
+      _FileJFormFieldState();
 }
 
-class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
+class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
   late FormFieldState<Object?> field;
   @override
   Object? get value => field.value;
@@ -31,28 +26,40 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
     field.didChange(newValue);
   }
 
+  FileHandler? _previousPicker;
+  Future<List<XFile>?> Function()? _customPicker;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentPicker = WidgetBuilderInherited.of(context).fieldFilePicker;
+    if (_previousPicker != currentPicker) {
+      _customPicker = currentPicker?.call(this);
+      _previousPicker = currentPicker;
+    }
+    if (_customPicker == null) throw Exception('no file handler found');
+  }
+
   @override
   Widget build(BuildContext context) {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
 
     return FormField<List<XFile>>(
-      key: Key(property.idKey),
+      key: JsonFormKeys.inputField(idKey),
       enabled: enabled,
       validator: (value) {
-        if ((value == null || value.isEmpty) && property.requiredNotNull) {
+        if ((value == null || value.isEmpty) && formValue.isRequiredNotNull) {
           return uiConfig.localizedTexts.required();
         }
 
-        if (widget.customValidator != null)
-          return widget.customValidator!(value);
-        return null;
+        return customValidator(value);
       },
       onSaved: (newValue) {
         if (newValue != null) {
           final response =
               property.isMultipleFile ? newValue : (newValue.first);
 
-          widget.onSaved(response);
+          onSaved(response);
         }
       },
       builder: (field) {
@@ -63,7 +70,7 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(uiConfig.labelText(property), style: uiConfig.subtitle),
+              Text(uiConfig.labelText(formValue), style: uiConfig.subtitle),
               const SizedBox(height: 10),
               _buildButton(uiConfig, field),
               const SizedBox(height: 10),
@@ -75,7 +82,7 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
                   final file = field.value![index];
 
                   return ListTile(
-                    key: Key('${property.idKey}_$index'),
+                    key: JsonFormKeys.inputFieldItem(idKey, index),
                     title: Text(
                       file.path.characters
                           .takeLastWhile((p0) => p0 != '/')
@@ -114,19 +121,17 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
   void change(FormFieldState<List<XFile>> field, List<XFile>? values) {
     field.didChange(values);
 
-    if (widget.onChanged != null) {
-      final response = property.isMultipleFile
-          ? values
-          : (values != null && values.isNotEmpty ? values.first : null);
-      widget.onChanged!(response);
-    }
+    final response = property.isMultipleFile
+        ? values
+        : (values != null && values.isNotEmpty ? values.first : null);
+    onChanged(response);
   }
 
   VoidCallback? _onTap(FormFieldState<List<XFile>> field) {
     if (!enabled) return null;
 
     return () async {
-      final result = await widget.fileHandler();
+      final result = await _customPicker!();
 
       if (result != null) {
         change(field, result);
@@ -135,11 +140,11 @@ class _FileJFormFieldState extends PropertyFieldState<dynamic, FileJFormField> {
   }
 
   Widget _buildButton(
-    JsonFormSchemaUiConfig uiConfig,
+    JsonFormUiConfig uiConfig,
     FormFieldState<List<XFile>> field,
   ) {
     final onTap = _onTap(field);
-    final custom = uiConfig.addFileButtonBuilder?.call(onTap, property.idKey);
+    final custom = uiConfig.addFileButtonBuilder?.call(onTap, idKey);
     if (custom != null) return custom;
 
     return ElevatedButton(

@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:json_form/json_form.dart';
 import 'package:json_form/src/builder/general_subtitle_widget.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
+import 'package:json_form/src/builder/widget_builder.dart';
 import 'package:json_form/src/fields/shared.dart';
-import 'package:json_form/src/helpers/helpers.dart';
+import 'package:json_form/src/models/json_form_schema_style.dart';
 import 'package:json_form/src/models/models.dart';
 
 class ArraySchemaBuilder extends StatefulWidget {
-  ArraySchemaBuilder({
+  const ArraySchemaBuilder({
+    super.key,
     required this.mainSchema,
     required this.schemaArray,
-  }) : super(key: Key(schemaArray.idKey));
+  });
   final Schema mainSchema;
   final SchemaArray schemaArray;
 
@@ -21,11 +23,12 @@ class ArraySchemaBuilder extends StatefulWidget {
 class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
     implements JsonFormField<List<Object?>> {
   late FormFieldState<List<Object?>> field;
+  late final JsonFormValue formValue;
   SchemaArray get schemaArray => widget.schemaArray;
-  int lastItemId = 1;
   bool showItems = true;
 
-  String generateItemId() => (lastItemId++).toString();
+  @override
+  String get idKey => formValue.idKey;
 
   bool get isCheckboxes => schemaArray.uiSchema.widget == 'checkboxes';
   List<Object?>? _initialValue;
@@ -33,19 +36,21 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
   @override
   void initState() {
     super.initState();
-    schemaArray.formField = this;
-
-    WidgetBuilderInherited.get(context).controller.updateDataInPlace(
-          schemaArray.idKey,
-          (prev) => _initialValue = (prev as List?) ?? [],
-        );
+    formValue = PrivateJsonFormController.setField(context, schemaArray, this);
+    formValue.value ??= [];
+    _initialValue = formValue.value! as List;
+    if (_initialValue!.isNotEmpty) {
+      // update children
+      value = _initialValue!;
+    }
   }
 
   @override
   void dispose() {
-    if (schemaArray.formField == this) {
-      schemaArray.formField = null;
-    }
+    // TODO: clean up
+    // if (schemaArray.formField == this) {
+    //   schemaArray.formField = null;
+    // }
     super.dispose();
   }
 
@@ -86,7 +91,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
                             ? schema.uiSchema.enumNames![index]
                             : option.toString();
                         return CheckboxListTile(
-                          key: Key('JsonForm_item_${schemaArray.idKey}_$index'),
+                          key: JsonFormKeys.arrayCheckboxItem(idKey, index),
                           title: Text(
                             title,
                             style: uiConfig.fieldInput,
@@ -94,7 +99,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
                           value: field.value != null &&
                               field.value!.contains(option),
                           onChanged: (_) {
-                            selectCheckbox(field, option);
+                            selectCheckbox(option);
                           },
                         );
                       }).toList(growable: false),
@@ -105,10 +110,12 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
               }
 
               int _index = 0;
-              final items = schemaArray.items.map((schemaLoop) {
+              final items = formValue.children.map((item) {
                 final index = _index++;
+                final idKey = JsonFormKeyPath.appendId(this.idKey, item.id);
+
                 return Column(
-                  key: Key('JsonForm_item_${schemaLoop.idKey}'),
+                  key: JsonFormKeys.arrayItem(idKey),
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -117,19 +124,19 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
                       children: [
                         if (uiConfig.labelPosition == LabelPosition.table)
                           Text(
-                            schemaLoop.titleOrId,
+                            '${index + 1}.',
                             style: uiConfig.fieldLabel,
                           ),
                         const Spacer(),
                         const SizedBox(height: 5),
                         if (schemaArray.uiSchema.copyable)
                           uiConfig.copyItemWidget(
-                            schemaLoop,
+                            idKey,
                             () => _copyItem(index),
                           ),
                         if (schemaArray.uiSchema.removable)
                           uiConfig.removeItemWidget(
-                            schemaLoop,
+                            idKey,
                             () => _removeItem(index),
                           ),
                         if (schemaArray.uiSchema.orderable)
@@ -141,19 +148,16 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
                     ),
                     Padding(
                       padding: const EdgeInsets.only(bottom: 5.0, left: 5.0),
-                      // TODO: improve this, necessary for ReorderableListView
                       child: WidgetBuilderInherited(
                         controller: widgetBuilderInherited.controller,
-                        customPickerHandler:
-                            widgetBuilderInherited.customPickerHandler,
-                        customValidatorHandler:
-                            widgetBuilderInherited.customValidatorHandler,
-                        fileHandler: widgetBuilderInherited.fileHandler,
+                        jsonForm: widgetBuilderInherited.jsonForm,
+                        uiConfig: widgetBuilderInherited.uiConfig,
+                        context: context,
                         child: FormFromSchemaBuilder(
                           mainSchema: widget.mainSchema,
-                          schema: schemaLoop,
+                          formValue: item,
                         ),
-                      )..uiConfig = widgetBuilderInherited.uiConfig,
+                      ),
                     ),
                   ],
                 );
@@ -167,6 +171,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
                     field: schemaArray,
                     mainSchema: widget.mainSchema,
                     trailing: IconButton(
+                      key: JsonFormKeys.showOrHideItems(idKey),
                       tooltip: showItems
                           ? uiConfig.localizedTexts.hideItems()
                           : uiConfig.localizedTexts.showItems(),
@@ -179,12 +184,13 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
                       icon: Row(
                         children: [
                           Text(
-                            schemaArray.items.length.toString(),
+                            formValue.children.length.toString(),
                             style: uiConfig.subtitle,
                           ),
-                          showItems
-                              ? const Icon(Icons.arrow_drop_up_outlined)
-                              : const Icon(Icons.arrow_drop_down_outlined),
+                          if (showItems)
+                            const Icon(Icons.arrow_drop_up_outlined)
+                          else
+                            const Icon(Icons.arrow_drop_down_outlined),
                         ],
                       ),
                     ),
@@ -200,23 +206,9 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
                         setState(() {
                           final toRemove =
                               newIndex > oldIndex ? oldIndex : oldIndex + 1;
-                          schemaArray.items.insert(
-                            newIndex,
-                            schemaArray.items[oldIndex],
-                          );
-                          schemaArray.items.removeAt(toRemove);
-
-                          WidgetBuilderInherited.of(context)
-                              .controller
-                              .updateDataInPlace(
-                            schemaArray.idKey,
-                            (array) {
-                              if (array is! List) return null;
-                              array.insert(newIndex, array[oldIndex]);
-                              array.removeAt(toRemove);
-                              return array;
-                            },
-                          );
+                          final array = formValue.children;
+                          formValue.children.insert(newIndex, array[oldIndex]);
+                          array.removeAt(toRemove);
                         });
                       },
                       children: items.toList(growable: false),
@@ -241,7 +233,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
               !isCheckboxes)
             Align(
               alignment: Alignment.centerRight,
-              child: uiConfig.addItemWidget(schemaArray, _addItem),
+              child: uiConfig.addItemWidget(formValue, _addItem),
             ),
         ],
       ),
@@ -250,48 +242,31 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
 
   void _addItem() {
     setState(() {
-      WidgetBuilderInherited.of(context).controller.updateDataInPlace(
-            schemaArray.idKey,
-            (array) => (array as List? ?? [])..add(null),
-          );
-
-      final newItem =
-          schemaArray.itemsBaseSchema.copyWith(id: generateItemId());
-      schemaArray.items.add(newItem);
+      formValue.addArrayChild(null);
     });
   }
 
   void _removeItem(int index) {
     setState(() {
-      WidgetBuilderInherited.of(context).controller.updateDataInPlace(
-            schemaArray.idKey,
-            (array) => (array as List? ?? [])..removeAt(index),
-          );
-      schemaArray.items.removeAt(index);
+      formValue.children.removeAt(index);
+
+      /// cleans up the output data in the controller
+      WidgetBuilderInherited.of(context)
+          .controller
+          .updateDataInPlace(idKey, (a) => a);
     });
   }
 
   void _copyItem(int index) {
     setState(() {
-      final schemaLoop = schemaArray.items[index];
-      final widgetBuilderInherited = WidgetBuilderInherited.of(context);
-      final item = widgetBuilderInherited.controller
-          .retrieveObjectData(schemaArray.idKey) as List?;
-      final newItem = copyJson(item![index]);
-      widgetBuilderInherited.controller.updateDataInPlace(
-        schemaArray.idKey,
-        (array) => (array as List? ?? [])..add(newItem),
-      );
-      schemaArray.items.add(
-        schemaLoop.copyWith(id: generateItemId()),
-      );
+      formValue.addArrayChild(null, baseValue: formValue.children[index]);
     });
   }
 
-  void selectCheckbox(FormFieldState<Object?> field, Object? option) {
+  void selectCheckbox(Object? option) {
     setState(() {
       WidgetBuilderInherited.of(context).controller.updateDataInPlace(
-        schemaArray.idKey,
+        idKey,
         (a) {
           final valueList = (a as List?)?.toList() ?? [];
           final i = valueList.indexOf(option);
@@ -308,23 +283,36 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
   }
 
   @override
-  List<Object?> get value => field.value!;
+  List<Object?> get value =>
+      isCheckboxes ? field.value! : formValue.toJson()! as List<Object?>;
 
   @override
   final focusNode = FocusNode();
 
   @override
-  SchemaUiInfo get property => schemaArray;
+  JsonSchemaInfo get property => schemaArray;
 
   @override
   set value(List<Object?> newValue) {
     if (isCheckboxes) {
       field.didChange(newValue);
-      WidgetBuilderInherited.of(context)
-          .controller
-          .updateObjectData(schemaArray.idKey, newValue);
+      formValue.value = newValue;
     } else {
-      throw UnimplementedError();
+      while (formValue.children.length != newValue.length) {
+        if (formValue.children.length < newValue.length) {
+          formValue.addArrayChild(null);
+        } else {
+          formValue.children.removeLast();
+        }
+      }
+      for (var i = 0; i < newValue.length; i++) {
+        final item = formValue.children[i];
+        if (item.field == null) {
+          if (mounted) setState(() {});
+          break;
+        }
+        item.field!.value = newValue[i];
+      }
     }
   }
 }

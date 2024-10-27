@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:json_form/json_form.dart';
+import 'package:json_form/src/builder/logic/object_schema_logic.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/models/property_schema.dart';
-import 'package:json_form/src/models/schema.dart';
 import 'package:json_form/src/utils/date_text_input_json_formatter.dart';
-import 'package:intl/intl.dart';
 
 export 'checkbox_form_field.dart';
 export 'date_form_field.dart';
@@ -21,15 +22,9 @@ abstract class PropertyFieldWidget<T> extends StatefulWidget {
   const PropertyFieldWidget({
     super.key,
     required this.property,
-    required this.onSaved,
-    required this.onChanged,
-    this.customValidator,
   });
 
   final SchemaProperty property;
-  final ValueSetter<T?> onSaved;
-  final ValueChanged<T?>? onChanged;
-  final String? Function(dynamic)? customValidator;
 
   @override
   PropertyFieldState<T, PropertyFieldWidget<T>> createState();
@@ -37,6 +32,7 @@ abstract class PropertyFieldWidget<T> extends StatefulWidget {
 
 abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
     extends State<W> implements JsonFormField<T> {
+  late JsonFormValue formValue;
   @override
   final focusNode = FocusNode();
   @override
@@ -44,47 +40,114 @@ abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
   bool get readOnly => property.uiSchema.readOnly;
   bool get enabled => !property.uiSchema.disabled && !readOnly;
 
+  CustomValidatorHandler? _previousValidator;
+  String? Function(Object?)? _customValidator;
+
   @override
   T get value;
   @override
   set value(T newValue);
 
   @override
+  String get idKey => formValue.idKey;
+
+  @override
   void initState() {
     super.initState();
     triggerDefaultValue();
-    property.formField = this;
+    formValue = PrivateJsonFormController.setField(context, property, this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final currentValidator = WidgetBuilderInherited.of(context).fieldValidator;
+    if (_previousValidator != currentValidator) {
+      _customValidator = currentValidator?.call(this);
+      _previousValidator = currentValidator;
+    }
+  }
+
+  String? customValidator(Object? newValue) {
+    return _customValidator?.call(newValue);
+  }
+
+  void onSaved(Object? newValue) {
+    final widgetBuilderInherited = WidgetBuilderInherited.of(context);
+    if (newValue is! DateTime) {
+      widgetBuilderInherited.controller.updateData(idKey, newValue);
+    } else {
+      String date;
+      if (property.format == PropertyFormat.date) {
+        date = DateFormat(dateFormatString).format(newValue);
+      } else {
+        date = DateFormat(dateTimeFormatString).format(newValue);
+      }
+      widgetBuilderInherited.controller.updateData(idKey, date);
+    }
+  }
+
+  void onChanged(Object? value) {
+    _dispatchChangeEventToParentObject(value);
+    onSaved(value);
+  }
+
+  void _dispatchChangeEventToParentObject(Object? value) {
+    bool isActive;
+    if (value is bool) {
+      isActive = value;
+    } else if (value is String) {
+      isActive = value.isNotEmpty;
+    } else if (value is List) {
+      isActive = value.isNotEmpty;
+    } else {
+      isActive = value != null;
+    }
+
+    final isSelect = property.enumm != null && property.enumm!.isNotEmpty ||
+        property.oneOf.isNotEmpty;
+    if (isActive != formValue.isDependentsActive || isSelect) {
+      ObjectSchemaInherited.of(context).listenChangeProperty(
+        isActive,
+        formValue,
+        optionalValue: isSelect ? value : null,
+      );
+    }
   }
 
   @override
   void dispose() {
-    if (property.formField == this) {
-      property.formField = null;
-    }
+    // TODO: remove field
+    // if (property.formField == this) {
+    //   property.formField = null;
+    // }
     super.dispose();
   }
 
-  Future<dynamic> triggerDefaultValue() async {
-    final completer = Completer<void>();
+  Future<T?> triggerDefaultValue() async {
+    final completer = Completer<T?>();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      final value = getDefaultValue();
+      final value = getDefaultValue<T>();
       if (value == null) return completer.complete();
 
-      widget.onChanged?.call(value);
+      onChanged(value);
       completer.complete(value);
     });
 
     return completer.future;
   }
 
-  dynamic getDefaultValue({bool parse = true}) {
+  D? getDefaultValue<D>({bool parse = true}) {
     final widgetBuilderInherited = WidgetBuilderInherited.get(context);
-    var data =
-        widgetBuilderInherited.controller.retrieveObjectData(property.idKey) ??
-            property.defaultValue;
+    final objectData = widgetBuilderInherited.controller.retrieveData(idKey);
+    final isDate = property.format == PropertyFormat.date ||
+        property.format == PropertyFormat.dateTime;
+    var data = (objectData is D || isDate && parse && objectData is String
+            ? objectData
+            : null) ??
+        property.defaultValue;
     if (data != null && parse) {
-      if (property.format == PropertyFormat.date ||
-          property.format == PropertyFormat.dateTime) {
+      if (isDate && data is String) {
         data = DateFormat(
           property.format == PropertyFormat.date
               ? dateFormatString
@@ -92,6 +155,6 @@ abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
         ).parse(data);
       }
     }
-    return data;
+    return data is D ? data : null;
   }
 }

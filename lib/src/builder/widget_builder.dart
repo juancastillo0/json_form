@@ -7,18 +7,31 @@ import 'package:json_form/src/builder/array_schema_builder.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/builder/object_schema_builder.dart';
 import 'package:json_form/src/builder/property_schema_builder.dart';
+import 'package:json_form/src/fields/shared.dart';
 import 'package:json_form/src/models/json_form_schema_style.dart';
+import 'package:json_form/src/models/models.dart';
 
-import '../models/models.dart';
+/// Returns a map of paths keys to functions that return the files selected by the user.
+typedef FileHandler = Future<List<XFile>?> Function() Function(
+  JsonFormField<Object?> field,
+);
 
-typedef FileHandler = Map<String, Future<List<XFile>?> Function()?> Function();
-typedef CustomPickerHandler = Map<String, Future<dynamic> Function(Map data)>
-    Function();
+/// Returns a map of paths keys to functions that receives a map values to strings
+/// and returns the selected value, or null if none was selected.
+typedef CustomPickerHandler
+    = Future<Object?> Function(Map<Object?, String> options)? Function(
+  JsonFormField<Object?> field,
+);
 
-typedef CustomValidatorHandler = Map<String, String? Function(dynamic)?>
-    Function();
+typedef CustomValidatorHandler = String? Function(dynamic newValue)? Function(
+  JsonFormField<Object?> field,
+);
 
+/// Builds a form with [jsonSchema] and configurations from [uiSchema] and [uiConfig].
+/// You may use [controller] for added functionalities.
 class JsonForm extends StatefulWidget {
+  /// Builds a form with [jsonSchema] and configurations from [uiSchema] and [uiConfig].
+  /// You may use [controller] for added functionalities.
   const JsonForm({
     super.key,
     required this.jsonSchema,
@@ -26,31 +39,49 @@ class JsonForm extends StatefulWidget {
     this.controller,
     this.uiSchema,
     this.uiConfig,
-    this.fileHandler,
-    this.customPickerHandler,
-    this.customValidatorHandler,
+    this.fieldValidator,
+    this.fieldDropdownPicker,
+    this.fieldFilePicker,
   });
 
+  /// The JSON schema to build the form from
   final String jsonSchema;
+
+  /// Callback function to be called when the form is submitted
   final void Function(Object) onFormDataSaved;
 
+  /// The controller to be used for the form.
+  /// It can be used to set the initial data, get/set the form data,
+  /// subscribe to changes, etc.
   final JsonFormController? controller;
+
+  /// The UI schema with input configurations for each field
   final String? uiSchema;
-  final JsonFormSchemaUiConfig? uiConfig;
-  final FileHandler? fileHandler;
-  final CustomPickerHandler? customPickerHandler;
-  final CustomValidatorHandler? customValidatorHandler;
+
+  /// The UI configuration with global styles, texts, builders and other Flutter configurations
+  final JsonFormUiConfig? uiConfig;
+
+  /// A custom validator that receives the field and returns an error message
+  /// or null if the field is valid. If the error is an empty String, it will
+  /// be considered an error in validation, but no error message will be shown.
+  final CustomValidatorHandler? fieldValidator;
+
+  /// A custom picker that receives the field and returns a Future with the selected value.
+  /// If no Future is returned, the default selector will be shown.
+  /// If the Future completes with a null value, the default field will be considered as not selected.
+  final CustomPickerHandler? fieldDropdownPicker;
+
+  /// A file picker that receives the field and returns a Function that selects the files.
+  final FileHandler? fieldFilePicker;
 
   @override
-  _JsonFormState createState() => _JsonFormState();
+  State<JsonForm> createState() => _JsonFormState();
 }
 
 class _JsonFormState extends State<JsonForm> {
   late JsonFormController controller;
-  Schema get mainSchema => controller.mainSchema!;
+  late Schema mainSchema;
   GlobalKey<FormState> get _formKey => controller.formKey!;
-
-  _JsonFormState();
 
   @override
   void initState() {
@@ -63,7 +94,7 @@ class _JsonFormState extends State<JsonForm> {
     required bool schemaChanged,
   }) {
     if (controllerChanged) {
-      controller = widget.controller ?? JsonFormController(data: {});
+      controller = widget.controller ?? JsonFormController(initialData: {});
       controller.formKey ??= GlobalKey<FormState>();
       if (controller.mainSchema != null &&
           (!schemaChanged || widget.jsonSchema.isEmpty)) {
@@ -71,7 +102,7 @@ class _JsonFormState extends State<JsonForm> {
       }
     }
     final mainSchema = Schema.fromJson(
-      json.decode(widget.jsonSchema),
+      json.decode(widget.jsonSchema) as Map<String, Object?>,
       id: kGenesisIdKey,
     );
     final map = widget.uiSchema != null
@@ -80,7 +111,7 @@ class _JsonFormState extends State<JsonForm> {
     if (map != null) {
       mainSchema.setUiSchema(map, fromOptions: false);
     }
-    controller.mainSchema = mainSchema;
+    this.mainSchema = mainSchema;
   }
 
   @override
@@ -101,9 +132,9 @@ class _JsonFormState extends State<JsonForm> {
   Widget build(BuildContext context) {
     return WidgetBuilderInherited(
       controller: controller,
-      fileHandler: widget.fileHandler,
-      customPickerHandler: widget.customPickerHandler,
-      customValidatorHandler: widget.customValidatorHandler,
+      jsonForm: widget,
+      context: context,
+      baseConfig: widget.uiConfig,
       child: Builder(
         builder: (context) {
           final widgetBuilderInherited = WidgetBuilderInherited.of(context);
@@ -121,13 +152,13 @@ class _JsonFormState extends State<JsonForm> {
               _buildHeaderTitle(context),
               FormFromSchemaBuilder(
                 mainSchema: mainSchema,
-                schema: mainSchema,
+                formValue: null,
               ),
               uiConfig.submitButtonBuilder?.call(onSubmit) ??
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     child: ElevatedButton(
-                      key: const Key('JsonForm_submitButton'),
+                      key: JsonFormKeys.submitButton,
                       onPressed: onSubmit,
                       child: Text(
                         uiConfig.localizedTexts.submit(),
@@ -138,7 +169,7 @@ class _JsonFormState extends State<JsonForm> {
           );
 
           return SingleChildScrollView(
-            key: const Key('JsonForm_scrollView'),
+            key: JsonFormKeys.scrollView,
             child: uiConfig.formBuilder?.call(_formKey, formChild) ??
                 Form(
                   key: _formKey,
@@ -151,7 +182,7 @@ class _JsonFormState extends State<JsonForm> {
           );
         },
       ),
-    )..setJsonFormSchemaStyle(context, widget.uiConfig);
+    );
   }
 
   Widget _buildHeaderTitle(BuildContext context) {
@@ -198,38 +229,102 @@ class FormFromSchemaBuilder extends StatelessWidget {
   const FormFromSchemaBuilder({
     super.key,
     required this.mainSchema,
-    required this.schema,
+    required this.formValue,
     this.schemaObject,
   });
   final Schema mainSchema;
-  final Schema schema;
+  final JsonFormValue? formValue;
   final SchemaObject? schemaObject;
 
   @override
   Widget build(BuildContext context) {
-    if (schema.uiSchema.hidden) {
-      return const SizedBox.shrink();
-    }
-    if (schema is SchemaProperty) {
-      return PropertySchemaBuilder(
-        mainSchema: mainSchema,
-        schemaProperty: schema as SchemaProperty,
-      );
-    }
-    if (schema is SchemaArray) {
-      return ArraySchemaBuilder(
-        mainSchema: mainSchema,
-        schemaArray: schema as SchemaArray,
-      );
-    }
+    final schema = formValue?.schema ?? mainSchema;
+    return JsonFormKeyPath(
+      context: context,
+      id: formValue?.id ?? schema.id,
+      child: Builder(
+        builder: (context) {
+          if (schema.uiSchema.hidden) {
+            return const SizedBox.shrink();
+          }
+          if (schema is SchemaProperty) {
+            return PropertySchemaBuilder(
+              mainSchema: mainSchema,
+              formValue: formValue!,
+            );
+          }
+          if (schema is SchemaArray) {
+            return ArraySchemaBuilder(
+              mainSchema: mainSchema,
+              schemaArray: schema,
+            );
+          }
 
-    if (schema is SchemaObject) {
-      return ObjectSchemaBuilder(
-        mainSchema: mainSchema,
-        schemaObject: schema as SchemaObject,
-      );
-    }
+          if (schema is SchemaObject) {
+            return ObjectSchemaBuilder(
+              mainSchema: mainSchema,
+              schemaObject: schema,
+            );
+          }
 
-    return const SizedBox.shrink();
+          return const SizedBox.shrink();
+        },
+      ),
+    );
+  }
+}
+
+class JsonFormKeyPath extends InheritedWidget {
+  JsonFormKeyPath({
+    super.key,
+    required BuildContext context,
+    required this.id,
+    required super.child,
+  }) : parent = maybeGet(context);
+
+  final String id;
+  final JsonFormKeyPath? parent;
+
+  String get path => appendId(parent?.path, id);
+
+  static String getPath(BuildContext context, {String id = ''}) {
+    return JsonFormKeyPath(
+      id: id,
+      context: context,
+      child: const SizedBox(),
+    ).path;
+  }
+
+  static String appendId(String? path, String id) {
+    return path == null || path.isEmpty || path == kGenesisIdKey
+        ? id
+        : id.isEmpty
+            ? path
+            : '$path.$id';
+  }
+
+  @override
+  bool updateShouldNotify(JsonFormKeyPath oldWidget) {
+    return id != oldWidget.id;
+  }
+
+  static JsonFormKeyPath? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<JsonFormKeyPath>();
+
+  static JsonFormKeyPath of(BuildContext context) {
+    final result = maybeOf(context);
+    assert(result != null, 'No JsonFormKeyPath found in context');
+    return result!;
+  }
+
+  static JsonFormKeyPath? maybeGet(BuildContext context) =>
+      context.getElementForInheritedWidgetOfExactType<JsonFormKeyPath>()?.widget
+          as JsonFormKeyPath?;
+
+  static JsonFormKeyPath get(BuildContext context) {
+    final result =
+        context.getElementForInheritedWidgetOfExactType<JsonFormKeyPath>();
+    assert(result != null, 'No JsonFormKeyPath found in context');
+    return result!.widget as JsonFormKeyPath;
   }
 }

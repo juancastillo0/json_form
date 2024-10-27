@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/models/json_form_schema_style.dart';
-import 'package:json_form/src/models/property_schema.dart';
 
 class CustomErrorText extends StatelessWidget {
   const CustomErrorText({super.key, required this.text});
@@ -22,17 +21,18 @@ class CustomErrorText extends StatelessWidget {
 class WrapFieldWithLabel extends StatelessWidget {
   const WrapFieldWithLabel({
     super.key,
-    required this.property,
+    required this.formValue,
     required this.child,
     this.ignoreFieldLabel = false,
   });
 
-  final SchemaProperty property;
+  final JsonFormValue formValue;
   final Widget child;
   final bool ignoreFieldLabel;
 
   @override
   Widget build(BuildContext context) {
+    final property = formValue.schema;
     final directionality = Directionality.of(context);
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
 
@@ -52,7 +52,7 @@ class WrapFieldWithLabel extends StatelessWidget {
             uiConfig.labelPosition != LabelPosition.table;
     if (!showLabel) return child;
 
-    final labelText = uiConfig.labelText(property);
+    final labelText = uiConfig.labelText(formValue);
     final label = Text(
       labelText,
       style: uiConfig.fieldLabel,
@@ -65,7 +65,6 @@ class WrapFieldWithLabel extends StatelessWidget {
         : const SizedBox(width: 20);
 
     return Flex(
-      crossAxisAlignment: CrossAxisAlignment.center,
       direction: uiConfig.labelPosition == LabelPosition.top
           ? Axis.vertical
           : Axis.horizontal,
@@ -105,4 +104,30 @@ class FormSection extends StatelessWidget {
       child: child,
     );
   }
+}
+
+// ignore: avoid_classes_with_only_static_members
+class JsonFormKeys {
+  static const Key submitButton = Key('JsonForm_submitButton');
+  static const Key scrollView = Key('JsonForm_scrollView');
+
+  static ValueKey<String> selectDate(String idKey) =>
+      ValueKey('JsonForm_selectDate_$idKey');
+  static ValueKey<String> selectTime(String idKey) =>
+      ValueKey('JsonForm_selectTime_$idKey');
+  static ValueKey<String> objectProperty(String idKey) =>
+      ValueKey('JsonForm_objectProperty_$idKey');
+
+  static Key arrayCheckboxItem(String arrayKey, int index) =>
+      Key('JsonForm_item_${arrayKey}_$index');
+  static Key arrayItem(String itemKey) => Key('JsonForm_item_$itemKey');
+  static Key showOrHideItems(String arrayKey) =>
+      Key('JsonForm_showOrHideItems_$arrayKey');
+
+  static Key removeItem(String idKey) => Key('removeItem_$idKey');
+  static Key addItem(String idKey) => Key('addItem_$idKey');
+  static Key copyItem(String idKey) => Key('copyItem_$idKey');
+
+  static Key inputField(String idKey) => Key(idKey);
+  static Key inputFieldItem(String idKey, int index) => Key('${idKey}_$index');
 }

@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:json_form/json_form.dart';
+import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
+import 'package:json_form/src/fields/shared.dart';
 import 'package:json_form/src/models/models.dart';
 
-class JsonFormSchemaUiConfig {
-  const JsonFormSchemaUiConfig({
+/// Global configuration for the UI of the form.
+/// Contains styles, texts, builders and other Flutter configurations.
+class JsonFormUiConfig {
+  /// Global configuration for the UI of the form.
+  /// Contains styles, texts, builders and other Flutter configurations.
+  const JsonFormUiConfig({
     this.title,
     this.titleAlign,
     this.subtitle,
@@ -60,19 +66,25 @@ class JsonFormSchemaUiConfig {
   /// Localized texts
   final LocalizedTexts localizedTexts;
 
-  /// Enable debug mode
+  /// Enables debug mode
   final bool debugMode;
 
   /// The position of the field labels
   final LabelPosition labelPosition;
 
+  /// Autovalidate mode for the form. Determines when the input validation occurs
   final AutovalidateMode autovalidateMode;
 
+  /// Render a custom add item button for arrays
   final Widget? Function(VoidCallback onPressed, String key)? addItemBuilder;
+
+  /// Render a custom remove item button for arrays
   final Widget? Function(VoidCallback onPressed, String key)? removeItemBuilder;
+
+  /// Render a custom copy item button for arrays
   final Widget? Function(VoidCallback onPressed, String key)? copyItemBuilder;
 
-  /// Render a custom submit button
+  /// Render a custom submit button for the form
   final Widget? Function(VoidCallback onSubmit)? submitButtonBuilder;
 
   /// Render a custom add file button.
@@ -80,74 +92,31 @@ class JsonFormSchemaUiConfig {
   final Widget? Function(VoidCallback? onPressed, String key)?
       addFileButtonBuilder;
 
+  /// Render a custom [Form] widget.
   final Form? Function(GlobalKey<FormState> formKey, Widget child)? formBuilder;
+
+  /// Render a custom form section widget. This is used for objects and arrays.
   final Widget? Function(Widget child)? formSectionBuilder;
-  final Widget? Function(SchemaUiInfo info)? titleAndDescriptionBuilder;
-  final Widget? Function(SchemaUiInfo property, Widget input)?
+
+  /// Render a custom title and description widget.
+  /// This is used for objects, arrays and fields (when using labelPosition = [LabelPosition.table]).
+  final Widget? Function(JsonSchemaInfo info)? titleAndDescriptionBuilder;
+
+  /// Render a custom field wrapper widget. Already contains the label
+  final Widget? Function(JsonSchemaInfo property, Widget input)?
       fieldWrapperBuilder;
-  final Widget? Function(SchemaUiInfo property, Widget input)?
+
+  /// Render a custom field wrapper widget. Does not contain the label
+  final Widget? Function(JsonSchemaInfo property, Widget input)?
       inputWrapperBuilder;
 
-  String labelText(SchemaProperty property) =>
-      '${property.titleOrId}${property.requiredNotNull ? "*" : ""}';
-
-  InputDecoration inputDecoration(SchemaProperty property) {
-    return InputDecoration(
-      errorStyle: error,
-      labelStyle: fieldLabel,
-      labelText:
-          labelPosition == LabelPosition.input ? labelText(property) : null,
-      hintText: property.uiSchema.placeholder,
-      helperText: property.uiSchema.help ??
-          (labelPosition == LabelPosition.table ? null : property.description),
-    );
-  }
-
-  Widget removeItemWidget(Schema property, void Function() removeItem) {
-    return removeItemBuilder?.call(removeItem, property.idKey) ??
-        TextButton.icon(
-          key: Key('removeItem_${property.idKey}'),
-          onPressed: removeItem,
-          icon: const Icon(Icons.remove),
-          label: Text(localizedTexts.removeItem()),
-        );
-  }
-
-  Widget addItemWidget(SchemaArray schemaArray, void Function() addItem) {
-    String? message;
-    final props = schemaArray.arrayProperties;
-    if (props.maxItems != null && schemaArray.items.length >= props.maxItems!) {
-      message = localizedTexts.maxItemsTooltip(props.maxItems!);
-    }
-    return addItemBuilder?.call(addItem, schemaArray.idKey) ??
-        Tooltip(
-          message: message ?? '',
-          child: TextButton.icon(
-            key: Key('addItem_${schemaArray.idKey}'),
-            onPressed: message == null ? addItem : null,
-            icon: const Icon(Icons.add),
-            label: Text(localizedTexts.addItem()),
-          ),
-        );
-  }
-
-  Widget copyItemWidget(Schema itemSchema, void Function() copyItem) {
-    return copyItemBuilder?.call(copyItem, itemSchema.idKey) ??
-        TextButton.icon(
-          key: Key('copyItem_${itemSchema.idKey}'),
-          onPressed: copyItem,
-          icon: const Icon(Icons.copy),
-          label: Text(localizedTexts.copyItem()),
-        );
-  }
-
-  factory JsonFormSchemaUiConfig.fromContext(
+  factory JsonFormUiConfig.fromContext(
     BuildContext context, {
-    JsonFormSchemaUiConfig? baseConfig,
+    JsonFormUiConfig? baseConfig,
   }) {
     final textTheme = Theme.of(context).textTheme;
 
-    return JsonFormSchemaUiConfig(
+    return JsonFormUiConfig(
       title: baseConfig?.title ?? textTheme.titleLarge,
       titleAlign: baseConfig?.titleAlign ?? TextAlign.center,
       subtitle: baseConfig?.subtitle ??
@@ -167,7 +136,7 @@ class JsonFormSchemaUiConfig {
       labelPosition: baseConfig?.labelPosition,
       autovalidateMode: baseConfig?.autovalidateMode,
 
-      /// builders
+      /// Builders
       addItemBuilder: baseConfig?.addItemBuilder,
       removeItemBuilder: baseConfig?.removeItemBuilder,
       copyItemBuilder: baseConfig?.copyItemBuilder,
@@ -183,7 +152,7 @@ class JsonFormSchemaUiConfig {
 
   @override
   bool operator ==(Object other) {
-    return other is JsonFormSchemaUiConfig &&
+    return other is JsonFormUiConfig &&
         other.error == error &&
         other.title == title &&
         other.titleAlign == titleAlign &&
@@ -235,17 +204,79 @@ class JsonFormSchemaUiConfig {
       ]);
 }
 
+/// The position of the field labels
 enum LabelPosition {
   /// Labels are on top of the input
   top,
 
   /// Labels are on the left or right of the input,
-  /// depending on the Directionality
+  /// depending on the [Directionality]
   side,
 
-  /// Labels are all in one column
+  /// Labels are all in one column and inputs are in another column
   table,
 
-  /// Label is in the Field Input Decoration
+  /// Label is in the [InputDecoration]
   input,
+}
+
+extension JsonFormUiConfigExtension on JsonFormUiConfig {
+  String labelText(JsonFormValue fromValue) =>
+      '${fromValue.schema.titleOrId}${fromValue.isRequiredNotNull ? "*" : ""}';
+
+  InputDecoration inputDecoration(JsonFormValue fromValue) {
+    final property = fromValue.schema;
+    return InputDecoration(
+      errorStyle: error,
+      labelStyle: fieldLabel,
+      labelText:
+          labelPosition == LabelPosition.input ? labelText(fromValue) : null,
+      hintText: property.uiSchema.placeholder,
+      helperText: property.uiSchema.help ??
+          (labelPosition == LabelPosition.table ? null : property.description),
+    );
+  }
+
+  Widget removeItemWidget(String idKey, void Function() removeItem) {
+    return removeItemBuilder?.call(removeItem, idKey) ??
+        TextButton.icon(
+          key: JsonFormKeys.removeItem(idKey),
+          onPressed: removeItem,
+          icon: const Icon(Icons.remove),
+          label: Text(localizedTexts.removeItem()),
+        );
+  }
+
+  Widget addItemWidget(
+    JsonFormValue arrayValue,
+    void Function() addItem,
+  ) {
+    String? message;
+    final props = (arrayValue.schema as SchemaArray).arrayProperties;
+    if (props.maxItems != null &&
+        arrayValue.children.length >= props.maxItems!) {
+      message = localizedTexts.maxItemsTooltip(props.maxItems!);
+    }
+    final idKey = arrayValue.idKey;
+    return addItemBuilder?.call(addItem, idKey) ??
+        Tooltip(
+          message: message ?? '',
+          child: TextButton.icon(
+            key: JsonFormKeys.addItem(idKey),
+            onPressed: message == null ? addItem : null,
+            icon: const Icon(Icons.add),
+            label: Text(localizedTexts.addItem()),
+          ),
+        );
+  }
+
+  Widget copyItemWidget(String idKey, void Function() copyItem) {
+    return copyItemBuilder?.call(copyItem, idKey) ??
+        TextButton.icon(
+          key: JsonFormKeys.copyItem(idKey),
+          onPressed: copyItem,
+          icon: const Icon(Icons.copy),
+          label: Text(localizedTexts.copyItem()),
+        );
+  }
 }

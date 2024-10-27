@@ -1,5 +1,5 @@
-import 'package:validators/validators.dart' as validators;
 import 'package:json_form/src/models/property_schema.dart';
+import 'package:validators/validators.dart' as validators;
 
 enum StringValidationError {
   minLength,
@@ -21,7 +21,7 @@ List<StringValidationError> validateJsonSchemaString({
     errors.add(StringValidationError.maxLength);
   }
   if (property.pattern != null &&
-      !validators.matches(newValue, property.pattern!)) {
+      !validators.matches(newValue, property.pattern)) {
     errors.add(StringValidationError.noMatchForPattern);
   }
   if (!isValidFormat(property.format, newValue)) {
@@ -55,12 +55,17 @@ bool isValidFormat(PropertyFormat format, String value) {
     case PropertyFormat.hostname:
     case PropertyFormat.idnHostname:
     case PropertyFormat.uriTemplate:
-    case PropertyFormat.dataUrl:
     case PropertyFormat.uri:
     case PropertyFormat.uriReference:
     case PropertyFormat.iri:
     case PropertyFormat.iriReference:
-      return validators.isURL(value);
+      return validators.isURL(value, requireTld: false);
+    case PropertyFormat.dataUrl:
+      return validators.isURL(
+        value,
+        protocols: const ['data'],
+        requireProtocol: true,
+      );
     // TODO:
     case PropertyFormat.date:
     case PropertyFormat.dateTime:

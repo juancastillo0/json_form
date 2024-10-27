@@ -5,19 +5,16 @@ import 'package:json_form/json_form.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
-import 'package:json_form/src/models/models.dart';
 
 class SliderJFormField extends PropertyFieldWidget<num> {
   const SliderJFormField({
     super.key,
     required super.property,
-    required super.onSaved,
-    super.onChanged,
-    super.customValidator,
   });
 
   @override
-  _SliderJFormFieldState createState() => _SliderJFormFieldState();
+  PropertyFieldState<num, SliderJFormField> createState() =>
+      _SliderJFormFieldState();
 }
 
 class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
@@ -43,24 +40,18 @@ class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
     inspect(property);
 
     return FormField<num>(
-      key: Key(property.idKey),
+      key: JsonFormKeys.inputField(idKey),
       autovalidateMode: uiConfig.autovalidateMode,
-      initialValue: super.getDefaultValue() ?? values.first,
-      onSaved: (newValue) {
-        widget.onSaved(newValue);
-      },
-      validator: (value) {
-        if (widget.customValidator != null)
-          return widget.customValidator!(value);
-
-        return null;
-      },
+      initialValue: super.getDefaultValue<num>() ?? values.first,
+      // TODO: map or parse?
+      onSaved: onSaved,
+      validator: customValidator,
       enabled: enabled,
       builder: (field) {
         this.field = field;
         final value = field.value!.toDouble();
         return WrapFieldWithLabel(
-          property: property,
+          formValue: formValue,
           ignoreFieldLabel: uiConfig.labelPosition != LabelPosition.table,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,11 +75,11 @@ class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
                       autofocus: property.uiSchema.autofocus,
                       onChanged: enabled
                           ? (double value) {
-                              final v = property.type == SchemaType.integer
+                              final v = property.type == JsonSchemaType.integer
                                   ? value.round()
                                   : value;
                               field.didChange(v);
-                              widget.onChanged!(v);
+                              onChanged(v);
                             }
                           : null,
                     ),
