@@ -39,14 +39,13 @@ class _SelectedFormFieldState
     }
   }
 
-  CustomPickerHandler? _previousPicker;
+  JsonFormSelectPickerHandler? _previousPicker;
   Future<Object?> Function(Map<Object?, String>)? _customPicker;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final currentPicker =
-        WidgetBuilderInherited.of(context).fieldDropdownPicker;
+    final currentPicker = WidgetBuilderInherited.of(context).fieldSelectPicker;
     if (_previousPicker != currentPicker) {
       _customPicker = currentPicker?.call(this);
       _previousPicker = currentPicker;

@@ -4,7 +4,11 @@ library json_form;
 export 'src/builder/logic/widget_builder_logic.dart'
     show JsonFormController, JsonFormUpdate;
 export 'src/builder/widget_builder.dart'
-    show CustomPickerHandler, CustomValidatorHandler, FileHandler, JsonForm;
+    show
+        JsonForm,
+        JsonFormFilePickerHandler,
+        JsonFormSelectPickerHandler,
+        JsonFormValidatorHandler;
 export 'src/models/json_form_schema_style.dart'
     show JsonFormUiConfig, LabelPosition;
 export 'src/models/schema.dart'

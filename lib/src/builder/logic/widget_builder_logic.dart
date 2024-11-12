@@ -22,9 +22,10 @@ class WidgetBuilderInherited extends InheritedWidget {
             );
   final JsonFormController controller;
   final JsonForm jsonForm;
-  FileHandler? get fieldFilePicker => jsonForm.fieldFilePicker;
-  CustomPickerHandler? get fieldDropdownPicker => jsonForm.fieldDropdownPicker;
-  CustomValidatorHandler? get fieldValidator => jsonForm.fieldValidator;
+  JsonFormFilePickerHandler? get fieldFilePicker => jsonForm.fieldFilePicker;
+  JsonFormSelectPickerHandler? get fieldSelectPicker =>
+      jsonForm.fieldSelectPicker;
+  JsonFormValidatorHandler? get fieldValidator => jsonForm.fieldValidator;
   final JsonFormUiConfig uiConfig;
 
   // TODO: implement not-required object
@@ -35,7 +36,7 @@ class WidgetBuilderInherited extends InheritedWidget {
       controller.mainSchema != oldWidget.controller.mainSchema ||
       uiConfig != oldWidget.uiConfig ||
       fieldValidator != oldWidget.fieldValidator ||
-      fieldDropdownPicker != oldWidget.fieldDropdownPicker ||
+      fieldSelectPicker != oldWidget.fieldSelectPicker ||
       fieldFilePicker != oldWidget.fieldFilePicker;
 
   static WidgetBuilderInherited of(BuildContext context) {

@@ -11,19 +11,24 @@ import 'package:json_form/src/fields/shared.dart';
 import 'package:json_form/src/models/json_form_schema_style.dart';
 import 'package:json_form/src/models/models.dart';
 
-/// Returns a map of paths keys to functions that return the files selected by the user.
-typedef FileHandler = Future<List<XFile>?> Function() Function(
+/// For each field, gives a function that returns the files selected by the user.
+/// The inner function is called when adding a file for input fields with format "data-url".
+typedef JsonFormFilePickerHandler = Future<List<XFile>?> Function() Function(
   JsonFormField<Object?> field,
 );
 
-/// Returns a map of paths keys to functions that receives a map values to strings
+/// For each field, gives a function that receives a map of values (items) to strings (labels)
 /// and returns the selected value, or null if none was selected.
-typedef CustomPickerHandler
+typedef JsonFormSelectPickerHandler
     = Future<Object?> Function(Map<Object?, String> options)? Function(
   JsonFormField<Object?> field,
 );
 
-typedef CustomValidatorHandler = String? Function(dynamic newValue)? Function(
+/// For each field, gives a function that receives the new value and returns an error,
+/// or null if the validation was successful and no error was found.
+/// If the error is an empty String, it will be considered an error in validation,
+/// but no error message will be shown.
+typedef JsonFormValidatorHandler = String? Function(Object? newValue)? Function(
   JsonFormField<Object?> field,
 );
 
@@ -40,7 +45,7 @@ class JsonForm extends StatefulWidget {
     this.uiSchema,
     this.uiConfig,
     this.fieldValidator,
-    this.fieldDropdownPicker,
+    this.fieldSelectPicker,
     this.fieldFilePicker,
   });
 
@@ -61,18 +66,25 @@ class JsonForm extends StatefulWidget {
   /// The UI configuration with global styles, texts, builders and other Flutter configurations
   final JsonFormUiConfig? uiConfig;
 
-  /// A custom validator that receives the field and returns an error message
-  /// or null if the field is valid. If the error is an empty String, it will
-  /// be considered an error in validation, but no error message will be shown.
-  final CustomValidatorHandler? fieldValidator;
+  /// A custom validator for each field.
+  ///
+  /// For each field, gives a function that receives the new value and returns an error,
+  /// or null if the validation was successful and no error was found.
+  /// If the error is an empty String, it will be considered an error in validation,
+  /// but no error message will be shown.
+  final JsonFormValidatorHandler? fieldValidator;
 
-  /// A custom picker that receives the field and returns a Future with the selected value.
-  /// If no Future is returned, the default selector will be shown.
-  /// If the Future completes with a null value, the default field will be considered as not selected.
-  final CustomPickerHandler? fieldDropdownPicker;
+  /// A custom select picker for enums and one-of fields.
+  ///
+  /// For each field, gives a function that receives a map of values (items) to strings (labels)
+  /// and returns the selected value, or null if none was selected.
+  final JsonFormSelectPickerHandler? fieldSelectPicker;
 
-  /// A file picker that receives the field and returns a Function that selects the files.
-  final FileHandler? fieldFilePicker;
+  /// A file picker, required when using the "data-url" string format .
+  ///
+  /// For each field, gives a function that returns the files selected by the user.
+  /// The inner function is called when adding a file for input fields with format "data-url".
+  final JsonFormFilePickerHandler? fieldFilePicker;
 
   @override
   State<JsonForm> createState() => _JsonFormState();

@@ -40,7 +40,7 @@ abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
   bool get readOnly => property.uiSchema.readOnly;
   bool get enabled => !property.uiSchema.disabled && !readOnly;
 
-  CustomValidatorHandler? _previousValidator;
+  JsonFormValidatorHandler? _previousValidator;
   String? Function(Object?)? _customValidator;
 
   @override
