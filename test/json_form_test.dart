@@ -853,14 +853,18 @@ void main() {
     await tester.pump();
 
     final isPM = now.hour >= 12;
+    final hourMapped = (now.hour > 12
+        ? now.hour - 12
+        : now.hour == 0
+            ? 12
+            : now.hour);
     await tester.enterText(
       find
           .byWidgetPredicate(
             (w) =>
                 w is TextFormField &&
                 w.restorationId == 'hour_minute_text_form_field' &&
-                w.controller!.text ==
-                    (isPM ? now.hour - 12 : now.hour).toString(),
+                w.controller!.text == hourMapped.toString(),
           )
           .first,
       '10',
