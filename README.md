@@ -7,7 +7,7 @@
 
 <h3 align="center">json_form</h3>
 
-A [Flutter](https://flutter.dev/) widget capable of using [JSON Schema](http://json-schema.org/) to declaratively build and customize input forms.
+A [Flutter](https://flutter.dev/) widget capable of using [JSON Schema](https://json-schema.org/) to declaratively build and customize input forms.
 
 Inspired by [react-jsonschema-form](https://github.com/rjsf-team/react-jsonschema-form).
 
@@ -18,12 +18,21 @@ Inspired by [react-jsonschema-form](https://github.com/rjsf-team/react-jsonschem
 - [Installation](#installation)
 - [Examples](#examples)
 - [Usage](#usage)
-  - [Using arrays \& Files](#using-arrays--files)
-  - [Using UI Schema](#using-ui-schema)
+  - [Arrays \& Files](#arrays--files)
+    - [File Picker Handlers](#file-picker-handlers)
+    - [Custom Validators](#custom-validators)
+    - [Custom Select Picker Handlers](#custom-select-picker-handlers)
+  - [UI Schema](#ui-schema)
+    - [Example](#example)
+    - [Individual `ui:<propertyName>`](#individual-uipropertyname)
+    - [Grouped `ui:options`](#grouped-uioptions)
+    - [Nested properties](#nested-properties)
     - [UI Schema Configurations](#ui-schema-configurations)
   - [UI Config](#ui-config)
-  - [Custom File Handler](#custom-file-handler)
-  - [Using Custom Validator](#using-custom-validator)
+    - [Custom Widget Builders](#custom-widget-builders)
+      - [Form Sections](#form-sections)
+      - [Buttons](#buttons)
+    - [Localization (l10n) and Internationalization (i18n)](#localization-l10n-and-internationalization-i18n)
   - [TODO](#todo)
 
 
@@ -36,7 +45,7 @@ dependencies:
   json_form: ^0.0.1+1
 ```
 
-See the [File Picker Installation](https://github.com/miguelpruivo/plugins_flutter_file_picker) for file fields.
+See the [File Picker Installation](https://github.com/miguelpruivo/flutter_file_picker) for file fields.
 
 
 ## Examples
@@ -47,10 +56,13 @@ You can interact with multiple form examples in the [deployed web page](https://
 
 ## Usage
 
+`JsonForm` is mhe main Widget exposed by the package. You can use it by providing a [Json Schema](https://json-schema.org/) formatted `String` with all the fields and their configurations as shown in this example:
+
 ```dart
 import 'package:json_form/json_form.dart';
 
-final jsonSchema = {
+final jsonSchema = '''
+{
   "title": "A registration form",
   "description": "A simple form example.",
   "type": "object",
@@ -75,6 +87,7 @@ final jsonSchema = {
     }
   }
 }
+''';
 
 @override
 Widget build(BuildContext context) {
@@ -89,9 +102,13 @@ Widget build(BuildContext context) {
 }
 ```
 
-<img width="364" alt="image" src="https://user-images.githubusercontent.com/58694638/187986742-3b1aa96c-4a85-42a3-aec0-dac62a8515a4.png">
+![Usage example](./images/usage_example.png)
 
-### Using arrays & Files
+### Arrays & Files
+
+Within the [Json Schema](https://json-schema.org/) specification, you may specify a `List` with the Json type "array" within the configuration.
+Files can be configured using the Json type "string" with a format "data-url".
+
 ```dart
 final jsonSchema = '''
 {
@@ -120,21 +137,144 @@ final jsonSchema = '''
 ''';
 ```
 
-### Using UI Schema
+#### File Picker Handlers
+
+If you use a field of Json type "string" and format "data-url" for file inputs fields, you have to provide a way of selecting files when a user taps in the "Add" file button:
 
 ```dart
-final uiSchema = '''
+import 'package:cross_file/cross_file.dart';
+
+fieldFilePicker: (JsonFormField<Object?> field) {
+  if (field.key == 'fieldName') {
+    // return a specific file handler for the "fieldName" input
+  }
+  // return the default file handler
+  return () async {
+    return [
+      XFile(
+        'https://cdn.mos.cms.futurecdn.net/LEkEkAKZQjXZkzadbHHsVj-970-80.jpg',
+      ),
+    ];
+  };
+}
+```
+
+The returned values will be used as the output value when submitting or saving the form.
+
+#### Custom Validators
+
+You may provide a custom validator for each field:
+
+```dart
+fieldValidator: (JsonFormField<Object?> field) {
+  if (field.key == 'fieldName') {
+    return (value) {
+      if (value == '2') return 'The value cannot be 2'
+      return null;
+    };
+  }
+  return null;
+}
+```
+
+
+#### Custom Select Picker Handlers
+
+// TODO: fieldSelectPicker docs
+
+
+### UI Schema
+
+Another parameter of the `JsonForm` widget is the `uiSchema` Json `String`. By providing an `uiSchema` you may configure different UI parameters 
+such as helper texts and the "widget" or presentations used for the specific field.
+
+#### Example
+
+The code example results in the following image:
+
+![UI Schema example](./images/ui_schema_example.png)
+
+```dart
+final jsonSchema = '''
 {
-  "selectYourCola": {
-    "ui:widget": "radio"
+  "type": "object",
+  "properties": {
+   "name": {
+      "type": "string"
+    },
+    "int": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 5,
+      "ui:options": {
+        "title": "Title in config"
+      }
+    }
   }
 }
 ''';
+
+final uiSchema = '''
+{
+  "name": {
+    "ui:help": "The name helper text",
+    "ui:options": {
+      "placeholder": "NAME PLACEHOLDER"
+    }
+  },
+  "int": {
+    "ui:widget": "range"
+  }
+}
+''';
+
+Widget build(BuildContext context) {
+  return JsonForm(
+    jsonSchema: jsonSchema,
+    uiSchema: uiSchema,
+  );
+}
 ```
-<img width="348" alt="image" src="https://user-images.githubusercontent.com/58694638/187996261-ab3be73d-35e0-40c5-a0de-47900b64f1be.png">
+
+In the example you may find the following ways of configuring properties.
+
+#### Individual `ui:<propertyName>`
+
+Can be used within the uiSchema. 
+In the example:
+- `"ui:help": "The name helper text",`
+- `"ui:widget": "range"`
+
+#### Grouped `ui:options`
+
+Can be used within the jsonSchema o in the uiSchema. In both, you don't need to provide the `ui:` prefix.
+
+In the example within the `uiSchema`:
+
+```json
+"ui:options": {
+  "placeholder": "NAME PLACEHOLDER"
+}
+```
+
+In the example within the `jsonSchema`:
+
+```json
+"ui:options": {
+  "title": "Title in config"
+}
+```
+
+#### Nested properties
+
+You can specify the properties within the json schema object for the property that you want to modify or as a nested
+property within the uiSchema.
 
 
 #### UI Schema Configurations
+
+This table has all the configurations implemented within a UI Schema. These properties can be configured using 
+`ui:<propertyName>` and `ui:options` as explained in the previous sections.
 
 | Configuration   | Type            | Default | Only For   | Description                                                                                                                                                         |
 | --------------- | --------------- | ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -168,6 +308,23 @@ final uiSchema = '''
 
 ### UI Config
 
+Global configuration for the UI of the form. Contains styles, texts, widget builders and other Flutter configurations such as `labelPosition` and `autovalidateMode`.
+
+```dart
+Widget build(BuildContext context) {
+  final uiConfig = JsonFormUiConfig(
+    subtitle: Theme.of(context).textTheme.titleMedium,
+    labelPosition: LabelPosition.input,
+    autovalidateMode: AutovalidateMode.onUnfocus,
+  );
+    
+  return JsonForm(
+    jsonSchema: jsonSchema,
+    uiConfig: uiConfig,
+  );
+}
+```
+
 | Configuration              | Type                                                          | Default                                                           | Description                                                                                                                                               |
 | -------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | title                      | TextStyle?                                                    | titleLarge                                                        |                                                                                                                                                           |
@@ -181,7 +338,7 @@ final uiSchema = '''
 | localizedTexts             | LocalizedTexts                                                | [English](./lib/src/utils/localized_texts.dart)                   | Translations of the standardized texts used within the form. For example, they are used for validation errors and buttons (add, remove, show, hide, ...)  |
 | debugMode                  | bool                                                          | false                                                             | Shows an "inspect" button for debugging                                                                                                                   |
 | labelPosition              | LabelPosition                                                 | table                                                             | The location of the input field labels. Options: side, top, table, input (InputDecoration)                                                                |
-| autovalidateMode           | AutovalidateMode                                              | onUnfocus                                                         | The `Form`'s validation execution                                                                                                                         |
+| autovalidateMode           | AutovalidateMode                                              | onUserInteraction                                                 | The `Form`'s validation execution                                                                                                                         |
 | addItemBuilder             | Widget? Function(VoidCallback onPressed, String key)?         |                                                                   | Add Item button for arrays                                                                                                                                |
 | removeItemBuilder          | Widget? Function(VoidCallback onPressed, String key)?         |                                                                   | Remove Item button for arrays                                                                                                                             |
 | copyItemBuilder            | Widget? Function(VoidCallback onPressed, String key)?         |                                                                   | Duplicate or Copy Item button for arrays                                                                                                                  |
@@ -194,37 +351,72 @@ final uiSchema = '''
 | inputWrapperBuilder        | Widget? Function(FieldWrapperParams params)?                  |                                                                   | Wraps the input field and returns it without the label                                                                                                    |
 
 
-### Custom File Handler 
+#### Custom Widget Builders
+
+They allow you to customize the visualization of certain sections and buttons of your form.
+
+##### Form Sections
+
+The `formBuilder` can be used to Instantiate Flutter's `Form` widget with you own parameters:
 
 ```dart
-customFileHandler: () => {
-  'profile_photo': () async {
-    return [
-      File(
-          'https://cdn.mos.cms.futurecdn.net/LEkEkAKZQjXZkzadbHHsVj-970-80.jpg')
-    ];
-  },
-  '*': null,
+formBuilder: (GlobalKey<FormState> formKey, Widget child) {
+  return Form(
+    key: _formKey,
+    canPop: false,
+    onChanged: () {
+      print('Form changed');
+    },
+    child: Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: Column(
+        children: [
+          Text('Form Title'),
+          Expanded(child: child),
+        ],  
+      ),
+    ),
+  );
 }
 ```
 
-### Using Custom Validator
+Other builders that allow you to change the rendering of distinct form and field sections. These include:
+ `formSectionBuilder`, `titleAndDescriptionBuilder`, `fieldWrapperBuilder`, `inputWrapperBuilder`.
+
+##### Buttons
+
+- Arrays: You can change the buttons that add, remove and copy array items.
+- Form: The `submitButtonBuilder` allow you to render a custom "Submit" button for the whole `JsonForm`.
+- Files: The addFileButtonBuilder. // TODO: other file buttons
+
+#### Localization (l10n) and Internationalization (i18n)
+
+You can implement the `LocalizedTexts` class. By default it contains English translation for 
 
 ```dart
-customValidatorHandler: () => {
-  'selectYourCola': (value) {
-    if (value == 0) {
-      return 'Cola 0 is not allowed';
-    }
-  }
-},
-```
-<img width="659" alt="image" src="https://user-images.githubusercontent.com/58694638/187993619-15adcfaf-2a0c-4ae0-ada4-4617d814f85e.png">
+class SpanishLocalizedTexts extends LocalizedTexts {
+  const SpanishLocalizedTexts();
 
+  /// Used to display the error message when a required field is empty
+  @override
+  String required() => 'Requerido';
+
+  /// Used when a [String] is too short.
+  @override
+  String minLength({required int minLength}) =>
+      'Debería tener al menos $minLength caracteres';
+
+  /// ... override other methods
+}
+
+final uiConfig = JsonFormUiConfig(
+  localizedTexts: Localizations.localeOf(context).languageCode == 'es'
+      ? const SpanishLocalizedTexts()
+      : null,
+);
+```
 
 ### TODO
 
-- [ ] Add all examples
-- [ ] OnChanged
 - [ ] pub.dev
 
