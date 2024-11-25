@@ -70,7 +70,8 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(uiConfig.labelText(formValue), style: uiConfig.subtitle),
+              if (uiConfig.labelPosition != LabelPosition.table)
+                Text(uiConfig.labelText(formValue), style: uiConfig.fieldLabel),
               const SizedBox(height: 10),
               _buildButton(uiConfig, field),
               const SizedBox(height: 10),

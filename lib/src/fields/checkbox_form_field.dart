@@ -55,7 +55,7 @@ class _CheckboxJFormFieldState
                       uiConfig.labelText(formValue),
                       style: readOnly
                           ? uiConfig.fieldInputReadOnly
-                          : uiConfig.fieldInput,
+                          : uiConfig.fieldLabel,
                     ),
               onChanged: enabled
                   ? (bool? value) {

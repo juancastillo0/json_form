@@ -474,6 +474,7 @@ class FormExample {
       FormExample('oneOfConst', oneOfConstJsonSchema, '{}');
   static const formatsExample =
       FormExample('formats', formatsJsonSchema, formatsUiSchema);
+  static const filesExample = FormExample('files', filesJsonSchema, '{}');
 
   static const allExamples = [
     primitivesExample,
@@ -487,6 +488,7 @@ class FormExample {
     oneOfDependenciesExample,
     oneOfConstExample,
     formatsExample,
+    filesExample,
   ];
 }
 
@@ -1133,5 +1135,34 @@ const formatsUiSchema = '''{
     "copyable": true,
     "removable": false,
     "autofocus": false
+  }
+}''';
+
+const filesJsonSchema = '''{
+  "type": "object",
+  "properties": {
+    "file": {
+      "type": "string",
+      "format": "data-url"
+    },
+    "file2": {
+      "type": "string",
+      "format": "data-url"
+    },
+    "file3": {
+      "type": "string",
+      "format": "data-url"
+    },
+    "file4": {
+      "type": "string",
+      "format": "data-url"
+    },
+    "arrayFile": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "data-url"
+      }
+    }
   }
 }''';
