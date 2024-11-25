@@ -18,10 +18,16 @@ Inspired by [react-jsonschema-form](https://github.com/rjsf-team/react-jsonschem
 - [Installation](#installation)
 - [Examples](#examples)
 - [Usage](#usage)
-  - [Arrays \& Files](#arrays--files)
+  - [JsonSchema Types](#jsonschema-types)
+    - [String](#string)
+    - [Enum, Selects and Checkboxes](#enum-selects-and-checkboxes)
+    - [Object](#object)
+    - [Arrays \& Files](#arrays--files)
     - [File Picker Handlers](#file-picker-handlers)
     - [Custom Validators](#custom-validators)
     - [Custom Select Picker Handlers](#custom-select-picker-handlers)
+    - [Definitions (`$defs`) and References (`$ref`)](#definitions-defs-and-references-ref)
+    - [`dependencies` and `oneOf`](#dependencies-and-oneof)
   - [UI Schema](#ui-schema)
     - [Example](#example)
     - [Individual `ui:<propertyName>`](#individual-uipropertyname)
@@ -104,7 +110,38 @@ Widget build(BuildContext context) {
 
 ![Usage example](./images/usage_example.png)
 
-### Arrays & Files
+### JsonSchema Types
+
+Supported types include:
+
+- [string](#string)
+- number 
+- integer
+- boolean
+- null
+- files (string with data-url format)
+- object
+- array
+
+#### String
+
+Depending on the ["format" configured for the "string" type in the Json Schema](https://json-schema.org/understanding-json-schema/reference/string#format)
+the widget or settings for the text field will be configured. The following are the supported formats:
+
+  - "email" and "uri" set the format within the text field
+  - "date-time" and "date" will present a text field with buttons for configuring the date and time using MaterialUI's dialogs.
+  - "time" validate the input using the RegExp `^[0-9]{2}:[0-9]{2}(:[0-9]{2})?$`
+  - "data-url" for [file pickers](#arrays--files)
+
+#### Enum, Selects and Checkboxes
+
+Enumerations can be used for any of the primitive types (string, number, integer, boolean) by setting the "enum" property within the Json Schema object with the list of variants or options. A select or single-value dropdown will be presented.
+
+For presenting a multi-select or checkbox you may use an array and configuring the "enum" property within the "items" object of the array. You may use the `uniqueItems` JsonSchema property for the array and the `ui:widget` [UISchema property](#ui-schema) equal to `checkboxes` for further customization.
+
+#### Object
+
+#### Arrays & Files
 
 Within the [Json Schema](https://json-schema.org/) specification, you may specify a `List` with the Json type "array" within the configuration.
 Files can be configured using the Json type "string" with a format "data-url".
@@ -179,6 +216,10 @@ fieldValidator: (JsonFormField<Object?> field) {
 
 
 #### Custom Select Picker Handlers
+
+#### Definitions (`$defs`) and References (`$ref`)
+
+#### `dependencies` and `oneOf`
 
 // TODO: fieldSelectPicker docs
 
@@ -380,18 +421,19 @@ formBuilder: (GlobalKey<FormState> formKey, Widget child) {
 }
 ```
 
-Other builders that allow you to change the rendering of distinct form and field sections. These include:
- `formSectionBuilder`, `titleAndDescriptionBuilder`, `fieldWrapperBuilder`, `inputWrapperBuilder`.
+Other builders that allow you to change the rendering of distinct form and field sections include:
+ `formSectionBuilder`, `titleAndDescriptionBuilder`, `fieldWrapperBuilder` and `inputWrapperBuilder`.
 
 ##### Buttons
 
 - Arrays: You can change the buttons that add, remove and copy array items.
-- Form: The `submitButtonBuilder` allow you to render a custom "Submit" button for the whole `JsonForm`.
+- Form: The `submitButtonBuilder` allows you to render a custom "Submit" button for the whole `JsonForm`.
 - Files: The addFileButtonBuilder. // TODO: other file buttons
 
 #### Localization (l10n) and Internationalization (i18n)
 
-You can implement the `LocalizedTexts` class. By default it contains English translation for 
+You can create a new instance that implements the `LocalizedTexts` class. By default, it contains English translations
+for the text presented within the form such as validation error messages and button labels or tooltips.
 
 ```dart
 class SpanishLocalizedTexts extends LocalizedTexts {
