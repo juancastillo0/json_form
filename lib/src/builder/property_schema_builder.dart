@@ -61,6 +61,10 @@ class PropertySchemaBuilder extends StatelessWidget {
       }
     }
 
+    final width = schemaProperty.uiSchema.width;
+    if (width != null) {
+      _field = SizedBox(width: width, child: _field);
+    }
     if (!widgetBuilderInherited.uiConfig.debugMode) {
       return _field;
     }

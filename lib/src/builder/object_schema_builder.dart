@@ -80,6 +80,10 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder>
         dependentSchemas.add(property.dependents!.schema!);
       }
     }
+    final widths = _schemaObject.properties
+        .where((p) => !p.uiSchema.hidden)
+        .map((e) => e.uiSchema.width)
+        .toSet();
 
     return ObjectSchemaInherited(
       schemaObject: _schemaObject,
@@ -99,6 +103,9 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder>
               ),
             if (isTableLabel)
               Table(
+                columnWidths: widths.length == 1 && widths.first != null
+                    ? {1: FixedColumnWidth(widths.first!)}
+                    : null,
                 children: [
                   ...fromValue.children
                       .where((c) => c.schema is SchemaProperty)

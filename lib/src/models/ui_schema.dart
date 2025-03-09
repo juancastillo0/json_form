@@ -14,6 +14,7 @@ class UiSchemaData {
   bool disabled = false;
   bool hidden = false;
   bool hideError = false;
+  double? width;
 
   ///
   /// String Options
@@ -120,6 +121,9 @@ class UiSchemaData {
           break;
         case 'hideError':
           hideError = data as bool;
+          break;
+        case 'width':
+          width = (data as num).toDouble();
           break;
         case 'enumDisabled':
           enumDisabled = (data as List).cast();
