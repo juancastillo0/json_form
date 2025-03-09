@@ -1,6 +1,5 @@
 import 'package:extended_masked_text/extended_masked_text.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/fields.dart';
@@ -24,13 +23,13 @@ class DateJFormField extends PropertyFieldWidget<DateTime> {
 class _DateJFormFieldState
     extends PropertyFieldState<DateTime, DateJFormField> {
   final txtDateCtrl = MaskedTextController(mask: '0000-00-00');
-  DateFormat formatter = DateFormat(dateFormatString);
+  String Function(DateTime) formatter = formatDate;
 
   @override
   DateTime get value => parseDate();
   @override
   set value(DateTime newValue) {
-    txtDateCtrl.updateText(formatter.format(newValue));
+    txtDateCtrl.updateText(formatter(newValue));
   }
 
   bool get isDateTime => property.format == PropertyFormat.dateTime;
@@ -40,7 +39,7 @@ class _DateJFormFieldState
     super.initState();
     if (isDateTime) {
       txtDateCtrl.updateMask('0000-00-00 00:00:00');
-      formatter = DateFormat(dateTimeFormatString);
+      formatter = formatDateTime;
     }
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       final defaultValue = super.getDefaultValue(parse: false) as String?;
@@ -49,8 +48,11 @@ class _DateJFormFieldState
     });
   }
 
+  DateTime? tryParse(String value) =>
+      DateTime.tryParse(isDateTime ? value : value.split(' ').first);
+
   DateTime parseDate() {
-    return formatter.tryParse(txtDateCtrl.text) ??
+    return tryParse(txtDateCtrl.text) ??
         DateTime.now().copyWith(second: 0, millisecond: 0, microsecond: 0);
   }
 
@@ -76,9 +78,7 @@ class _DateJFormFieldState
           if (formValue.isRequiredNotNull && (value == null || value.isEmpty)) {
             return uiConfig.localizedTexts.required();
           }
-          if (value != null &&
-              value.isNotEmpty &&
-              formatter.tryParse(value) == null)
+          if (value != null && value.isNotEmpty && tryParse(value) == null)
             return uiConfig.localizedTexts.invalidDate();
 
           return customValidator(value);
@@ -88,21 +88,21 @@ class _DateJFormFieldState
         enabled: enabled,
         style: readOnly ? uiConfig.fieldInputReadOnly : uiConfig.fieldInput,
         onSaved: (value) {
-          if (value != null && value.isNotEmpty)
-            onSaved(formatter.parse(value));
+          if (value != null && value.isNotEmpty) onSaved(tryParse(value));
         },
         onChanged: enabled
             ? (value) {
                 try {
                   if (DateTime.tryParse(value) != null)
-                    onChanged(formatter.parse(value));
+                    onChanged(tryParse(value));
                 } catch (e) {
                   return;
                 }
               }
             : null,
         decoration: uiConfig.inputDecoration(formValue).copyWith(
-              hintText: formatter.pattern!.toUpperCase(),
+              hintText: (isDateTime ? dateTimeFormatString : dateFormatString)
+                  .toUpperCase(),
               suffixIcon: isDateTime
                   ? Row(
                       mainAxisSize: MainAxisSize.min,
@@ -150,7 +150,7 @@ class _DateJFormFieldState
       minute: tempDate.minute,
       second: tempDate.second,
     );
-    txtDateCtrl.text = formatter.format(date);
+    txtDateCtrl.text = formatter(date);
     onSaved(date);
   }
 
@@ -168,7 +168,7 @@ class _DateJFormFieldState
       minute: time.minute,
       second: date.second,
     );
-    txtDateCtrl.text = formatter.format(date);
+    txtDateCtrl.text = formatter(date);
     onSaved(date);
   }
 }

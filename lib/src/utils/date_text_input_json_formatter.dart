@@ -5,6 +5,14 @@ import 'package:flutter/services.dart';
 const String dateFormatString = 'yyyy-MM-dd';
 const String dateTimeFormatString = 'yyyy-MM-dd HH:mm:ss';
 
+String formatDate(DateTime dateTime) {
+  return '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}';
+}
+
+String formatDateTime(DateTime dateTime) {
+  return '${formatDate(dateTime)} ${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}:${dateTime.second.toString().padLeft(2, '0')}';
+}
+
 class DateTextInputJsonFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(

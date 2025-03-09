@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:json_form/json_form.dart';
 import 'package:json_form/src/builder/logic/object_schema_logic.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
@@ -79,9 +78,9 @@ abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
     } else {
       String date;
       if (property.format == PropertyFormat.date) {
-        date = DateFormat(dateFormatString).format(newValue);
+        date = formatDate(newValue);
       } else {
-        date = DateFormat(dateTimeFormatString).format(newValue);
+        date = formatDateTime(newValue);
       }
       widgetBuilderInherited.controller.updateData(idKey, date);
     }
@@ -148,11 +147,9 @@ abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
         property.defaultValue;
     if (data != null && parse) {
       if (isDate && data is String) {
-        data = DateFormat(
-          property.format == PropertyFormat.date
-              ? dateFormatString
-              : dateTimeFormatString,
-        ).parse(data);
+        data = DateTime.parse(
+          property.format == PropertyFormat.date ? data.split(' ').first : data,
+        );
       }
     }
     return data is D ? data : null;
