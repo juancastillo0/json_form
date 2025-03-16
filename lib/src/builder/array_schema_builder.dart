@@ -114,51 +114,60 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
                 final index = _index++;
                 final idKey = JsonFormKeyPath.appendId(this.idKey, item.id);
 
+                final horizontal = item.schema is SchemaProperty;
+                final input = Padding(
+                  padding: const EdgeInsets.only(bottom: 5.0, left: 5.0),
+                  child: WidgetBuilderInherited(
+                    controller: widgetBuilderInherited.controller,
+                    jsonForm: widgetBuilderInherited.jsonForm,
+                    uiConfig: widgetBuilderInherited.uiConfig,
+                    context: context,
+                    child: FormFromSchemaBuilder(
+                      mainSchema: widget.mainSchema,
+                      formValue: item,
+                    ),
+                  ),
+                );
+                final row = Row(
+                  key: horizontal ? JsonFormKeys.arrayItem(idKey) : null,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (uiConfig.labelPosition == LabelPosition.table)
+                      Text(
+                        '${index + 1}.',
+                        style: uiConfig.fieldLabel,
+                      ),
+                    if (horizontal) Expanded(child: input) else const Spacer(),
+                    const SizedBox(height: 5),
+                    if (schemaArray.uiSchema.copyable)
+                      uiConfig.copyItemWidget(
+                        idKey,
+                        () => _copyItem(index),
+                        onlyIcon: horizontal,
+                      ),
+                    if (schemaArray.uiSchema.removable)
+                      uiConfig.removeItemWidget(
+                        idKey,
+                        () => _removeItem(index),
+                        onlyIcon: horizontal,
+                      ),
+                    if (schemaArray.uiSchema.orderable)
+                      ReorderableDragStartListener(
+                        index: index,
+                        child: const Icon(Icons.drag_handle),
+                      ),
+                  ],
+                );
+                if (horizontal) {
+                  return row;
+                }
                 return Column(
                   key: JsonFormKeys.arrayItem(idKey),
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        if (uiConfig.labelPosition == LabelPosition.table)
-                          Text(
-                            '${index + 1}.',
-                            style: uiConfig.fieldLabel,
-                          ),
-                        const Spacer(),
-                        const SizedBox(height: 5),
-                        if (schemaArray.uiSchema.copyable)
-                          uiConfig.copyItemWidget(
-                            idKey,
-                            () => _copyItem(index),
-                          ),
-                        if (schemaArray.uiSchema.removable)
-                          uiConfig.removeItemWidget(
-                            idKey,
-                            () => _removeItem(index),
-                          ),
-                        if (schemaArray.uiSchema.orderable)
-                          ReorderableDragStartListener(
-                            index: index,
-                            child: const Icon(Icons.drag_handle),
-                          ),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 5.0, left: 5.0),
-                      child: WidgetBuilderInherited(
-                        controller: widgetBuilderInherited.controller,
-                        jsonForm: widgetBuilderInherited.jsonForm,
-                        uiConfig: widgetBuilderInherited.uiConfig,
-                        context: context,
-                        child: FormFromSchemaBuilder(
-                          mainSchema: widget.mainSchema,
-                          formValue: item,
-                        ),
-                      ),
-                    ),
+                    row,
+                    if (!horizontal) input,
                   ],
                 );
               });

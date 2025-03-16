@@ -237,14 +237,25 @@ extension JsonFormUiConfigExtension on JsonFormUiConfig {
     );
   }
 
-  Widget removeItemWidget(String idKey, void Function() removeItem) {
+  Widget removeItemWidget(
+    String idKey,
+    void Function() removeItem, {
+    bool onlyIcon = false,
+  }) {
     return removeItemBuilder?.call(removeItem, idKey) ??
-        TextButton.icon(
-          key: JsonFormKeys.removeItem(idKey),
-          onPressed: removeItem,
-          icon: const Icon(Icons.remove),
-          label: Text(localizedTexts.removeItem()),
-        );
+        (onlyIcon
+            ? IconButton(
+                key: JsonFormKeys.removeItem(idKey),
+                onPressed: removeItem,
+                icon: const Icon(Icons.remove),
+                tooltip: localizedTexts.removeItem(),
+              )
+            : TextButton.icon(
+                key: JsonFormKeys.removeItem(idKey),
+                onPressed: removeItem,
+                icon: const Icon(Icons.remove),
+                label: Text(localizedTexts.removeItem()),
+              ));
   }
 
   Widget addItemWidget(
@@ -270,13 +281,24 @@ extension JsonFormUiConfigExtension on JsonFormUiConfig {
         );
   }
 
-  Widget copyItemWidget(String idKey, void Function() copyItem) {
+  Widget copyItemWidget(
+    String idKey,
+    void Function() copyItem, {
+    bool onlyIcon = false,
+  }) {
     return copyItemBuilder?.call(copyItem, idKey) ??
-        TextButton.icon(
-          key: JsonFormKeys.copyItem(idKey),
-          onPressed: copyItem,
-          icon: const Icon(Icons.copy),
-          label: Text(localizedTexts.copyItem()),
-        );
+        (onlyIcon
+            ? IconButton(
+                key: JsonFormKeys.copyItem(idKey),
+                onPressed: copyItem,
+                icon: const Icon(Icons.copy),
+                tooltip: localizedTexts.copyItem(),
+              )
+            : TextButton.icon(
+                key: JsonFormKeys.copyItem(idKey),
+                onPressed: copyItem,
+                icon: const Icon(Icons.copy),
+                label: Text(localizedTexts.copyItem()),
+              ));
   }
 }
