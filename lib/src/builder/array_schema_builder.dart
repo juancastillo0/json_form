@@ -303,6 +303,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
 
   @override
   set value(List<Object?> newValue) {
+    WidgetBuilderInherited.get(context).controller.updateData(idKey, newValue);
     if (isCheckboxes) {
       field.didChange(newValue);
       formValue.value = newValue;
@@ -316,11 +317,8 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
       }
       for (var i = 0; i < newValue.length; i++) {
         final item = formValue.children[i];
-        if (item.field == null) {
-          if (mounted) setState(() {});
-          break;
-        }
-        item.field!.value = newValue[i];
+        item.value = newValue[i];
+        if (item.field != null) item.field!.value = newValue[i];
       }
     }
   }

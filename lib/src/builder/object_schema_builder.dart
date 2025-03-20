@@ -25,13 +25,13 @@ class ObjectSchemaBuilder extends StatefulWidget {
 class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder>
     implements JsonFormField<Map<String, Object?>> {
   late SchemaObject _schemaObject;
-  late final JsonFormValue fromValue;
+  late final JsonFormValue formValue;
 
   @override
   void initState() {
     super.initState();
     _schemaObject = widget.schemaObject;
-    fromValue =
+    formValue =
         PrivateJsonFormController.setField(context, _schemaObject, this);
     syncValues();
   }
@@ -46,18 +46,18 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder>
   }
 
   void syncValues() {
-    fromValue.children.removeWhere(
+    formValue.children.removeWhere(
       (c) =>
           _schemaObject.properties.every((p) => p.id != c.id) &&
               c.dependentsAddedBy.isEmpty ||
           c.parent?.schema != _schemaObject,
     );
-    final added = Set.of(fromValue.children.map((c) => c.id));
-    fromValue.children.addAll(
+    final added = Set.of(formValue.children.map((c) => c.id));
+    formValue.children.addAll(
       _schemaObject.properties.where((p) => !added.contains(p.id)).map((e) {
         return JsonFormValue(
           id: e.id,
-          parent: fromValue,
+          parent: formValue,
           schema: e,
         );
       }),
@@ -72,7 +72,7 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder>
     final widgetBuilderInherited = WidgetBuilderInherited.of(context);
     final uiConfig = widgetBuilderInherited.uiConfig;
     final isTableLabel = uiConfig.labelPosition == LabelPosition.table;
-    final objectKey = fromValue.idKey;
+    final objectKey = formValue.idKey;
 
     final Set<Schema> dependentSchemas = {};
     for (final property in properties) {
@@ -85,6 +85,95 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder>
         .map((e) => e.uiSchema.width)
         .toSet();
 
+    final child = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (!isTableLabel || widget.schemaObject.parent is! SchemaArray)
+          GeneralSubtitle(
+            field: widget.schemaObject,
+            mainSchema: widget.mainSchema,
+          ),
+        if (isTableLabel)
+          Table(
+            columnWidths: widths.length == 1 && widths.first != null
+                ? {1: FixedColumnWidth(widths.first!)}
+                : null,
+            children: [
+              ...formValue.children
+                  .where((c) => c.schema is SchemaProperty)
+                  .expand(
+                (e) {
+                  final r = (e.schema as SchemaProperty).dependents?.schema;
+                  return r != null && e.isDependentsActive
+                      ? [
+                          e,
+                          ...((r is SchemaObject) ? r.properties : [r]).map(
+                            (s) => JsonFormValue(
+                              id: s.id,
+                              parent: formValue,
+                              schema: s,
+                            ),
+                          ),
+                        ]
+                      : [e];
+                },
+              ).map(
+                (e) {
+                  final s = e.schema;
+                  final title = uiConfig.titleAndDescriptionBuilder?.call(s) ??
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 15),
+                          Text(
+                            s.titleOrId,
+                            style: uiConfig.fieldLabel,
+                          ),
+                          if (s.description != null)
+                            Text(
+                              s.description!,
+                              style: uiConfig.description,
+                            ),
+                        ],
+                      );
+                  return TableRow(
+                    key: JsonFormKeys.objectProperty(
+                      JsonFormKeyPath.appendId(objectKey, e.id),
+                    ),
+                    children: [
+                      if (directionality == TextDirection.ltr) title,
+                      FormFromSchemaBuilder(
+                        schemaObject: widget.schemaObject,
+                        mainSchema: widget.mainSchema,
+                        formValue: e,
+                      ),
+                      if (directionality == TextDirection.rtl) title,
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ...formValue.children
+            .where(
+              (p) =>
+                  !isTableLabel ||
+                  p.schema is! SchemaProperty &&
+                      !dependentSchemas.contains(p.schema),
+            )
+            .map(
+              (e) => FormFromSchemaBuilder(
+                key: JsonFormKeys.objectProperty(
+                  JsonFormKeyPath.appendId(objectKey, e.id),
+                ),
+                schemaObject: widget.schemaObject,
+                mainSchema: widget.mainSchema,
+                formValue: e,
+              ),
+            ),
+      ],
+    );
+
     return ObjectSchemaInherited(
       schemaObject: _schemaObject,
       listen: (value) {
@@ -92,115 +181,28 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder>
           setState(() => _schemaObject = value.schemaObject);
         }
       },
-      child: FormSection(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (!isTableLabel || widget.schemaObject.parent is! SchemaArray)
-              GeneralSubtitle(
-                field: widget.schemaObject,
-                mainSchema: widget.mainSchema,
-              ),
-            if (isTableLabel)
-              Table(
-                columnWidths: widths.length == 1 && widths.first != null
-                    ? {1: FixedColumnWidth(widths.first!)}
-                    : null,
-                children: [
-                  ...fromValue.children
-                      .where((c) => c.schema is SchemaProperty)
-                      .expand(
-                    (e) {
-                      final r = (e.schema as SchemaProperty).dependents?.schema;
-                      return r != null && e.isDependentsActive
-                          ? [
-                              e,
-                              ...((r is SchemaObject) ? r.properties : [r]).map(
-                                (s) => JsonFormValue(
-                                  id: s.id,
-                                  parent: fromValue,
-                                  schema: s,
-                                ),
-                              ),
-                            ]
-                          : [e];
-                    },
-                  ).map(
-                    (e) {
-                      final s = e.schema;
-                      final title =
-                          uiConfig.titleAndDescriptionBuilder?.call(s) ??
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(height: 15),
-                                  Text(
-                                    s.titleOrId,
-                                    style: uiConfig.fieldLabel,
-                                  ),
-                                  if (s.description != null)
-                                    Text(
-                                      s.description!,
-                                      style: uiConfig.description,
-                                    ),
-                                ],
-                              );
-                      return TableRow(
-                        key: JsonFormKeys.objectProperty(
-                          JsonFormKeyPath.appendId(objectKey, e.id),
-                        ),
-                        children: [
-                          if (directionality == TextDirection.ltr) title,
-                          FormFromSchemaBuilder(
-                            schemaObject: widget.schemaObject,
-                            mainSchema: widget.mainSchema,
-                            formValue: e,
-                          ),
-                          if (directionality == TextDirection.rtl) title,
-                        ],
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ...fromValue.children
-                .where(
-                  (p) =>
-                      !isTableLabel ||
-                      p.schema is! SchemaProperty &&
-                          !dependentSchemas.contains(p.schema),
-                )
-                .map(
-                  (e) => FormFromSchemaBuilder(
-                    key: JsonFormKeys.objectProperty(
-                      JsonFormKeyPath.appendId(objectKey, e.id),
-                    ),
-                    schemaObject: widget.schemaObject,
-                    mainSchema: widget.mainSchema,
-                    formValue: e,
-                  ),
-                ),
-          ],
-        ),
-      ),
+      child: _schemaObject.parent == null ? child : FormSection(child: child),
     );
   }
 
   @override
-  Map<String, Object?> get value => fromValue.toJson()! as Map<String, Object?>;
+  Map<String, Object?> get value => formValue.toJson()! as Map<String, Object?>;
   @override
   final FocusNode focusNode = FocusNode();
   @override
-  String get idKey => fromValue.idKey;
+  String get idKey => formValue.idKey;
   @override
   JsonSchemaInfo get property => widget.schemaObject;
 
   @override
   set value(Map<String, Object?> newValue) {
+    WidgetBuilderInherited.get(context).controller.updateData(idKey, newValue);
     newValue.forEach((k, v) {
-      fromValue.children.firstWhere((c) => c.id == k).field!.value = v;
+      final child = formValue.children.firstWhere((c) => c.id == k);
+      child.value = v;
+      child.field!.value = v;
     });
-    for (final c in fromValue.children) {
+    for (final c in formValue.children) {
       if (!newValue.containsKey(c.id)) {
         c.field!.value = null;
       }
