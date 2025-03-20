@@ -262,7 +262,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
       /// cleans up the output data in the controller
       WidgetBuilderInherited.of(context)
           .controller
-          .updateDataInPlace(idKey, (a) => a);
+          .updateDataInPlace(idKey, (a) => (a! as List)..removeAt(index));
     });
   }
 
