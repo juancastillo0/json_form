@@ -201,7 +201,9 @@ class _JsonFormState extends State<JsonForm> {
     final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
     final custom = uiConfig.titleAndDescriptionBuilder?.call(mainSchema);
     if (custom != null) return custom;
-
+    if (mainSchema.title == null && mainSchema.description == null) {
+      return const SizedBox();
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
