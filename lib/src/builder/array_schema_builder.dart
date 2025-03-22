@@ -210,15 +210,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
                       shrinkWrap: true,
                       buildDefaultDragHandles: false,
                       physics: const NeverScrollableScrollPhysics(),
-                      onReorder: (oldIndex, newIndex) {
-                        setState(() {
-                          final toRemove =
-                              newIndex > oldIndex ? oldIndex : oldIndex + 1;
-                          final array = formValue.children;
-                          formValue.children.insert(newIndex, array[oldIndex]);
-                          array.removeAt(toRemove);
-                        });
-                      },
+                      onReorder: reorder,
                       children: items.toList(growable: false),
                     )
                   else
@@ -259,15 +251,35 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
       formValue.children.removeAt(index);
 
       /// cleans up the output data in the controller
-      WidgetBuilderInherited.of(context)
-          .controller
-          .updateDataInPlace(idKey, (a) => (a! as List)..removeAt(index));
+      WidgetBuilderInherited.of(context).controller.updateDataInPlace(
+            idKey,
+            (a) => a is List && a.length > index ? (a..removeAt(index)) : a,
+          );
     });
   }
 
   void _copyItem(int index) {
     setState(() {
       formValue.addArrayChild(null, baseValue: formValue.children[index]);
+    });
+  }
+
+  void reorder(int oldIndex, int newIndex) {
+    setState(() {
+      final toRemove = newIndex > oldIndex ? oldIndex : oldIndex + 1;
+      final array = formValue.children;
+      array.insert(newIndex, array[oldIndex]);
+      array.removeAt(toRemove);
+      WidgetBuilderInherited.of(context).controller.updateDataInPlace(
+        idKey,
+        (a) {
+          if (a is List) {
+            a.insert(newIndex, a[oldIndex]);
+            a.removeAt(toRemove);
+          }
+          return a;
+        },
+      );
     });
   }
 
