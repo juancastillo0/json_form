@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
-import 'package:json_form/src/models/json_form_schema_style.dart';
+import 'package:json_form/src/models/json_form_ui_config.dart';
+
+export 'package:json_form/src/fields/fields.dart' show PropertyFieldState, PropertyFieldWidget;
+export 'package:json_form/src/models/json_form_ui_config.dart';
 
 class CustomErrorText extends StatelessWidget {
   const CustomErrorText({super.key, required this.text});

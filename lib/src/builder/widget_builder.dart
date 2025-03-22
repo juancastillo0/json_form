@@ -8,7 +8,6 @@ import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/builder/object_schema_builder.dart';
 import 'package:json_form/src/builder/property_schema_builder.dart';
 import 'package:json_form/src/fields/shared.dart';
-import 'package:json_form/src/models/json_form_schema_style.dart';
 import 'package:json_form/src/models/models.dart';
 
 /// For each field, gives a function that returns the files selected by the user.

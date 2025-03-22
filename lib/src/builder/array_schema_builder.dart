@@ -4,7 +4,6 @@ import 'package:json_form/src/builder/general_subtitle_widget.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/builder/widget_builder.dart';
 import 'package:json_form/src/fields/shared.dart';
-import 'package:json_form/src/models/json_form_schema_style.dart';
 import 'package:json_form/src/models/models.dart';
 
 class ArraySchemaBuilder extends StatefulWidget {

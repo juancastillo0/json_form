@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/builder/widget_builder.dart';
-import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
-import 'package:json_form/src/models/json_form_schema_style.dart';
 import 'package:json_form/src/models/property_schema.dart';
 
 class DropdownOneOfJFormField extends PropertyFieldWidget<Object?> {
@@ -19,6 +17,7 @@ class DropdownOneOfJFormField extends PropertyFieldWidget<Object?> {
 
 class _SelectedFormFieldState
     extends PropertyFieldState<Object?, DropdownOneOfJFormField> {
+  late WidgetBuilderInherited widgetBuilderInherited;
   SchemaProperty? valueSelected;
   @override
   Object? get value => valueSelected?.constValue;
@@ -45,7 +44,8 @@ class _SelectedFormFieldState
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final currentPicker = WidgetBuilderInherited.of(context).fieldSelectPicker;
+    widgetBuilderInherited = WidgetBuilderInherited.of(context);
+    final currentPicker = widgetBuilderInherited.fieldSelectPicker;
     if (_previousPicker != currentPicker) {
       _customPicker = currentPicker?.call(this);
       _previousPicker = currentPicker;
@@ -60,7 +60,7 @@ class _SelectedFormFieldState
 
   @override
   Widget build(BuildContext context) {
-    final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
+    final uiConfig = widgetBuilderInherited.uiConfig;
     return WrapFieldWithLabel(
       formValue: formValue,
       child: GestureDetector(
@@ -106,7 +106,7 @@ class _SelectedFormFieldState
   }
 
   List<DropdownMenuItem<SchemaProperty>>? _buildItems() {
-    final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
+    final uiConfig = widgetBuilderInherited.uiConfig;
     int i = 0;
     return property.oneOf
         .cast<SchemaProperty>()
@@ -115,7 +115,7 @@ class _SelectedFormFieldState
             key: JsonFormKeys.inputFieldItem(idKey, i++),
             value: item,
             child: Text(
-              item.titleOrId,
+              uiConfig.schemaTitleOrId(item),
               style:
                   readOnly ? uiConfig.fieldInputReadOnly : uiConfig.fieldInput,
             ),
@@ -126,7 +126,8 @@ class _SelectedFormFieldState
 
   Map<Object?, String> _getItems() {
     return {
-      for (final element in property.oneOf) element: element.titleOrId,
+      for (final element in property.oneOf)
+        element: widgetBuilderInherited.uiConfig.schemaTitleOrId(element),
     };
   }
 }

@@ -126,7 +126,7 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder>
                         children: [
                           const SizedBox(height: 15),
                           Text(
-                            s.titleOrId,
+                            uiConfig.schemaTitleOrId(s),
                             style: uiConfig.fieldLabel,
                           ),
                           if (s.description != null)

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
-import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
-import 'package:json_form/src/models/json_form_schema_style.dart';
 
 class CheckboxJFormField extends PropertyFieldWidget<bool> {
   const CheckboxJFormField({

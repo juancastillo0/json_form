@@ -1,10 +1,8 @@
 import 'package:cross_file/cross_file.dart';
 import 'package:flutter/material.dart';
+import 'package:json_form/json_form.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
-import 'package:json_form/src/builder/widget_builder.dart';
-import 'package:json_form/src/fields/fields.dart';
 import 'package:json_form/src/fields/shared.dart';
-import 'package:json_form/src/models/json_form_schema_style.dart';
 
 class FileJFormField extends PropertyFieldWidget<Object?> {
   const FileJFormField({

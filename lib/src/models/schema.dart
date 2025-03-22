@@ -133,6 +133,7 @@ abstract class Schema implements JsonSchemaInfo {
   }
 
   // props
+  @override
   final String id;
   final String? _title;
   final String? _description;
@@ -147,8 +148,6 @@ abstract class Schema implements JsonSchemaInfo {
 
   bool requiredProperty;
   final bool nullable;
-
-  String get titleOrId => title != null ? title! : id;
 
   // util props
   final Schema? parent;
@@ -226,6 +225,9 @@ Either<Schema, Map<String, Object?>> _resolveRef(String ref, Schema? parent) {
 
 /// Basic schema information
 abstract class JsonSchemaInfo {
+  /// The identifier for this schema
+  String get id;
+
   /// User facing title
   String? get title;
 

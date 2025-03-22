@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
+import 'package:json_form/src/fields/shared.dart';
 import 'package:json_form/src/models/models.dart';
 
 class GeneralSubtitle extends StatelessWidget {
@@ -35,17 +36,19 @@ class GeneralSubtitle extends StatelessWidget {
       description = null;
     }
 
+    final titleOrId = uiConfig.schemaTitleOrId(field);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 10),
-        if (mainSchema?.titleOrId != field.titleOrId &&
-            field.titleOrId.isNotEmpty) ...[
+        if (mainSchema == null ||
+            uiConfig.schemaTitleOrId(mainSchema!) != titleOrId &&
+                titleOrId.isNotEmpty) ...[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                field.titleOrId,
+                titleOrId,
                 style: uiConfig.subtitle,
               ),
               if (trailing != null) trailing!,

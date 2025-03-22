@@ -9,7 +9,7 @@ export 'src/builder/widget_builder.dart'
         JsonFormFilePickerHandler,
         JsonFormSelectPickerHandler,
         JsonFormValidatorHandler;
-export 'src/models/json_form_schema_style.dart'
+export 'src/models/json_form_ui_config.dart'
     show JsonFormUiConfig, LabelPosition;
 export 'src/models/schema.dart'
     show JsonFormField, JsonSchemaInfo, JsonSchemaType;

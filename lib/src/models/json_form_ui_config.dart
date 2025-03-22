@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:json_form/json_form.dart';
 import 'package:json_form/src/builder/logic/widget_builder_logic.dart';
 import 'package:json_form/src/fields/shared.dart';
+import 'package:json_form/src/helpers/helpers.dart';
 import 'package:json_form/src/models/models.dart';
 
 /// Global configuration for the UI of the form.
@@ -29,6 +30,7 @@ class JsonFormUiConfig {
     this.titleAndDescriptionBuilder,
     this.fieldWrapperBuilder,
     this.inputWrapperBuilder,
+    this.mapSchemaToTitle = defaultMapSchemaToTitle,
     LocalizedTexts? localizedTexts,
     bool? debugMode,
     LabelPosition? labelPosition,
@@ -74,6 +76,11 @@ class JsonFormUiConfig {
 
   /// Autovalidate mode for the form. Determines when the input validation occurs
   final AutovalidateMode autovalidateMode;
+
+  /// Maps the schema information to a title shown in the form.
+  /// By default, it returns the id of the schema
+  /// in "Title Case" using [defaultMapSchemaToTitle].
+  final String Function(JsonSchemaInfo info) mapSchemaToTitle;
 
   /// Render a custom add item button for arrays
   final Widget? Function(VoidCallback onPressed, String key)? addItemBuilder;
@@ -202,6 +209,17 @@ class JsonFormUiConfig {
         fieldWrapperBuilder,
         inputWrapperBuilder,
       ]);
+
+  /// Converts the schema's id to "Title Case".
+  /// userName -> User Name
+  /// user.name -> User Name
+  /// user/name -> User Name
+  /// user  name2 -> User Name 2
+  /// UserName26 -> User Name 26
+  /// User1Name26 -> User 1 Name 26
+  /// User NAME-26 -> User NAME 26
+  static String defaultMapSchemaToTitle(JsonSchemaInfo info) =>
+      toTitleCase(info.id);
 }
 
 /// The position of the field labels
@@ -222,7 +240,10 @@ enum LabelPosition {
 
 extension JsonFormUiConfigExtension on JsonFormUiConfig {
   String labelText(JsonFormValue fromValue) =>
-      '${fromValue.schema.titleOrId}${fromValue.isRequiredNotNull ? "*" : ""}';
+      '${schemaTitleOrId(fromValue.schema)}${fromValue.isRequiredNotNull ? "*" : ""}';
+
+  String schemaTitleOrId(Schema schema) =>
+      schema.title != null ? schema.title! : mapSchemaToTitle(schema);
 
   InputDecoration inputDecoration(JsonFormValue fromValue) {
     final property = fromValue.schema;
