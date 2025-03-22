@@ -247,7 +247,7 @@ class NumberProperties {
     final ma = (maximum != null ? maximum! : exclusiveMaximum! - 1);
     final mof = multipleOf;
     if (mof == null) {
-      return List.generate((ma - mi).toInt(), (i) => mi + i);
+      return List.generate((ma - mi).toInt() + 1, (i) => mi + i);
     }
     final mi2 = mi % mof == 0 ? mi : mi + mof - mi % mof;
     final ma2 = ma % mof == 0 ? ma : ma - ma % mof;
