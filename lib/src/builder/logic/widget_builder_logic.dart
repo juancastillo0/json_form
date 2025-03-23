@@ -150,10 +150,6 @@ class JsonFormController extends ChangeNotifier {
         if (_keyNumeric == -1) {
           return const MapEntry(null, null);
         }
-        final l = outputValues as List;
-        while (l.length != object.children.length) {
-          l.length > object.children.length ? l.removeLast() : l.add(null);
-        }
         schema = schema.itemsBaseSchema;
       } else {
         final s = schema as SchemaObject;
@@ -176,11 +172,21 @@ class JsonFormController extends ChangeNotifier {
 
       if (i == stack.length - 1) {
         JsonFormValue? item = object[_keyNumeric ?? _key];
-        final outputValue = outputValues[_keyNumeric ?? _key];
+        final listNotSynced = outputValues is List &&
+            _keyNumeric is int &&
+            outputValues.length <= _keyNumeric;
+        final outputValue =
+            listNotSynced ? null : outputValues[_keyNumeric ?? _key];
         final previous = item?.value ?? outputValue;
         if (update) {
           final isNewItem = item == null;
           item = updateFn(item);
+          if (listNotSynced) {
+            outputValues.insert(_keyNumeric, item.value);
+          } else {
+            outputValues[_keyNumeric ?? _key] = item.value;
+          }
+
           if (isSchemaUpdate) {
             item.parent = object;
             if (isNewItem) object.children.add(item);
@@ -188,7 +194,6 @@ class JsonFormController extends ChangeNotifier {
               item.value = outputValue;
             }
           } else {
-            outputValues[_keyNumeric ?? _key] = item.value;
             _lastEvent = JsonFormUpdate(
               field: item.field!,
               previousValue: previous,
