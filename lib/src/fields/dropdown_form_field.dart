@@ -72,6 +72,7 @@ class _DropDownJFormFieldState
             onSaved: onSaved,
             style: readOnly ? uiConfig.fieldInputReadOnly : uiConfig.fieldInput,
             decoration: uiConfig.inputDecoration(formValue),
+            isExpanded: true,
           ),
         ),
       ),
