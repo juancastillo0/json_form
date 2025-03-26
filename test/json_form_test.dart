@@ -163,31 +163,30 @@ void main() {
         ),
       ),
     );
-    expect(data, <String, Object?>{});
 
-    // TODO: use JsonFormInput_string as Key?
-    await utils.findAndEnterText('string', 'hello');
-    final numberInput = await utils.findAndEnterText('number', '2');
-    expect(
-      data,
-      {
-        'string': 'hello',
-        'number': 2.0,
-      },
-    );
-
-    final currentValues = {
-      'string': 'hello',
-      'number': 2.0,
+    final currentValues = <String, Object?>{
+      'string': null,
+      'number': null,
       'integer': null,
-      'boolean': false,
+      'boolean': null,
       'enum': null,
       'enumRadio': null,
       'date': null,
       'dateTime': null,
-      'arrayCheckbox': <Object?>[],
+      'arrayCheckbox': null,
     };
+    expect(data, currentValues);
+
+    // TODO: use JsonFormInput_string as Key?
+    await utils.findAndEnterText('string', 'hello');
+    final numberInput = await utils.findAndEnterText('number', '2');
+    currentValues['string'] = 'hello';
+    currentValues['number'] = 2.0;
+    expect(data, currentValues);
+
     await utils.tapSubmitButton();
+    currentValues['arrayCheckbox'] = <Object?>[];
+    currentValues['boolean'] = false;
     expect(data, currentValues);
 
     final integerInput = find.byKey(const Key('integer'));
@@ -342,10 +341,12 @@ void main() {
   testWidgets('array', (tester) async {
     final utils = TestUtils(tester);
     Object? data = {};
+    final controller = JsonFormController(initialData: data);
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
           child: JsonForm(
+            controller: controller,
             jsonSchema: arrayJsonSchema,
             onFormDataSaved: (p) => data = p,
           ),
@@ -365,7 +366,14 @@ void main() {
     await tester.tap(arrayAdd);
     await tester.pump();
     final array1Input = await utils.findAndEnterText('array.2', 'text1');
-    expect(data, <String, Object?>{});
+    expect(
+      data,
+      {
+        'integer': null,
+        'array': ['text0', 'text1'],
+        'arrayWithObjects': null,
+      },
+    );
     await utils.tapSubmitButton();
     expect(data, {
       'array': ['text0', 'text1'],
@@ -455,13 +463,116 @@ void main() {
     expect(arrayWithObjectsValue2, findsOneWidget);
     await tester.tap(arrayWithObjectsValue2);
     await utils.tapSubmitButton();
-    expect(data, {
+    Map<String, Object?> prev = {
       'array': ['text00', 'text2'],
       'arrayWithObjects': [
         {'value': true, 'value2': false},
       ],
       'integer': 2,
+    };
+    expect(data, prev);
+
+    final List<JsonFormUpdate<Object?>> updates = [];
+    void onChanged() {
+      updates.add(controller.lastEvent!);
+    }
+
+    controller.addListener(onChanged);
+
+    final arrayField = controller.retrieveField('array')!;
+    Object? previousValue = arrayField.value;
+    arrayField.value = ['other'];
+
+    await utils.tapSubmitButton();
+    expect(updates, hasLength(1));
+    expect(updates.last.field, arrayField);
+    expect(updates.last.previousValue, previousValue);
+    expect(updates.last.newValue, arrayField.value);
+    expect(data, prev);
+    expect(controller.rootOutputData, {
+      'array': ['other'],
+      'arrayWithObjects': [
+        {'value': true, 'value2': false},
+      ],
+      'integer': 2,
     });
+
+    // must have at least 2 items
+    arrayField.value = ['other', 'other2'];
+    prev = {
+      'array': ['other', 'other2'],
+      'arrayWithObjects': [
+        {'value': true, 'value2': false},
+      ],
+      'integer': 2,
+    };
+    expect(controller.rootOutputData, prev);
+    await tester.pump();
+    await utils.tapSubmitButton();
+    expect(data, prev);
+
+    final arrayWithObjectsField = controller.retrieveField('arrayWithObjects')!;
+    previousValue = arrayWithObjectsField.value;
+    expect(previousValue, [
+      {'value': true, 'value2': false}
+    ]);
+    arrayWithObjectsField.value = [
+      {'value': false, 'value2': false},
+      {'value': false, 'value2': true},
+    ];
+    await tester.pump();
+    expect(updates, hasLength(4));
+    expect(updates[2].field, arrayWithObjectsField);
+    expect(updates[2].previousValue, previousValue);
+    // TODO: .value is not changed right away, it needs to re-render. Don't require pump
+    expect(updates[2].newValue, arrayWithObjectsField.value);
+
+    final arrayWithObjectsField1 =
+        controller.retrieveField('arrayWithObjects.1')!;
+    expect(updates.last.field, arrayWithObjectsField1);
+    expect(updates.last.previousValue, (previousValue! as List)[0]);
+    expect(updates.last.newValue, (arrayWithObjectsField.value! as List)[0]);
+
+    await utils.tapSubmitButton();
+    final currData = {
+      'array': ['other', 'other2'],
+      'arrayWithObjects': [
+        {'value': false, 'value2': false},
+        {'value': false, 'value2': true},
+      ],
+      'integer': 2,
+    };
+    expect(data, currData);
+
+    // Integer field
+    final integerField = controller.retrieveField('integer')!;
+    previousValue = integerField.value;
+    expect(previousValue, 2);
+    integerField.value = 3;
+    expect(updates, hasLength(5));
+    await tester.pump();
+    expect(updates.last.field, integerField);
+    expect(updates.last.previousValue, previousValue);
+    expect(updates.last.newValue, 3);
+    currData['integer'] = 3;
+
+    await utils.tapSubmitButton();
+    expect(data, currData);
+
+    // Nested bool field
+    final nestedField = controller.retrieveField('arrayWithObjects.1.value')!;
+    previousValue = nestedField.value;
+    expect(previousValue, false);
+    nestedField.value = true;
+    expect(updates, hasLength(6));
+    await tester.pump();
+    expect(updates.last.field, nestedField);
+    expect(updates.last.previousValue, previousValue);
+    expect(updates.last.newValue, true);
+    ((currData['arrayWithObjects']! as List)[0] as Map)['value'] = true;
+
+    await utils.tapSubmitButton();
+    expect(data, currData);
   });
 
   testWidgets('nested object', (tester) async {
@@ -755,6 +866,9 @@ void main() {
           child: JsonForm(
             jsonSchema: dependenciesJsonSchema,
             onFormDataSaved: (p) => data = p,
+            uiConfig: JsonFormUiConfig(
+              mapSchemaToTitle: (info) => info.id,
+            ),
           ),
         ),
       ),
@@ -901,9 +1015,14 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Material(
-          child: JsonForm(
-            jsonSchema: oneOfDependenciesJsonSchema,
-            onFormDataSaved: (p) => data = p,
+          child: JsonFormUiConfigInherited(
+            uiConfig: JsonFormUiConfig(
+              mapSchemaToTitle: (info) => info.id,
+            ),
+            child: JsonForm(
+              jsonSchema: oneOfDependenciesJsonSchema,
+              onFormDataSaved: (p) => data = p,
+            ),
           ),
         ),
       ),
@@ -1006,6 +1125,9 @@ void main() {
           child: JsonForm(
             jsonSchema: oneOfConstJsonSchema,
             onFormDataSaved: (p) => data = p,
+            uiConfig: JsonFormUiConfig(
+              mapSchemaToTitle: (info) => info.id,
+            ),
           ),
         ),
       ),
@@ -1075,7 +1197,6 @@ void main() {
     );
     final emailField = controller.retrieveField('email')!;
     expect(emailField.focusNode.hasPrimaryFocus, true);
-    expect(data, <String, Object?>{});
 
     final currentData = <String, Object?>{
       'email': null,
@@ -1089,10 +1210,14 @@ void main() {
       'number': null,
       'numberExclusive': null,
       'dateTime': null,
-      'arrayRoot': [],
-      'arrayInts': [],
+      'arrayRoot': null,
+      'arrayInts': null,
     };
+    expect(data, currentData);
+
     await utils.tapSubmitButton();
+    currentData['arrayRoot'] = [];
+    currentData['arrayInts'] = [];
 
     /// Required
     expect(find.text('Required'), findsExactly(3));

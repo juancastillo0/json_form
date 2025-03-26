@@ -30,11 +30,12 @@ class JsonFormUiConfig {
     this.titleAndDescriptionBuilder,
     this.fieldWrapperBuilder,
     this.inputWrapperBuilder,
-    this.mapSchemaToTitle = defaultMapSchemaToTitle,
+    String Function(JsonSchemaInfo info)? mapSchemaToTitle,
     LocalizedTexts? localizedTexts,
     bool? debugMode,
     LabelPosition? labelPosition,
-  })  : localizedTexts = localizedTexts ?? const LocalizedTexts(),
+  })  : mapSchemaToTitle = mapSchemaToTitle ?? defaultMapSchemaToTitle,
+        localizedTexts = localizedTexts ?? const LocalizedTexts(),
         debugMode = debugMode ?? false,
         labelPosition = labelPosition ?? LabelPosition.table,
         autovalidateMode =
@@ -122,6 +123,7 @@ class JsonFormUiConfig {
     JsonFormUiConfig? baseConfig,
   }) {
     final textTheme = Theme.of(context).textTheme;
+    baseConfig ??= JsonFormUiConfigInherited.maybeOf(context)?.uiConfig;
 
     return JsonFormUiConfig(
       title: baseConfig?.title ?? textTheme.titleLarge,
@@ -142,6 +144,7 @@ class JsonFormUiConfig {
       localizedTexts: baseConfig?.localizedTexts,
       labelPosition: baseConfig?.labelPosition,
       autovalidateMode: baseConfig?.autovalidateMode,
+      mapSchemaToTitle: baseConfig?.mapSchemaToTitle,
 
       /// Builders
       addItemBuilder: baseConfig?.addItemBuilder,
@@ -172,6 +175,7 @@ class JsonFormUiConfig {
         other.debugMode == debugMode &&
         other.labelPosition == labelPosition &&
         other.autovalidateMode == autovalidateMode &&
+        other.mapSchemaToTitle == mapSchemaToTitle &&
         other.addItemBuilder == addItemBuilder &&
         other.removeItemBuilder == removeItemBuilder &&
         other.copyItemBuilder == copyItemBuilder &&
@@ -198,6 +202,7 @@ class JsonFormUiConfig {
         debugMode,
         labelPosition,
         autovalidateMode,
+        mapSchemaToTitle,
         addItemBuilder,
         removeItemBuilder,
         copyItemBuilder,
@@ -220,6 +225,26 @@ class JsonFormUiConfig {
   /// User NAME-26 -> User NAME 26
   static String defaultMapSchemaToTitle(JsonSchemaInfo info) =>
       toTitleCase(info.id);
+}
+
+/// Inherited widget to provide the [JsonFormUiConfig] to the form.
+class JsonFormUiConfigInherited extends InheritedWidget {
+  const JsonFormUiConfigInherited({
+    super.key,
+    required this.uiConfig,
+    required super.child,
+  });
+  final JsonFormUiConfig uiConfig;
+
+  @override
+  bool updateShouldNotify(covariant WidgetBuilderInherited oldWidget) =>
+      uiConfig != oldWidget.uiConfig;
+
+  static JsonFormUiConfigInherited? maybeOf(BuildContext context) {
+    final result =
+        context.dependOnInheritedWidgetOfExactType<JsonFormUiConfigInherited>();
+    return result;
+  }
 }
 
 /// The position of the field labels
