@@ -22,6 +22,7 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
   @override
   set value(Object? newValue) {
     field.didChange(newValue);
+    super.value = newValue;
   }
 
   JsonFormFilePickerHandler? _previousPicker;

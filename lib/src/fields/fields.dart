@@ -45,7 +45,10 @@ abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
   @override
   T get value;
   @override
-  set value(T newValue);
+  @mustCallSuper
+  set value(T newValue) {
+    WidgetBuilderInherited.of(context).controller.updateData(idKey, newValue);
+  }
 
   @override
   String get idKey => formValue.idKey;

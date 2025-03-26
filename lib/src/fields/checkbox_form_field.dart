@@ -21,6 +21,7 @@ class _CheckboxJFormFieldState
   @override
   set value(bool newValue) {
     field.didChange(newValue);
+    super.value = newValue;
   }
 
   @override

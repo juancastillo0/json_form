@@ -24,6 +24,7 @@ class _DropDownJFormFieldState
   set value(Object? newValue) {
     setState(() {
       _value = newValue;
+      super.value = newValue;
     });
   }
 

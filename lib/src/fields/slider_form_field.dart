@@ -23,6 +23,7 @@ class _SliderJFormFieldState extends PropertyFieldState<num, SliderJFormField> {
   @override
   set value(num newValue) {
     field.didChange(newValue);
+    super.value = newValue;
   }
 
   late List<num> values;

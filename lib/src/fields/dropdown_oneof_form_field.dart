@@ -25,6 +25,7 @@ class _SelectedFormFieldState
   set value(Object? newValue) {
     setState(() {
       valueSelected = parseValue(newValue);
+      super.value = newValue;
     });
   }
 

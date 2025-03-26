@@ -236,6 +236,11 @@ abstract class JsonSchemaInfo {
 
   /// The kind of the JSON Schema
   JsonSchemaType get type;
+
+  @override
+  String toString() {
+    return '$JsonSchemaInfo#$hashCode:$runtimeType(id: $id, type: $type, title: $title)';
+  }
 }
 
 /// A field that can be used to retrieve and update
@@ -256,4 +261,9 @@ abstract class JsonFormField<T> {
   /// The focus node of the input.
   /// You may use this to retrieve and change the focus status.
   FocusNode get focusNode;
+
+  @override
+  String toString() {
+    return '${JsonFormField<T>}#$hashCode:$runtimeType(idKey: $idKey, property: $value)';
+  }
 }

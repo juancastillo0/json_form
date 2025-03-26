@@ -24,6 +24,7 @@ class _RadioButtonJFormFieldState
   @override
   set value(Object? newValue) {
     field.didChange(newValue);
+    super.value = newValue;
   }
 
   late List<Object?> values;

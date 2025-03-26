@@ -25,6 +25,7 @@ class _NumberJFormFieldState
   @override
   set value(num? newValue) {
     textController.text = newValue?.toString() ?? '';
+    super.value = newValue;
   }
 
   num? parseValue(String? value) {

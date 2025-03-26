@@ -28,6 +28,7 @@ class _DateJFormFieldState
   @override
   set value(DateTime newValue) {
     txtDateCtrl.updateText(formatter(newValue));
+    super.value = newValue;
   }
 
   bool get isDateTime => property.format == PropertyFormat.dateTime;

@@ -25,6 +25,7 @@ class _TextJFormFieldState extends PropertyFieldState<String, TextJFormField> {
   @override
   set value(String newValue) {
     textController.text = newValue;
+    super.value = newValue;
   }
 
   @override
