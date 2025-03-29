@@ -177,15 +177,10 @@ class JsonFormController extends ChangeNotifier {
             outputValues.length <= _keyNumeric;
         final outputValue =
             listNotSynced ? null : outputValues[_keyNumeric ?? _key];
-        final previous = item?.value ?? outputValue;
+        final previous = item?.toJson() ?? outputValue;
         if (update) {
           final isNewItem = item == null;
           item = updateFn(item);
-          if (listNotSynced) {
-            outputValues.insert(_keyNumeric, item.value);
-          } else {
-            outputValues[_keyNumeric ?? _key] = item.value;
-          }
 
           if (isSchemaUpdate) {
             item.parent = object;
@@ -193,13 +188,22 @@ class JsonFormController extends ChangeNotifier {
             if (outputValue != null) {
               item.value = outputValue;
             }
-          } else {
+          } else if (item.schema is! SchemaProperty || item.value != previous) {
             _lastEvent = JsonFormUpdate(
               field: item.field!,
               previousValue: previous,
               newValue: item.value,
             );
             notifyListeners();
+          }
+
+          if (listNotSynced) {
+            while (outputValues.length < _keyNumeric) {
+              outputValues.add(null);
+            }
+            outputValues.insert(_keyNumeric, item.value);
+          } else {
+            outputValues[_keyNumeric ?? _key] = item.value;
           }
         }
         return MapEntry(item, previous);

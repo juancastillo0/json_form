@@ -163,8 +163,14 @@ void main() {
         ),
       ),
     );
+    final updates = <JsonFormUpdate<Object?>>[];
+    void addUpdateEvent() {
+      updates.add(controller.lastEvent!);
+    }
 
-    final currentValues = <String, Object?>{
+    controller.addListener(addUpdateEvent);
+
+    var currentValues = <String, Object?>{
       'string': null,
       'number': null,
       'integer': null,
@@ -179,6 +185,15 @@ void main() {
 
     // TODO: use JsonFormInput_string as Key?
     await utils.findAndEnterText('string', 'hello');
+    expect(updates, hasLength(1));
+    expect(
+      updates.last.toString(),
+      JsonFormUpdate(
+        field: controller.retrieveField('string')!,
+        newValue: 'hello',
+        previousValue: null,
+      ).toString(),
+    );
     final numberInput = await utils.findAndEnterText('number', '2');
     currentValues['string'] = 'hello';
     currentValues['number'] = 2.0;
@@ -220,15 +235,26 @@ void main() {
     expect(data, currentValues);
 
     await utils.findAndEnterText('date', currentValues['date'] = '2023-04-02');
+    expect(updates, hasLength(9));
     await utils.findAndEnterText(
       'dateTime',
       currentValues['dateTime'] = '2021-12-27 13:01:49',
+    );
+    expect(updates, hasLength(10));
+    expect(
+      updates.last.toString(),
+      JsonFormUpdate(
+        field: controller.retrieveField('dateTime')!,
+        newValue: currentValues['dateTime'],
+        previousValue: null,
+      ).toString(),
     );
     await utils.tapSubmitButton();
     expect(data, currentValues);
 
     int i = 0;
     for (final position in LabelPosition.values) {
+      final previousUpdateIndex = updates.length;
       setState(() {
         labelPosition = position;
       });
@@ -267,6 +293,16 @@ void main() {
         ['e', 'f'],
         newArrayCheckbox,
       );
+      expect(
+        updates.last.toString(),
+        JsonFormUpdate(
+          field: controller.retrieveField('arrayCheckbox')!,
+          newValue: newArrayCheckbox,
+          previousValue: newArrayCheckbox.isEmpty
+              ? ['f']
+              : ([...newArrayCheckbox]..removeLast()),
+        ).toString(),
+      );
 
       await utils.tapSubmitButton();
       final previousValues = {
@@ -283,7 +319,22 @@ void main() {
       };
       expect(data, previousValues);
 
-      final nextValues = {
+      updates.getRange(previousUpdateIndex, updates.length).forEach((update) {
+        if (update.field.idKey == 'boolean' ||
+            update.field.idKey == 'arrayCheckbox') {
+          return;
+        }
+        expect(
+          update.toString(),
+          JsonFormUpdate(
+            field: controller.retrieveField(update.field.idKey)!,
+            newValue: previousValues[update.field.idKey],
+            previousValue: currentValues[update.field.idKey],
+          ).toString(),
+        );
+      });
+
+      currentValues = {
         'string': 'hi$i',
         'number': (i + 10).toDouble(),
         'integer': i + 20,
@@ -300,7 +351,7 @@ void main() {
           ['e', 'f'],
         ][(i + 2) % 4],
       };
-      for (final key in nextValues.keys) {
+      for (final key in currentValues.keys) {
         final field = controller.retrieveField(key)!;
         expect(field.idKey, key);
         expect(field.property.title, '${key}Title');
@@ -313,7 +364,7 @@ void main() {
               ? DateTime.parse(previousValues[key]! as String)
               : previousValues[key],
         );
-        final value = nextValues[key];
+        final value = currentValues[key];
         // Update value
         field.value = isDate ? DateTime.parse(value! as String) : value;
         await tester.pump();
@@ -332,8 +383,7 @@ void main() {
         }
       }
       await utils.tapSubmitButton();
-      expect(data, nextValues);
-
+      expect(data, currentValues);
       i++;
     }
   });
@@ -514,7 +564,7 @@ void main() {
     final arrayWithObjectsField = controller.retrieveField('arrayWithObjects')!;
     previousValue = arrayWithObjectsField.value;
     expect(previousValue, [
-      {'value': true, 'value2': false}
+      {'value': true, 'value2': false},
     ]);
     arrayWithObjectsField.value = [
       {'value': false, 'value2': false},
@@ -534,7 +584,7 @@ void main() {
     expect(updates.last.newValue, (arrayWithObjectsField.value! as List)[0]);
 
     await utils.tapSubmitButton();
-    final currData = {
+    prev = {
       'array': ['other', 'other2'],
       'arrayWithObjects': [
         {'value': false, 'value2': false},
@@ -542,7 +592,7 @@ void main() {
       ],
       'integer': 2,
     };
-    expect(data, currData);
+    expect(data, prev);
 
     // Integer field
     final integerField = controller.retrieveField('integer')!;
@@ -550,14 +600,13 @@ void main() {
     expect(previousValue, 2);
     integerField.value = 3;
     expect(updates, hasLength(5));
-    await tester.pump();
     expect(updates.last.field, integerField);
     expect(updates.last.previousValue, previousValue);
     expect(updates.last.newValue, 3);
-    currData['integer'] = 3;
+    prev['integer'] = 3;
 
     await utils.tapSubmitButton();
-    expect(data, currData);
+    expect(data, prev);
 
     // Nested bool field
     final nestedField = controller.retrieveField('arrayWithObjects.1.value')!;
@@ -565,14 +614,28 @@ void main() {
     expect(previousValue, false);
     nestedField.value = true;
     expect(updates, hasLength(6));
-    await tester.pump();
     expect(updates.last.field, nestedField);
     expect(updates.last.previousValue, previousValue);
     expect(updates.last.newValue, true);
-    ((currData['arrayWithObjects']! as List)[0] as Map)['value'] = true;
+    ((prev['arrayWithObjects']! as List)[0] as Map)['value'] = true;
 
     await utils.tapSubmitButton();
-    expect(data, currData);
+    expect(data, prev);
+
+    // Nested field
+    final nestedObjectField = controller.retrieveField('arrayWithObjects.1')!;
+    previousValue = nestedObjectField.value;
+    expect(previousValue, {'value': true, 'value2': false});
+    final newObject = {'value': false, 'value2': true};
+    nestedObjectField.value = newObject;
+    expect(updates, hasLength(7));
+    expect(updates.last.field, nestedObjectField);
+    expect(updates.last.previousValue, previousValue);
+    expect(updates.last.newValue, newObject);
+    (prev['arrayWithObjects']! as List)[0] = newObject;
+
+    await utils.tapSubmitButton();
+    expect(data, prev);
   });
 
   testWidgets('nested object', (tester) async {

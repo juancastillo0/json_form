@@ -332,5 +332,6 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
         if (item.field != null) item.field!.value = newValue[i];
       }
     }
+    setState(() {});
   }
 }
