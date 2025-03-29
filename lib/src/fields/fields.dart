@@ -157,4 +157,9 @@ abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
     }
     return data is D ? data : null;
   }
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return '${super.toString(minLevel: minLevel)}(idKey: $idKey, property: $property)';
+  }
 }

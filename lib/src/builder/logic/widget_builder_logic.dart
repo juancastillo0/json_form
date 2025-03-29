@@ -73,6 +73,11 @@ class JsonFormUpdate<T> {
     required this.newValue,
     required this.previousValue,
   });
+
+  @override
+  String toString() {
+    return 'JsonFormUpdate(field: $field, newValue: $newValue, previousValue: $previousValue)';
+  }
 }
 
 /// The controller for the form.
