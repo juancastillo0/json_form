@@ -99,7 +99,7 @@ class FormSection extends StatelessWidget {
           left: BorderSide(
             color: (DividerTheme.of(context).color ??
                     Theme.of(context).dividerColor)
-                .withOpacity(0.2),
+                .withAlpha((255 * 0.2).round()),
           ),
         ),
       ),

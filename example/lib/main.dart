@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
         inputDecorationTheme: InputDecorationTheme(
           border: const UnderlineInputBorder(),
           filled: true,
-          fillColor: Colors.grey.withOpacity(0.1),
+          fillColor: Colors.grey.withAlpha((255 * 0.1).round()),
         ),
         colorScheme: const ColorScheme.light(
           primary: Colors.blueAccent,

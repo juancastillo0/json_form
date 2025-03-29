@@ -175,13 +175,14 @@ class JsonFormController extends ChangeNotifier {
         );
       }
 
+      final listNotSynced = outputValues is List &&
+          _keyNumeric is int &&
+          outputValues.length <= _keyNumeric;
+      Object? outputValue =
+          // ignore: avoid_dynamic_calls
+          listNotSynced ? null : outputValues[_keyNumeric ?? _key];
       if (i == stack.length - 1) {
         JsonFormValue? item = object[_keyNumeric ?? _key];
-        final listNotSynced = outputValues is List &&
-            _keyNumeric is int &&
-            outputValues.length <= _keyNumeric;
-        final outputValue =
-            listNotSynced ? null : outputValues[_keyNumeric ?? _key];
         final previous = item?.toJson() ?? outputValue;
         if (update) {
           final isNewItem = item == null;
@@ -208,6 +209,7 @@ class JsonFormController extends ChangeNotifier {
             }
             outputValues.insert(_keyNumeric, item.value);
           } else {
+            // ignore: avoid_dynamic_calls
             outputValues[_keyNumeric ?? _key] = item.value;
           }
         }
@@ -226,7 +228,6 @@ class JsonFormController extends ChangeNotifier {
           object = value;
         }
 
-        Object? outputValue = outputValues[_keyNumeric ?? _key];
         if (outputValue == null) {
           if (schema is SchemaArray) {
             outputValue = outputValue is List ? outputValue : [];
@@ -235,6 +236,7 @@ class JsonFormController extends ChangeNotifier {
             outputValue =
                 outputValue is Map ? outputValue : <String, Object?>{};
           }
+          // ignore: avoid_dynamic_calls
           outputValues[_keyNumeric ?? _key] = outputValue;
         }
         outputValues = outputValue;

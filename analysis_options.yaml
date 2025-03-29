@@ -11,6 +11,7 @@ linter:
     curly_braces_in_flow_control_structures: false
     unawaited_futures: true
     prefer_single_quotes: true
+    sort_pub_dependencies: false
 analyzer: 
   errors:
     cast_nullable_to_non_nullable: warning
