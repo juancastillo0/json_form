@@ -126,7 +126,7 @@ abstract class PropertyFieldState<T, W extends PropertyFieldWidget<T>>
     super.dispose();
   }
 
-  Future<T?> triggerDefaultValue() async {
+  Future<T?> triggerDefaultValue() {
     final completer = Completer<T?>();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       final value = getDefaultValue<T>();

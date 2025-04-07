@@ -524,7 +524,42 @@ void main() {
 
     final List<JsonFormUpdate<Object?>> updates = [];
     void onChanged() {
-      updates.add(controller.lastEvent!);
+      final path = const [
+        'array',
+        'array',
+        'arrayWithObjects',
+        'arrayWithObjects.0',
+        'integer',
+        'arrayWithObjects.0.value',
+        'arrayWithObjects.0',
+      ][updates.length];
+      final value = const [
+        ['other'],
+        ['other', 'other2'],
+        [
+          {'value': false, 'value2': false},
+          {'value': false, 'value2': true},
+        ],
+        {'value': false, 'value2': false},
+        3,
+        true,
+        {'value': false, 'value2': true},
+      ][updates.length];
+
+      Object? val = controller.rootOutputData;
+      for (final p in path.split('.')) {
+        val = (val as dynamic)[val is List ? int.parse(p) : p];
+      }
+
+      final event = controller.lastEvent!;
+      expect(event.newValue, value);
+      expect(val, value);
+      // TODO: f.toJson vs f.value vs rootOutputData
+      // final d = controller.retrieveData(path);
+      // final f = controller.retrieveField(path)!;
+      // expect(f.value, value);
+      // expect(d, value);
+      updates.add(event);
     }
 
     controller.addListener(onChanged);
@@ -571,7 +606,8 @@ void main() {
       {'value': false, 'value2': true},
     ];
     await tester.pump();
-    expect(updates, hasLength(4));
+    int numUpdates = 4;
+    expect(updates, hasLength(numUpdates));
     expect(updates[2].field, arrayWithObjectsField);
     expect(updates[2].previousValue, previousValue);
     // TODO: .value is not changed right away, it needs to re-render. Don't require pump
@@ -599,7 +635,7 @@ void main() {
     previousValue = integerField.value;
     expect(previousValue, 2);
     integerField.value = 3;
-    expect(updates, hasLength(5));
+    expect(updates, hasLength(++numUpdates));
     expect(updates.last.field, integerField);
     expect(updates.last.previousValue, previousValue);
     expect(updates.last.newValue, 3);
@@ -613,7 +649,7 @@ void main() {
     previousValue = nestedField.value;
     expect(previousValue, false);
     nestedField.value = true;
-    expect(updates, hasLength(6));
+    expect(updates, hasLength(++numUpdates));
     expect(updates.last.field, nestedField);
     expect(updates.last.previousValue, previousValue);
     expect(updates.last.newValue, true);
@@ -628,7 +664,7 @@ void main() {
     expect(previousValue, {'value': true, 'value2': false});
     final newObject = {'value': false, 'value2': true};
     nestedObjectField.value = newObject;
-    expect(updates, hasLength(7));
+    expect(updates, hasLength(++numUpdates));
     expect(updates.last.field, nestedObjectField);
     expect(updates.last.previousValue, previousValue);
     expect(updates.last.newValue, newObject);

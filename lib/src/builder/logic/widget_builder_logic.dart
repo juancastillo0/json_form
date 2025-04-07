@@ -15,9 +15,8 @@ class WidgetBuilderInherited extends InheritedWidget {
     required BuildContext context,
     JsonFormUiConfig? baseConfig,
     JsonFormUiConfig? uiConfig,
-  }) : uiConfig =
-           uiConfig ??
-           JsonFormUiConfig.fromContext(context, baseConfig: baseConfig);
+  }) : uiConfig = uiConfig ??
+            JsonFormUiConfig.fromContext(context, baseConfig: baseConfig);
   final JsonFormController controller;
   final JsonForm jsonForm;
   JsonFormFilePickerHandler? get fieldFilePicker => jsonForm.fieldFilePicker;
@@ -46,9 +45,8 @@ class WidgetBuilderInherited extends InheritedWidget {
   }
 
   static WidgetBuilderInherited get(BuildContext context) {
-    final result =
-        context
-            .getElementForInheritedWidgetOfExactType<WidgetBuilderInherited>();
+    final result = context
+        .getElementForInheritedWidgetOfExactType<WidgetBuilderInherited>();
 
     assert(result != null, 'No WidgetBuilderInherited found in context');
     return result!.widget as WidgetBuilderInherited;
@@ -104,8 +102,8 @@ class JsonFormController extends ChangeNotifier {
 
   /// The controller for the form
   JsonFormController({required Object initialData, this.formKey})
-    : rootOutputData = initialData,
-      _rootFormValue = JsonFormValue(parent: null, schema: null, id: '');
+      : rootOutputData = initialData,
+        _rootFormValue = JsonFormValue(parent: null, schema: null, id: '');
 
   /// Validates the form and returns the output data if valid
   Object? submit() {
@@ -153,28 +151,22 @@ class JsonFormController extends ChangeNotifier {
         final s = schema as SchemaObject;
         schema = s.properties.firstWhere(
           (p) => p.id == _key,
-          orElse:
-              () => s.dependentSchemas.values.firstWhere(
-                (p) => p.id == _key,
-                orElse:
-                    () => [
-                          ...s.dependentSchemas.values,
-                          // TODO: select the specific oneOf, pass it as parameter
-                          ...s.dependentSchemas.values.expand((e) => e.oneOf),
-                        ]
-                        .expand(
-                          (p) =>
-                              p is SchemaObject
-                                  ? p.properties
-                                  : const <Schema>[],
-                        )
-                        .firstWhere((p) => p.id == _key),
-              ),
+          orElse: () => s.dependentSchemas.values.firstWhere(
+            (p) => p.id == _key,
+            orElse: () => [
+              ...s.dependentSchemas.values,
+              // TODO: select the specific oneOf, pass it as parameter
+              ...s.dependentSchemas.values.expand((e) => e.oneOf),
+            ]
+                .expand(
+                  (p) => p is SchemaObject ? p.properties : const <Schema>[],
+                )
+                .firstWhere((p) => p.id == _key),
+          ),
         );
       }
 
-      final listNotSynced =
-          outputValues is List &&
+      final listNotSynced = outputValues is List &&
           _keyNumeric is int &&
           outputValues.length <= _keyNumeric;
       Object? outputValue =
@@ -186,7 +178,21 @@ class JsonFormController extends ChangeNotifier {
         if (update) {
           final isNewItem = item == null;
           item = updateFn(item);
-
+          final willUpdate = !isSchemaUpdate &&
+              (item.schema is! SchemaProperty || item.value != previous);
+          if (isSchemaUpdate) {
+            item.parent = object;
+            if (isNewItem) object.children.add(item);
+            if (outputValue != null) {
+              item.value = outputValue;
+            }
+          } else if (willUpdate) {
+            _lastEvent = JsonFormUpdate(
+              field: item.field!,
+              previousValue: previous,
+              newValue: item.value,
+            );
+          }
           if (listNotSynced) {
             while (outputValues.length < _keyNumeric) {
               outputValues.add(null);
@@ -196,20 +202,7 @@ class JsonFormController extends ChangeNotifier {
             // ignore: avoid_dynamic_calls
             outputValues[_keyNumeric ?? _key] = item.value;
           }
-          if (isSchemaUpdate) {
-            item.parent = object;
-            if (isNewItem) object.children.add(item);
-            if (outputValue != null) {
-              item.value = outputValue;
-            }
-          } else if (item.schema is! SchemaProperty || item.value != previous) {
-            _lastEvent = JsonFormUpdate(
-              field: item.field!,
-              previousValue: previous,
-              newValue: item.value,
-            );
-            notifyListeners();
-          }
+          if (willUpdate) notifyListeners();
         }
         return MapEntry(item, previous);
       } else {
@@ -284,18 +277,16 @@ extension PrivateJsonFormController on JsonFormController {
         value: controller.rootOutputData,
       );
     } else {
-      return controller
-          ._transverseObjectData(
-            path,
-            isSchemaUpdate: true,
-            updateFn: (v) {
-              v ??= JsonFormValue(id: schema.id, parent: null, schema: null);
-              return v
-                ..schema = schema
-                ..field = field;
-            },
-          )
-          .key!;
+      return controller._transverseObjectData(
+        path,
+        isSchemaUpdate: true,
+        updateFn: (v) {
+          v ??= JsonFormValue(id: schema.id, parent: null, schema: null);
+          return v
+            ..schema = schema
+            ..field = field;
+        },
+      ).key!;
     }
   }
 }
