@@ -197,15 +197,7 @@ class _ObjectSchemaBuilderState extends State<ObjectSchemaBuilder>
   @override
   set value(Map<String, Object?> newValue) {
     WidgetBuilderInherited.get(context).controller.updateData(idKey, newValue);
-    newValue.forEach((k, v) {
-      final child = formValue.children.firstWhere((c) => c.id == k);
-      child.value = v;
-      child.field!.value = v;
-    });
-    for (final c in formValue.children) {
-      if (!newValue.containsKey(c.id)) {
-        c.field!.value = null;
-      }
-    }
+    formValue.syncChildrenValues(newValue);
+    setState(() {});
   }
 }

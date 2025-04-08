@@ -149,21 +149,7 @@ class JsonFormController extends ChangeNotifier {
         schema = schema.itemsBaseSchema;
       } else {
         final s = schema as SchemaObject;
-        schema = s.properties.firstWhere(
-          (p) => p.id == _key,
-          orElse: () => s.dependentSchemas.values.firstWhere(
-            (p) => p.id == _key,
-            orElse: () => [
-              ...s.dependentSchemas.values,
-              // TODO: select the specific oneOf, pass it as parameter
-              ...s.dependentSchemas.values.expand((e) => e.oneOf),
-            ]
-                .expand(
-                  (p) => p is SchemaObject ? p.properties : const <Schema>[],
-                )
-                .firstWhere((p) => p.id == _key),
-          ),
-        );
+        schema = s.getChildSchema(_key);
       }
 
       final listNotSynced = outputValues is List &&
@@ -178,8 +164,8 @@ class JsonFormController extends ChangeNotifier {
         if (update) {
           final isNewItem = item == null;
           item = updateFn(item);
-          final willUpdate = !isSchemaUpdate &&
-              (item.schema is! SchemaProperty || item.value != previous);
+          final willUpdate =
+              !isSchemaUpdate && !jsonEqual(item.value, previous);
           if (isSchemaUpdate) {
             item.parent = object;
             if (isNewItem) object.children.add(item);
@@ -217,15 +203,15 @@ class JsonFormController extends ChangeNotifier {
 
         if (outputValue == null) {
           if (schema is SchemaArray) {
-            outputValue = outputValue is List ? outputValue : [];
+            outputValue = object.value ?? [];
           } else {
             assert(schema is SchemaObject);
-            outputValue =
-                outputValue is Map ? outputValue : <String, Object?>{};
+            outputValue = object.value ?? <String, Object?>{};
           }
           // ignore: avoid_dynamic_calls
           outputValues[_keyNumeric ?? _key] = outputValue;
         }
+        object.value ??= outputValue;
         outputValues = outputValue;
       }
     }
@@ -299,7 +285,17 @@ class JsonFormValue {
   String _generateItemId() => (_lastItemId++).toString();
   late Schema schema;
   JsonFormField<Object?>? field;
-  Object? value;
+  Object? _value;
+  Object? get value => _value;
+  set value(Object? newValue) {
+    _value = newValue;
+    final isCollection =
+        schema is SchemaArray && schema.uiSchema.widget != 'checkboxes' ||
+            schema is SchemaObject;
+    if (isCollection && newValue != null) {
+      syncChildrenValues(newValue, updateFields: false);
+    }
+  }
 
   late final String idKey = JsonFormKeyPath.appendId(parent?.idKey, id);
 
@@ -318,9 +314,9 @@ class JsonFormValue {
     required this.id,
     required this.parent,
     required Schema? schema,
-    this.value,
+    Object? value,
     this.field,
-  }) {
+  }) : _value = value {
     if (schema != null) this.schema = schema;
   }
 
@@ -350,20 +346,19 @@ class JsonFormValue {
     return formValue;
   }
 
+  /// If we use .value directly, we would need to separate it from rootOutputValue.
+  /// Otherwise we could not save the state for object properties that are not being rendered.
+  /// We filter non rendered values to use it as a submit output.
   Object? toJson() {
-    if (schema is SchemaArray) {
-      if (schema.uiSchema.widget == 'checkboxes') {
-        return value;
-      }
-      return children
-          .where((e) => e.field != null)
-          .map((e) => e.toJson())
-          .toList();
-    } else if (schema is SchemaObject) {
-      return {
-        for (final e in children)
-          if (e.field != null) e.id: e.toJson(),
-      };
+    if (schema is SchemaObject) {
+      return Map.fromEntries(
+        children
+            .where((c) => c.field != null)
+            .map((c) => MapEntry(c.id, c.toJson())),
+      );
+    } else if (schema is SchemaArray &&
+        schema.uiSchema.widget != 'checkboxes') {
+      return [...children.map((c) => c.toJson())];
     } else {
       return value;
     }
@@ -385,5 +380,47 @@ class JsonFormValue {
       );
     }
     children.add(newValue);
+  }
+
+  void syncChildrenValues(Object newValue, {bool updateFields = true}) {
+    final s = schema;
+    if (s is SchemaArray && newValue is List) {
+      while (children.length != newValue.length) {
+        if (children.length < newValue.length) {
+          addArrayChild(null);
+        } else {
+          children.removeLast();
+        }
+      }
+      for (var i = 0; i < newValue.length; i++) {
+        final child = children[i];
+        child.value = newValue[i];
+        if (child.field != null && updateFields)
+          child.field!.value = newValue[i];
+      }
+    } else if (s is SchemaObject && newValue is Map) {
+      newValue.forEach((k, v) {
+        final index = children.indexWhere((c) => c.id == k);
+        JsonFormValue child;
+        if (index != -1) {
+          child = children[index];
+        } else {
+          child = JsonFormValue(
+            id: k as String,
+            parent: this,
+            schema: s.getChildSchema(k),
+          );
+          children.add(child);
+        }
+        child.value = v;
+        if (child.field != null && updateFields) child.field!.value = v;
+      });
+      for (final child in children) {
+        if (!newValue.containsKey(child.id)) {
+          child.value = null;
+          if (child.field != null && updateFields) child.field!.value = null;
+        }
+      }
+    }
   }
 }

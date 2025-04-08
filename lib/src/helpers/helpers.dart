@@ -1,10 +1,25 @@
 Object? copyJson(Object? json) {
   if (json is Map) {
-    return json.map((key, value) => MapEntry(key, copyJson(value)));
+    return json.map((key, value) => MapEntry(key as String, copyJson(value)));
   } else if (json is List) {
-    return json.map((e) => copyJson(e)).toList();
+    return json.map(copyJson).toList();
   } else {
     return json;
+  }
+}
+
+bool jsonEqual(Object? json, Object? other) {
+  if (json is Map) {
+    return other is Map &&
+        other.length == json.length &&
+        json.entries.every((e) => jsonEqual(other[e.key], e.value));
+  } else if (json is List) {
+    return other is List &&
+        other.length == json.length &&
+        Iterable<int>.generate(json.length)
+            .every((i) => jsonEqual(json[i], other[i]));
+  } else {
+    return json == other;
   }
 }
 

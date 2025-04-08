@@ -319,18 +319,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
       field.didChange(newValue);
       formValue.value = newValue;
     } else {
-      while (formValue.children.length != newValue.length) {
-        if (formValue.children.length < newValue.length) {
-          formValue.addArrayChild(null);
-        } else {
-          formValue.children.removeLast();
-        }
-      }
-      for (var i = 0; i < newValue.length; i++) {
-        final item = formValue.children[i];
-        item.value = newValue[i];
-        if (item.field != null) item.field!.value = newValue[i];
-      }
+      formValue.syncChildrenValues(newValue);
     }
     setState(() {});
   }

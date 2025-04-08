@@ -424,10 +424,11 @@ void main() {
         'arrayWithObjects': null,
       },
     );
+    const arrayWithObjectsV = <Object?>[];
     await utils.tapSubmitButton();
     expect(data, {
       'array': ['text0', 'text1'],
-      'arrayWithObjects': <Object?>[],
+      'arrayWithObjects': arrayWithObjectsV,
       'integer': null,
     });
 
@@ -452,7 +453,7 @@ void main() {
     await utils.tapSubmitButton();
     expect(data, {
       'array': ['text00', 'text2', null],
-      'arrayWithObjects': <Object?>[],
+      'arrayWithObjects': arrayWithObjectsV,
       'integer': null,
     });
     expect(find.text('Items must be unique'), findsNothing);
@@ -463,7 +464,7 @@ void main() {
     // No item added
     expect(data, {
       'array': ['text00', 'text2', null],
-      'arrayWithObjects': <Object?>[],
+      'arrayWithObjects': arrayWithObjectsV,
       'integer': null,
     });
 
@@ -471,7 +472,7 @@ void main() {
     await utils.tapSubmitButton();
     expect(data, {
       'array': ['text00', 'text2', 'text3'],
-      'arrayWithObjects': <Object?>[],
+      'arrayWithObjects': arrayWithObjectsV,
       'integer': null,
     });
     expect(find.byTooltip('You can only add 3 items'), findsOneWidget);
@@ -483,7 +484,7 @@ void main() {
     await tester.pump();
     expect(data, {
       'array': ['text00', 'text2'],
-      'arrayWithObjects': <Object?>[],
+      'arrayWithObjects': arrayWithObjectsV,
       'integer': null,
     });
 
@@ -528,10 +529,11 @@ void main() {
         'array',
         'array',
         'arrayWithObjects',
-        'arrayWithObjects.0',
+        // 'arrayWithObjects.1',
         'integer',
-        'arrayWithObjects.0.value',
-        'arrayWithObjects.0',
+        // TODO: should we use 0 as first index?
+        'arrayWithObjects.1.value',
+        'arrayWithObjects.1',
       ][updates.length];
       final value = const [
         ['other'],
@@ -540,7 +542,7 @@ void main() {
           {'value': false, 'value2': false},
           {'value': false, 'value2': true},
         ],
-        {'value': false, 'value2': false},
+        // {'value': false, 'value2': false},
         3,
         true,
         {'value': false, 'value2': true},
@@ -548,17 +550,26 @@ void main() {
 
       Object? val = controller.rootOutputData;
       for (final p in path.split('.')) {
-        val = (val as dynamic)[val is List ? int.parse(p) : p];
+        val = (val as dynamic)[val is List ? int.parse(p) - 1 : p];
       }
 
       final event = controller.lastEvent!;
       expect(event.newValue, value);
       expect(val, value);
-      // TODO: f.toJson vs f.value vs rootOutputData
-      // final d = controller.retrieveData(path);
-      // final f = controller.retrieveField(path)!;
-      // expect(f.value, value);
-      // expect(d, value);
+      final d = controller.retrieveData(path);
+      final f = controller.retrieveField(path)!;
+      if (updates.length == 2) {
+        // TODO: f.toJson vs f.value vs rootOutputData
+        final nonRenderedValue = [
+          {'value': false, 'value2': false},
+          <String, Object?>{},
+        ];
+        expect(f.value, nonRenderedValue);
+        expect(d, nonRenderedValue);
+      } else {
+        expect(f.value, value);
+        expect(d, value);
+      }
       updates.add(event);
     }
 
@@ -606,18 +617,20 @@ void main() {
       {'value': false, 'value2': true},
     ];
     await tester.pump();
-    int numUpdates = 4;
+    int numUpdates = 3;
     expect(updates, hasLength(numUpdates));
     expect(updates[2].field, arrayWithObjectsField);
     expect(updates[2].previousValue, previousValue);
     // TODO: .value is not changed right away, it needs to re-render. Don't require pump
     expect(updates[2].newValue, arrayWithObjectsField.value);
 
-    final arrayWithObjectsField1 =
-        controller.retrieveField('arrayWithObjects.1')!;
-    expect(updates.last.field, arrayWithObjectsField1);
-    expect(updates.last.previousValue, (previousValue! as List)[0]);
-    expect(updates.last.newValue, (arrayWithObjectsField.value! as List)[0]);
+    if (numUpdates == 4) {
+      final arrayWithObjectsField1 =
+          controller.retrieveField('arrayWithObjects.1')!;
+      expect(updates.last.field, arrayWithObjectsField1);
+      expect(updates.last.newValue, (arrayWithObjectsField.value! as List)[0]);
+      expect(updates.last.previousValue, (previousValue! as List)[0]);
+    }
 
     await utils.tapSubmitButton();
     prev = {

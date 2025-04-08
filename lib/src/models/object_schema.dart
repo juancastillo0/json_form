@@ -105,6 +105,24 @@ class SchemaObject extends Schema {
   final Map<String, Schema> dependentSchemas;
   final Map<String, List<String>> dependentRequired;
 
+  Schema getChildSchema(String id) {
+    return properties.firstWhere(
+      (p) => p.id == id,
+      orElse: () => dependentSchemas.values.firstWhere(
+        (p) => p.id == id,
+        orElse: () => [
+          ...dependentSchemas.values,
+          // TODO: select the specific oneOf, pass it as parameter
+          ...dependentSchemas.values.expand((e) => e.oneOf),
+        ]
+            .expand(
+              (p) => p is SchemaObject ? p.properties : const <Schema>[],
+            )
+            .firstWhere((p) => p.id == id),
+      ),
+    );
+  }
+
   @override
   void setUiSchema(
     Map<String, Object?> data, {
