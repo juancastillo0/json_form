@@ -7,27 +7,28 @@ import 'package:json_form/src/models/property_schema.dart';
 
 import 'package:json_form/src/utils/date_text_input_json_formatter.dart';
 
-class DateJFormField extends PropertyFieldWidget<DateTime> {
+class DateJFormField extends PropertyFieldWidget<Object> {
   const DateJFormField({
     super.key,
     required super.property,
   });
 
   @override
-  PropertyFieldState<DateTime, DateJFormField> createState() =>
+  PropertyFieldState<Object, DateJFormField> createState() =>
       _DateJFormFieldState();
 }
 
-class _DateJFormFieldState
-    extends PropertyFieldState<DateTime, DateJFormField> {
+class _DateJFormFieldState extends PropertyFieldState<Object, DateJFormField> {
   final txtDateCtrl = MaskedTextController(mask: '0000-00-00');
   String Function(DateTime) formatter = formatDate;
 
   @override
-  DateTime get value => parseDate();
+  Object get value => parseDate();
   @override
-  set value(DateTime newValue) {
-    txtDateCtrl.updateText(formatter(newValue));
+  set value(Object newValue) {
+    txtDateCtrl.updateText(
+      newValue is String ? newValue : formatter(newValue as DateTime),
+    );
     super.value = newValue;
   }
 
