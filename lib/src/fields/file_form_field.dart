@@ -26,6 +26,7 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
   }
 
   JsonFormFilePickerHandler? _previousPicker;
+  late FileInputHandler<Object?> _fileHandler;
   Future<List<XFile>?> Function()? _customPicker;
 
   @override
@@ -37,6 +38,7 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
       _previousPicker = currentPicker;
     }
     if (_customPicker == null) throw Exception('no file handler found');
+    _fileHandler = DefaultFileInputHandler(_customPicker!);
   }
 
   @override
@@ -81,31 +83,23 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
                 itemBuilder: (context, index) {
                   final file = field.value![index];
 
-                  return ListTile(
+                  void onDelete() {
+                    change(
+                      field,
+                      field.value!
+                        ..removeWhere(
+                          (element) => element.path == file.path,
+                        ),
+                    );
+                  }
+
+                  return KeyedSubtree(
                     key: JsonFormKeys.inputFieldItem(idKey, index),
-                    title: Text(
-                      file.path.characters
-                          .takeLastWhile((p0) => p0 != '/')
-                          .string,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: readOnly
-                          ? uiConfig.fieldInputReadOnly
-                          : uiConfig.fieldInput,
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.close, size: 14),
-                      onPressed: enabled
-                          ? () {
-                              change(
-                                field,
-                                field.value!
-                                  ..removeWhere(
-                                    (element) => element.path == file.path,
-                                  ),
-                              );
-                            }
-                          : null,
+                    child: _fileHandler.fileItem(
+                      context,
+                      this,
+                      file,
+                      onDelete: onDelete,
                     ),
                   );
                 },
@@ -138,6 +132,7 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
       }
     };
   }
+  // TODO: handle file drop and allow custom file handling or base64 encoding
 
   Widget _buildButton(
     JsonFormUiConfig uiConfig,
@@ -155,4 +150,63 @@ class _FileJFormFieldState extends PropertyFieldState<Object?, FileJFormField> {
       child: Text(uiConfig.localizedTexts.addFile()),
     );
   }
+}
+
+abstract class FileInputHandler<T> {
+  Future<List<T>?> pickFiles();
+
+  Widget fileItem(
+    BuildContext context,
+    PropertyFieldState<Object?, Object?> field,
+    XFile file, {
+    required void Function() onDelete,
+  });
+
+  /// Map the file to the result that will be used when the form is submitted
+  Object mapFileToResult(T file);
+}
+
+class DefaultFileInputHandler extends FileInputHandler<XFile> {
+  final Future<List<XFile>?> Function() _pickFiles;
+  final bool useDataUriResult;
+
+  DefaultFileInputHandler(this._pickFiles, {this.useDataUriResult = false});
+
+  @override
+  Future<List<XFile>?> pickFiles() => _pickFiles();
+
+  @override
+  Widget fileItem(
+    BuildContext context,
+    PropertyFieldState<Object?, Object?> field,
+    XFile file, {
+    required void Function() onDelete,
+  }) {
+    final uiConfig = WidgetBuilderInherited.of(context).uiConfig;
+    String pathName =
+        file.path.characters.takeLastWhile((p0) => p0 != '/').string;
+    if (!pathName.startsWith(file.name)) {
+      pathName = file.name;
+    }
+    return ListTile(
+      title: Tooltip(
+        message: file.path,
+        child: Text(
+          pathName,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: field.readOnly
+              ? uiConfig.fieldInputReadOnly
+              : uiConfig.fieldInput,
+        ),
+      ),
+      trailing: IconButton(
+        icon: const Icon(Icons.close, size: 14),
+        onPressed: field.enabled ? onDelete : null,
+      ),
+    );
+  }
+
+  @override
+  Object mapFileToResult(XFile file) => useDataUriResult ? file : file;
 }

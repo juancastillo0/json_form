@@ -316,6 +316,7 @@ class _ArraySchemaBuilderState extends State<ArraySchemaBuilder>
   set value(List<Object?> newValue) {
     WidgetBuilderInherited.get(context).controller.updateData(idKey, newValue);
     if (isCheckboxes) {
+      // TODO: tests change from initState
       field.didChange(newValue);
       formValue.value = newValue;
     } else {

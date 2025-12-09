@@ -1500,4 +1500,108 @@ void main() {
     expect(find.text('Should be different than 6'), findsOneWidget);
     expect(find.text('Should be absolute URI'), findsOneWidget);
   });
+
+  // testWidgets('array add/delete item button', (tester) async {
+  //   final utils = TestUtils(tester);
+  //   Object? data = {};
+  //   await tester.pumpWidget(
+  //     MaterialApp(
+  //       home: Material(
+  //         child: JsonForm(
+  //           jsonSchema: '''{
+  //         "type": "object",
+  //         "properties": {
+  //           "arrayString": {
+  //             "type": "array",
+  //             "items": {
+  //               "type": "string"
+  //             }
+  //           },
+  //           "arrayNumber": {
+  //             "type": "array",
+  //             "items": {
+  //               "type": "number"
+  //             }
+  //           },
+  //           "arrayInteger": {
+  //             "type": "array",
+  //             "items": {
+  //               "type": "integer"
+  //             }
+  //           },
+  //           "arrayBoolean": {
+  //             "type": "array",
+  //             "items": {
+  //               "type": "boolean"
+  //             }
+  //           },
+  //           "arrayEnum": {
+  //             "type": "array",
+  //             "items": {
+  //               "type": "string",
+  //               "enum": ["a", "b", "c", "d"]
+  //             }
+  //           },
+  //           "arrayEnumRadio": {
+  //             "type": "array",
+  //             "items": {
+  //               "type": "integer",
+  //               "enum": [2, 4, 6]
+  //             }
+  //           },
+  //           "arrayDate": {
+  //             "type": "array",
+  //             "items": {
+  //               "type": "string",
+  //               "format": "date"
+  //             }
+  //           },
+  //           "arrayDateTime": {
+  //             "type": "array",
+  //             "items": {
+  //               "type": "string",
+  //               "format": "date-time"
+  //             }
+  //           }
+  //         }
+  //       }''',
+  //           onFormDataSaved: (p) => data = p,
+  //         ),
+  //       ),
+  //     ),
+  //   );
+
+  //   await utils.tapSubmitButton();
+  //   expect(find.text('You must add at least 2 items'), findsOneWidget);
+
+  //   final arrayAdd = find.byKey(const Key('addItem_array'));
+  //   expect(arrayAdd, findsOneWidget);
+  //   await tester.tap(arrayAdd);
+  //   await tester.pump();
+  //   final array0Input = await utils.findAndEnterText('array.0', 'text0');
+
+  //   await tester.tap(arrayAdd);
+  //   await tester.pump();
+  //   final array1Input = await utils.findAndEnterText('array.1', 'text1');
+  //   expect(data, {});
+  //   await utils.tapSubmitButton();
+  //   expect(data, {
+  //     'array': ['text0', 'text1'],
+  //     'arrayWithObjects': [],
+  //   });
+
+  //   await tester.enterText(array1Input, 'text0');
+  //   await utils.tapSubmitButton();
+  //   expect(find.text('Items must be unique'), findsOneWidget);
+
+  //   await tester.tap(arrayAdd);
+  //   await tester.pump();
+  //   await utils.findAndEnterText('array.2', 'text2');
+
+  //   final array1Remove = find.byKey(const Key('removeItem_array.1'));
+  //   expect(array1Remove, findsOneWidget);
+  //   await tester.tap(array1Remove);
+  //   await tester.pump();
+  //   expect(find.byKey(const Key('removeItem_array.1')), findsNothing);
+  // });
 }
